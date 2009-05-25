@@ -216,8 +216,23 @@ return;
 // Main program starts here
 
 // TODO: Is there a way to figure out whether or not stripslashes is needed?
-// $source = stripslashes($_REQUEST["latex"]);
+if (array_key_exists('testslashes',$_REQUEST))
+{
+  if ($_REQUEST['testslashes'] == "\test")
+{
 $source = $_REQUEST["latex"];
+}
+else
+{
+$source = stripslashes($_REQUEST["latex"]);
+}
+}
+else
+{
+$source = $_REQUEST["latex"];
+}
+
+
 
 ?>
 
@@ -227,6 +242,7 @@ $source = $_REQUEST["latex"];
 <?php print $source ?>
 </textarea>
 </p>
+<input type="hidden" name="testslashes" value="\test" />
 <input type="submit" value="send" />
 <input type="reset" />
 </form>
