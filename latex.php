@@ -1,9 +1,15 @@
 <?php
 
+$defs = array();
 $commands = array();
 $primitives = array();
 
-  function nexttok (&$latex)
+function error ($message)
+{
+  print "<br /><strong>Error:&nbsp;</strong>" . $message . "<br />";
+}
+
+function nexttok (&$latex)
 {
 
   $firstchar = substr($latex,0,1);
@@ -57,6 +63,7 @@ $primitives = array();
 
 function expandtok ($token,&$latex)
 {
+  global $defs;
   global $commands;
   global $primitives;
   // get first character of the token
@@ -70,6 +77,21 @@ function expandtok ($token,&$latex)
 	{
 	  // command is actually a "primitive" which is a PHP function called with the stream as its argument
 	  return array(1,$primitives[$command]($latex));
+	}
+      elseif (array_key_exists($command,$defs))
+	{
+	  // command is a generic def, need to slurp in tokens to match its pattern
+	  $pattern = $defs[$command]["pattern"];
+	  $defn = $defs[$command]["defn"];
+	  // in an ideal world we'd use a regular expression here but . only mathes characters not tokens
+	  if ($pattern)
+	    {
+	      // TODO: do this!
+	    }
+	  else
+	    {
+	      $latex = $defn . $latex;
+	    }
 	}
       elseif (array_key_exists($command,$commands))
 	{
@@ -102,10 +124,32 @@ function expandtok ($token,&$latex)
       $extoken = preg_replace('/^{(.*)}$/s','$1',$token);
       return array(1,$extoken);
     }
+  elseif ($firstchar == "%")
+    {
+      // slurp in rest until a newline
+      do {
+	  $nexttok = nexttok($latex);
+      } while ($nexttok != "\n");
+    }
+  elseif ($firstchar == "\n")
+    {
+      // strip off leading whitespace, if this whitespace contains another newline then return \par, otherwise return a single space
+      preg_match('/^(\s*)/s',$latex,$whitespace);
+      $latex = preg_replace('/^\s*/s','',$latex);
+      if (substr_count($whitespace[1],"\n") > 0)
+	{
+	  return array(1,"\\par");
+	}
+      else
+	{
+	  return array(1," ");
+	}
+    }
   else
     {
       // no expansion to be done
       // TODO: add support for ^ and _ in math mode
+      // any other "special" characters?
       return array(0,$token);
     }
 }
@@ -138,22 +182,11 @@ function processLaTeX (&$latex)
   return $processed;
 }
 
-function newcommand ($name,$args,$opts,$defn)
-{
-  global $commands;
-  // strip off slashes, just in case
-  $name=ltrim($name,"\\");
-  $commands[$name] = array(
-			   "args" => $args,
-			   "opts" => $opts,
-			   "defn" => $defn
-			   );
-}
-
 // commands
 
 $primitives["newcommand"] = 
   create_function ('& $latex','
+global $commands;
 list($mod,$name) = expandtok(nexttok($latex),$latex); // first argument is name of command, need to strip off brackets
 $nexttok = nexttok($latex); // next is either defn or says we have arguments
 if ($nexttok == "[")
@@ -174,7 +207,7 @@ if ($nexttok == "[")
 	    $opt = $opt . $nexttok;
 	    $nexttok = nexttok($latex);
 	  }
-	$optarray = array($opt);
+	$optarray = array("1" => $opt);
 	$defn = nexttok($latex);
       }
     else
@@ -190,7 +223,15 @@ else
     $optarray = array();
     $defn = $nexttok;
   }
-newcommand($name,$num,$optarray,$defn);
+
+// strip off slashes, just in case
+// need the four slashes as we are already inside a quoted string
+$name=ltrim($name,"\\\\");
+$commands[$name] = array(
+			 "args" => $num,
+			 "opts" => $optarray,
+			 "defn" => $defn
+			 );
 	      return;
 ');
 
@@ -213,44 +254,97 @@ if (file_exists($filename) and is_readable($filename))
 return;
 ');
 
+// Define \( and \) as primitives to get round spacing issues
+// TODO: check for math mode to ensure well-formed syntax
+
+$primitives["("] =
+  create_function ('&$latex','
+$latex = "<math xmlns=\"&mathml;\">" . $latex;
+return;
+');
+
+$primitives[")"] =
+  create_function ('&$latex','
+$latex = "</math>" . $latex;
+return;
+');
+
+$primitives["def"] = 
+  create_function ('&$latex','
+// slurp in stuff until we get a non-trivial token
+global $defs;
+list($mod,$name) = expandtok(nexttok($latex),$latex); // first argument is name of command, need to strip off brackets
+$nexttok = nexttok($latex);
+$pattern = "";
+while(strlen($nexttok) == 1)
+  {
+    $pattern .= $nexttok;
+    $nexttok = nexttok($latex);
+  }
+$defn = $nexttok;
+// strip off slashes if needed
+// need the four slashes as we are already inside a quoted string
+$name = ltrim($name,"\\\\");
+$defs[$name] = array(
+                     "pattern" => $pattern,
+                     "defn" => $defn
+                    );
+return;
+');
+
 // Main program starts here
 
-// TODO: Is there a way to figure out whether or not stripslashes is needed?
+// This is to figure out whether or not stripslashes is needed
 if (array_key_exists('testslashes',$_REQUEST))
-{
-  if ($_REQUEST['testslashes'] == "\test")
-{
-$source = $_REQUEST["latex"];
-}
+  {
+    if ($_REQUEST['testslashes'] == "\test")
+      {
+	$source = $_REQUEST["latex"];
+      }
+    else
+      {
+	$source = stripslashes($_REQUEST["latex"]);
+      }
+  }
 else
-{
-$source = stripslashes($_REQUEST["latex"]);
-}
-}
-else
-{
-$source = $_REQUEST["latex"];
-}
+  {
+    $source = $_REQUEST["latex"];
+  }
 
+$source = trim($source);
 
+header("Content-type: application/xhtml+xml");
 
-?>
+// Must be a better way of generating these lines ...
+print '<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
+               "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd" [
+  <!ENTITY mathml "http://www.w3.org/1998/Math/MathML">
+]>
+<html xmlns="http://www.w3.org/1999/xhtml">  
+  <head>
+    <title>PHPLaTeX Demo Page</title> 
+  </head>
+  <body>
 
-<form action="<?php print $_SERVER['PHP_SELF'] ?>" method="post">
+<form action="' . $_SERVER['PHP_SELF'] .'" method="post">
 <p>
-<textarea name="latex" rows="20" cols="50">
-<?php print $source ?>
-</textarea>
+<textarea name="latex" rows="20" cols="50">' . $source . '</textarea>
 </p>
 <input type="hidden" name="testslashes" value="\test" />
 <input type="submit" value="send" />
 <input type="reset" />
 </form>
 
-<?php
+<h3>Result:</h3>
 
-  print processLaTeX ($source);
+<p>';
 
-?>
+print processLaTeX ($source);
 
+print '
+</p>
 
+</body>
+</html>';
