@@ -11,9 +11,11 @@ function error ($message)
 
 function nexttok (&$latex)
 {
-
-  $firstchar = substr($latex,0,1);
-  $latex = substr($latex,1);
+  // Silently ignore nulls
+  do {
+    $firstchar = substr($latex,0,1);
+    $latex = substr($latex,1);
+  } while ($firstchar == "\0");
 
   if ($firstchar)
     {
@@ -86,12 +88,45 @@ function expandtok ($token,&$latex)
 	  // in an ideal world we'd use a regular expression here but . only mathes characters not tokens
 	  if ($pattern)
 	    {
-	      // TODO: do this!
+	      // explode along hashes (check no more than 9?)
+	      $patarray = explode("#",$pattern);
+	      // first entry is whatever is before #1
+	      ltrim($latex,array_shift ($patarray)); // or error!
+	      $num = 0;
+	      while ($patarray)
+		{
+		  $num++;
+		  $arg = "";
+		  $testpat = "";
+		  $nextpat = substr(array_shift($patarray),1);
+		  if ($nextpat)
+		    {
+		      // have a delimiter, slurp in tokens until we match the delimiter
+		      do {
+			$nexttok = nexttok($latex);
+
+			if (strpos($nextpat,$testpat . $nexttok) === 0)
+			  {
+			    // matches the start of the delimiter
+			    $testpat = $testpat . $nexttok;
+			  }
+			else
+			  {
+			    // broke the match, add it all to $arg and start again
+			    $arg = $arg . $testpat . $nexttok;
+			}
+		      } while ($nextpat !== $testpat);
+		    }
+		  else
+		    {
+		      // no delimiter, slurp in next token only
+		      $arg = nexttok($latex);
+		    }
+		  $defn=str_replace("#" . $num, $arg, $defn);
+		}
 	    }
-	  else
-	    {
-	      $latex = $defn . $latex;
-	    }
+	  // return expanded command
+	  return array(1,$defn);
 	}
       elseif (array_key_exists($command,$commands))
 	{
@@ -106,7 +141,32 @@ function expandtok ($token,&$latex)
 	  $latex = ltrim($latex);
 	  for ($i = 0;$i < $args;$i++)
 	    {
-	      $arg = nexttok($latex);
+	      if (array_key_exists(($i+1),$opts))
+		{
+		  // optional argument
+		  $nexttok = nexttok($latex);
+		  if ($nexttok == "[")
+		    {
+		      // specified by user, slurp in until closing brace
+		      $nexttok = nexttok($latex);
+		      $arg = "";
+		      while ($nexttok != "]")
+			{
+			  $arg = $arg . $nexttok;
+			  $nexttok = nexttok($latex);
+			}
+		    }
+		  else
+		    {
+		      // put the token back on the stream, wasn't wanted, and use default instead
+		      $latex = $nexttok . $latex;
+		      $arg = $opts[($i+1)];
+		    }
+		}
+	      else
+		{
+		  $arg = nexttok($latex);
+		}
 	      $defn=str_replace("#" . ($i+1), $arg, $defn);
 	    }
 	  // return expanded command
@@ -170,8 +230,8 @@ function processLaTeX (&$latex)
 
       if ($mod)
 	{
-	  // yes, reinsert at front of stream and start again
-	  $latex = $extoken . $latex;
+	  // yes, reinsert at front of stream (with a separator) and start again
+	  $latex = $extoken . "\0" . $latex;
 	}
       else
 	{
@@ -182,169 +242,26 @@ function processLaTeX (&$latex)
   return $processed;
 }
 
-// commands
+// primitives
 
-$primitives["newcommand"] = 
-  create_function ('& $latex','
-global $commands;
-list($mod,$name) = expandtok(nexttok($latex),$latex); // first argument is name of command, need to strip off brackets
-$nexttok = nexttok($latex); // next is either defn or says we have arguments
-if ($nexttok == "[")
+$primitivedir = dirname($_SERVER["SCRIPT_FILENAME"]) ."/primitives/";
+
+if (is_dir($primitivedir) and is_readable($primitivedir))
   {
-    // have arguments, how many?
-    $num = nexttok($latex);
-    nexttok($latex); // ought to be a "]", should test this
-    // should test for numeric here also
-    $nexttok = nexttok($latex); // either optional first argument or defn
-    if ($nexttok == "[")
+    $handle = opendir($primitivedir);
+    while (false !== ($file = readdir($handle)))
       {
-	// option argument specified
-	$nexttok = nexttok($latex);
-	$opt = "";
-	while ($nexttok != "]")
+	$file = $primitivedir . $file;
+	if (is_file($file) and is_readable($file))
 	  {
-	    // slurp everything up to but not including "]"
-	    $opt = $opt . $nexttok;
-	    $nexttok = nexttok($latex);
+	    $primitive = file_get_contents($file);
+	    list($name,$function) = explode("\n",$primitive,2);
+	    // actual name is last non-whitespace part of first line
+	    $name = preg_replace('/^.*\b([A-z]+).*$/','\1',$name);
+	    $primitives[$name] = create_function('&$latex',$function);
+
 	  }
-	$optarray = array("1" => $opt);
-	$defn = nexttok($latex);
-      }
-    else
-      {
-	// no optional arguments, just defn
-	$optarray = array();
-	$defn = $nexttok;
       }
   }
-else
-  {
-    $num = 0;
-    $optarray = array();
-    $defn = $nexttok;
-  }
 
-// strip off slashes, just in case
-// need the four slashes as we are already inside a quoted string
-$name=ltrim($name,"\\\\");
-$commands[$name] = array(
-			 "args" => $num,
-			 "opts" => $optarray,
-			 "defn" => $defn
-			 );
-	      return;
-');
-
-$primitives["usepackage"] =
-  create_function ('&$latex','
-list($mod,$package) = expandtok(nexttok($latex),$latex); // get package name and strip off braces
-// check that $package is safe!
-if (preg_match("/^\\w+$/s",$package))
-{
-// TODO: should check that we have not loaded it already
-$filename = dirname($_SERVER["SCRIPT_FILENAME"]) . "/" . $package . ".sty";
-if (file_exists($filename) and is_readable($filename))
-  {
-    $handle = fopen($filename,"r");
-    $preamble = fread($handle, filesize($filename));
-    fclose($handle);
-    processLaTeX($preamble);
-  }
-}
-return;
-');
-
-// Define \( and \) as primitives to get round spacing issues
-// TODO: check for math mode to ensure well-formed syntax
-
-$primitives["("] =
-  create_function ('&$latex','
-$latex = "<math xmlns=\"&mathml;\">" . $latex;
-return;
-');
-
-$primitives[")"] =
-  create_function ('&$latex','
-$latex = "</math>" . $latex;
-return;
-');
-
-$primitives["def"] = 
-  create_function ('&$latex','
-// slurp in stuff until we get a non-trivial token
-global $defs;
-list($mod,$name) = expandtok(nexttok($latex),$latex); // first argument is name of command, need to strip off brackets
-$nexttok = nexttok($latex);
-$pattern = "";
-while(strlen($nexttok) == 1)
-  {
-    $pattern .= $nexttok;
-    $nexttok = nexttok($latex);
-  }
-$defn = $nexttok;
-// strip off slashes if needed
-// need the four slashes as we are already inside a quoted string
-$name = ltrim($name,"\\\\");
-$defs[$name] = array(
-                     "pattern" => $pattern,
-                     "defn" => $defn
-                    );
-return;
-');
-
-// Main program starts here
-
-// This is to figure out whether or not stripslashes is needed
-if (array_key_exists('testslashes',$_REQUEST))
-  {
-    if ($_REQUEST['testslashes'] == "\test")
-      {
-	$source = $_REQUEST["latex"];
-      }
-    else
-      {
-	$source = stripslashes($_REQUEST["latex"]);
-      }
-  }
-else
-  {
-    $source = $_REQUEST["latex"];
-  }
-
-$source = trim($source);
-
-header("Content-type: application/xhtml+xml");
-
-// Must be a better way of generating these lines ...
-print '<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
-               "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd" [
-  <!ENTITY mathml "http://www.w3.org/1998/Math/MathML">
-]>
-<html xmlns="http://www.w3.org/1999/xhtml">  
-  <head>
-    <title>PHPLaTeX Demo Page</title> 
-  </head>
-  <body>
-
-<form action="' . $_SERVER['PHP_SELF'] .'" method="post">
-<p>
-<textarea name="latex" rows="20" cols="50">' . $source . '</textarea>
-</p>
-<input type="hidden" name="testslashes" value="\test" />
-<input type="submit" value="send" />
-<input type="reset" />
-</form>
-
-<h3>Result:</h3>
-
-<p>';
-
-print processLaTeX ($source);
-
-print '
-</p>
-
-</body>
-</html>';
+?>
