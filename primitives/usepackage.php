@@ -1,5 +1,5 @@
 // name: usepackage
-list($mod,$package) = expandtok(nexttok($latex),$latex); // get package name and strip off braces
+$package = nextgrp($latex); // get package name
 // check that $package is safe!
 if (preg_match("/^\\w+$/s",$package))
 {

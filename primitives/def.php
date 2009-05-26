@@ -1,14 +1,15 @@
 // name: def
 global $defs;
-list($mod,$name) = expandtok(nexttok($latex),$latex); // first argument is name of command, need to strip off brackets
+$name = nextgrp($latex); // first argument is name of command
 $nexttok = nexttok($latex);
 $pattern = "";
-while(strlen($nexttok) == 1)
+while($nexttok != "{")
   {
     $pattern .= $nexttok;
     $nexttok = nexttok($latex);
   }
-$defn = $nexttok;
+$latex = $nexttok . $latex;
+$defn = nextgrp($latex);
 // strip off slashes if needed
 // need the four slashes as we are already inside a quoted string
 $name = ltrim($name,"\\\\");

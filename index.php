@@ -1,4 +1,5 @@
 <?php
+
 include("latex.php");
 
 // Main program starts here

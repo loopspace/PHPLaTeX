@@ -1,4 +1,4 @@
-// name: newcommand
+// name: newenvironment
 global $commands;
 $name = nextgrp($latex); // first argument is name of command
 $nextgrp = nextgrp($latex); // next is either defn or says we have arguments
@@ -21,21 +21,23 @@ if ($nextgrp == "[")
 	    $nextgrp = nextgrp($latex);
 	  }
 	$optarray = array("1" => $opt);
-	$defn = nextgrp($latex);
+	$startdefn = nextgrp($latex);
       }
     else
       {
 	// no optional arguments, just defn
 	$optarray = array();
-	$defn = $nextgrp;
+	$startdefn = $nextgrp;
       }
   }
 else
   {
     $num = 0;
     $optarray = array();
-    $defn = $nextgrp;
+    $startdefn = $nextgrp;
   }
+
+$enddefn = nextgrp($latex);
 
 // strip off slashes, just in case
 // need the four slashes as we are already inside a quoted string
@@ -43,6 +45,11 @@ $name=ltrim($name,"\\\\");
 $commands[$name] = array(
 			 "args" => $num,
 			 "opts" => $optarray,
-			 "defn" => $defn
+			 "defn" => $startdefn
 			 );
+$commands["end" . $name] = array(
+				 "args" => 0,
+				 "opts" => array(),
+				 "defn" => $enddefn
+				 );
 	      return;
