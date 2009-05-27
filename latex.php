@@ -20,6 +20,7 @@ $defs = array();
 $commands = array();
 $primitives = array();
 $counters = array();
+$conditionals = array();
 $mode = "text";
 
 /*
@@ -76,6 +77,26 @@ function nexttok (&$latex)
 	  // comment, ignore rest of line and recall ourselves
 	  $latex = preg_replace('/^.*/','',$latex);
 	  return nexttok($latex);
+	}
+      elseif ($firstchar == "<")
+	{
+	  // XHTML tag, get the rest and pass on
+	  list($tag,$latex) = explode(">",$latex,2);
+	  $tag = "<" . $tag . ">";
+	  return $tag;
+	}
+      elseif ($firstchar == "&")
+	{
+	  // possible HTML or MathML entity, get the rest
+	  if (preg_match('/^([A-Za-z]+|[#0-9]+);/',$latex))
+	    {
+	      list($entity,$latex) = explode(";",$latex,2);
+	      return "&" . $entity . ";";
+	    }
+	  else
+	    {
+	      return $firstchar;
+	    }
 	}
       else
 	{
@@ -246,14 +267,15 @@ function expandtok ($token,&$latex)
 	  return array(0,$token);
 	}
     }
-  elseif ($firstchar == "<")
-    {
-      // xhtml tag, skip
-      list($tag,$latex) = explode(">",$latex,2);
-      // remove nulls just in case any are left hanging around
-      $tag = str_replace("\0","",$tag);
-      return array(0,"<" . $tag . ">");
-    }
+  /*  elseif ($firstchar == "<")
+   *{
+   *  // xhtml tag, skip
+   *  list($tag,$latex) = explode(">",$latex,2);
+   *  // remove nulls just in case any are left hanging around
+   *  $tag = str_replace("\0","",$tag);
+   *  return array(0,"<" . $tag . ">");
+   *}
+   */
   elseif ($firstchar == "\n")
     {
       // strip off leading whitespace, if this whitespace contains another newline then return \par, otherwise return a single space
@@ -367,9 +389,13 @@ function expandtok ($token,&$latex)
 		{
 		  $return = "";
 		}
-	      else
+	      elseif (preg_match('/^[+=-]*$/',$token))
 		{
 		  $return = '<mo>' . $token . '</mo>';
+		}
+	      else
+		{
+		  $return = $token;
 		}
 
 	      $mod = 0;

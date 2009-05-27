@@ -1,5 +1,5 @@
 // name: )
 global $mode;
 $mode = "text";
-$latex = "</math>" . $latex;
+$latex = "\\mmodefalse</math>" . $latex;
 return;

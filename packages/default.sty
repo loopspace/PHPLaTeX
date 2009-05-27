@@ -1,5 +1,8 @@
 \newcommand{\begin}[1]{\csname #1\endcsname}
 \newcommand{\end}[1]{\csname end#1\endcsname}
+\newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\#1true}{\true{#1}}\newcommand{\#1false}{\false{#1}}\csname #1false\endcsname}
+
+\newif{mmode}
 
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
@@ -25,6 +28,9 @@
 % Not sure why this works, but it does ...
 \newcommand{\ }{ }
 
+\newcommand{\mathop}[1]{\ifmmode<mo>#1</mo>\else #1\fi}
+\newcommand{\mathchar}[1]{\ifmmode<mi>#1</mi>\else #1\fi}
+
 \newcommand{\ae}{&aelig;}
 \newcommand{\AE}{&AElig;}
 \newcommand{\oe}{&oelig;}
@@ -34,6 +40,7 @@
 \newcommand{\o}{&oslash;}
 \newcommand{\O}{&Oslash;}
 \newcommand{\ss}{&szlig;}
+
 \newcommand{\dag}{&dagger;}
 \newcommand{\ddag}{&Dagger;}
 \newcommand{\S}{&sect;}
@@ -41,6 +48,7 @@
 \newcommand{\copyright}{&copy;}
 \newcommand{\pounds}{&pound;}
 \newcommand{\aleph}{&alefsym;}
+
 \newcommand{\wp}{&weierp;}
 \newcommand{\Re}{&real;}
 \newcommand{\Im}{&image;}
@@ -94,7 +102,7 @@
 \newcommand{\ge}{&ge;}
 \newcommand{\otimes}{&otimes;}
 \newcommand{\perp}{&perp;}
-\newcommand{\alpha}{&alpha;}
+\newcommand{\alpha}{\mathchar{&alpha;}}
 \newcommand{\beta}{&beta;}
 \newcommand{\gamma}{&gamma;}
 \newcommand{\delta}{&delta;}
