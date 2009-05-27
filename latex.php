@@ -20,6 +20,7 @@ $defs = array();
 $commands = array();
 $primitives = array();
 $counters = array();
+$mode = "text";
 
 /*
  * Error function: should be more used
@@ -134,6 +135,7 @@ function expandtok ($token,&$latex)
   global $defs;
   global $commands;
   global $primitives;
+  global $mode;
   // get first character of the token
 
   $firstchar = substr($token,0,1);
@@ -244,13 +246,14 @@ function expandtok ($token,&$latex)
 	  return array(0,$token);
 	}
     }
-/*  elseif ($firstchar == "{")
- *   {
- *     // token by virtue of grouping, strip off outermost grouping
- *     $extoken = preg_replace('/^{(.*)}$/s','$1',$token);
- *     return array(1,$extoken);
- *   }
- */
+  elseif ($firstchar == "<")
+    {
+      // xhtml tag, skip
+      list($tag,$latex) = explode(">",$latex,2);
+      // remove nulls just in case any are left hanging around
+      $tag = str_replace("\0","",$tag);
+      return array(0,"<" . $tag . ">");
+    }
   elseif ($firstchar == "\n")
     {
       // strip off leading whitespace, if this whitespace contains another newline then return \par, otherwise return a single space
@@ -265,8 +268,115 @@ function expandtok ($token,&$latex)
 	  return array(1," ");
 	}
     }
+  elseif (($firstchar == "{") and ($mode == "math"))
+    {
+      // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
+      $latex = $firstchar . $latex;
+      $base = nextgrp($latex);
+      $nexttok = nexttok($latex);
+      if ($nexttok == '^')
+	{
+	  // superscript, do we have a subscript?
+	  $sup = nextgrp($latex);
+	  $nexttok = nexttok($latex);
+	  if ($nexttok == '_')
+	    {
+	      // also have subscript
+	      $sub = nextgrp($latex);
+	      $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+	    }
+	  else
+	    {
+	      $return = '<msup><mrow>' . $base . '</mrow><mrow>' . $sup . '</mrow></msup>' . $nexttok;
+	    }
+	}
+      elseif ($nexttok == '_')
+	{
+	  $sub = nextgrp($latex);
+	  $nexttok = nexttok($latex);
+	  if ($nexttok == '^')
+	    {
+	      // also have subscript
+	      $sup = nextgrp($latex);
+	      $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+	    }
+	  else
+	    {
+	      $return = '<msub><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow></msub>' . $nexttok;
+	    }
+	}
+      else
+	{
+	  // neither sub or sup, replace token
+	  $return = '<mrow>' . $nextgrp . '</mrow>' . $nexttok;
+	}
+      return array(1,$return);
+    }
   else
     {
+      if ($mode == "math")
+	{
+	  $nexttok = nexttok($latex);
+	  if ($nexttok == '^')
+	    {
+	      // superscript, do we have a subscript?
+	      $sup = nextgrp($latex);
+	      $nexttok = nexttok($latex);
+	      $mod = 1;
+	      if ($nexttok == '_')
+		{
+		  // also have subscript
+		  $sub = nextgrp($latex);
+		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		}
+	      else
+		{
+		  $return = '<msup><mrow>' . $token . '</mrow><mrow>' . $sup . '</mrow></msup>' . $nexttok;
+		}
+	    }
+	  elseif ($nexttok == '_')
+	    {
+	      $sub = nextgrp($latex);
+	      $nexttok = nexttok($latex);
+	      $mod = 1;
+	      if ($nexttok == '^')
+		{
+		  // also have subscript
+		  $sup = nextgrp($latex);
+		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		}
+	      else
+		{
+		  $return = '<msub><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow></msub>' . $nexttok;
+		}
+	    }
+	  else
+	    {
+	      // neither sub or sup, replace next token back on stream
+	      $latex = $nexttok . "\0" . $latex;
+	      // enclose character in appropriate tags
+	      if (preg_match('/^[A-Za-z]*$/',$token))
+		{
+		  $return = '<mi>' . $token . '</mi>';
+		}
+	      elseif (preg_match('/^[0-9]*$/',$token))
+		{
+		  $return = '<mn>' . $token . '</mn>';
+		}
+	      elseif (preg_match('/^\s*$/',$token))
+		{
+		  $return = "";
+		}
+	      else
+		{
+		  $return = '<mo>' . $token . '</mo>';
+		}
+
+	      $mod = 0;
+	    }
+	  return array($mod,$return);
+
+	}
       // no expansion to be done
       // TODO: add support for ^ and _ in math mode
       // any other "special" characters?
