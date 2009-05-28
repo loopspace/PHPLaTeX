@@ -3,6 +3,7 @@
 \newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\#1true}{\true{#1}}\newcommand{\#1false}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
+\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML'>\mmodetrue}
 
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
@@ -25,11 +26,26 @@
 \newcommand{\~}[1]{&#1tilde;}
 \newcommand{\c}[1]{&#1cedil;}
 \newcommand{\mathbb}[1]{&#1opf;}
+\newcommand{\mathcal}[1]{&#1scr;}
+\newcommand{\mathfrak}[1]{&#1fr;}
 % Not sure why this works, but it does ...
 \newcommand{\ }{ }
 
 \newcommand{\mathop}[1]{\ifmmode<mo>#1</mo>\else #1\fi}
+\newcommand{\mathnum}[1]{\ifmmode<mn>#1</mn>\else #1\fi}
 \newcommand{\mathchar}[1]{\ifmmode<mi>#1</mi>\else #1\fi}
+\newcommand{\text}[1]{\ifmmode<mtext>\mmodefalse #1\mmodetrue</mtext>\else #1\fi}
+\newcommand{\frac}[2]{<mfrac><mrow>#1</mrow><mrow>#2</mrow></mfrac>}
+
+\newcommand{\sqrt}[1]{<msqrt>#1</msqrt>}
+\newcommand{\root}[2]{<mroot><mrow>#1</mrow><mrow>#2</mrow></mroot>}
+
+
+\newcommand{\,}{<mspace width="1em" />}
+\newcommand{\;}{<mspace width="1em" />}
+\newcommand{\:}{<mspace width="1em" />}
+\newcommand{\quad}{<mspace width="1em" />}
+\newcommand{\qquad}{<mspace width="1em" />}
 
 \newcommand{\ae}{&aelig;}
 \newcommand{\AE}{&AElig;}
@@ -47,82 +63,83 @@
 \newcommand{\P}{&para;}
 \newcommand{\copyright}{&copy;}
 \newcommand{\pounds}{&pound;}
-\newcommand{\aleph}{&alefsym;}
 
-\newcommand{\wp}{&weierp;}
-\newcommand{\Re}{&real;}
-\newcommand{\Im}{&image;}
-\newcommand{\surd}{&radic;}
-\newcommand{\angle}{&ang;}
-\newcommand{\partial}{&part;}
-\newcommand{\infty}{&infin;}
-\newcommand{\clubsuit}{&clubs;}
-\newcommand{\diamondsuit}{&diams;}
-\newcommand{\heartsuit}{&hearts;}
-\newcommand{\spadesuit}{&spades;}
-\newcommand{\cdot}{&sdot;}
-\newcommand{\vartheta}{&thetasym;}
-\newcommand{\varpi}{&piv;}
-\newcommand{\dots}{&hellip;}
-\newcommand{\in}{&isin;}
-\newcommand{\to}{&rarr;}
-\newcommand{\approx}{&asymp;}
-\newcommand{\propto}{&prop;}
-\newcommand{\neq}{&ne;}
-\newcommand{\neg}{&not;}
-\newcommand{\wedge}{&and;}
-\newcommand{\vee}{&or;}
-\newcommand{\supset}{&sup;}
-\newcommand{\subset}{&sub;}
-\newcommand{\emptyset}{&empty;}
-\newcommand{\pm}{&plusm;}
-\newcommand{\implies}{&rArr;}
+\newcommand{\aleph}{\mathchar{&alefsym;}}
 
-\newcommand{\prime}{&prime;}
-\newcommand{\nabla}{&nabla;}
-\newcommand{\forall}{&forall;}
-\newcommand{\exists}{&exists;}
-\newcommand{\times}{&times;}
-\newcommand{\notin}{&notin;}
-\newcommand{\ni}{&ni;}
-\newcommand{\prod}{&prod;}
-\newcommand{\sum}{&sum;}
-\newcommand{\ast}{&ast;}
-\newcommand{\equiv}{&equiv;}
-\newcommand{\sim}{&sim;}
-\newcommand{\oplus}{&oplus;}
-\newcommand{\cap}{&cap;}
-\newcommand{\cup}{&cup;}
-\newcommand{\rfloor}{&rfloor;}
-\newcommand{\euro}{&euro;}
-\newcommand{\int}{&int;}
-\newcommand{\cong}{&cong;}
-\newcommand{\ne}{&ne;}
-\newcommand{\le}{&le;}
-\newcommand{\ge}{&ge;}
-\newcommand{\otimes}{&otimes;}
-\newcommand{\perp}{&perp;}
+\newcommand{\wp}{\mathchar{&weierp;}}
+\newcommand{\Re}{\mathchar{&real;}}
+\newcommand{\Im}{\mathchar{&image;}}
+\newcommand{\surd}{\mathchar{&radic;}}
+\newcommand{\angle}{\mathchar{&ang;}}
+\newcommand{\partial}{\mathchar{&part;}}
+\newcommand{\infty}{\mathchar{&infin;}}
+\newcommand{\clubsuit}{\mathchar{&clubs;}}
+\newcommand{\diamondsuit}{\mathchar{&diams;}}
+\newcommand{\heartsuit}{\mathchar{&hearts;}}
+\newcommand{\spadesuit}{\mathchar{&spades;}}
+\newcommand{\cdot}{\mathchar{&sdot;}}
+\newcommand{\vartheta}{\mathchar{&thetasym;}}
+\newcommand{\varpi}{\mathchar{&piv;}}
+\newcommand{\dots}{\mathchar{&hellip;}}
+\newcommand{\in}{\mathchar{&isin;}}
+\newcommand{\to}{\mathchar{&rarr;}}
+\newcommand{\approx}{\mathchar{&asymp;}}
+\newcommand{\propto}{\mathchar{&prop;}}
+\newcommand{\neq}{\mathop{&ne;}}
+\newcommand{\neg}{\mathop{&not;}}
+\newcommand{\wedge}{\mathop{&and;}}
+\newcommand{\vee}{\mathop{&or;}}
+\newcommand{\supset}{\mathop{&sup;}}
+\newcommand{\subset}{\mathop{&sub;}}
+\newcommand{\emptyset}{\mathchar{&empty;}}
+\newcommand{\pm}{\mathchar{&plusm;}}
+\newcommand{\implies}{\mathop{&rArr;}}
+
+\newcommand{\prime}{\mathchar{&prime;}}
+\newcommand{\nabla}{\mathchar{&nabla;}}
+\newcommand{\forall}{\mathchar{&forall;}}
+\newcommand{\exists}{\mathchar{&exist;}}
+\newcommand{\times}{\mathop{&times;}}
+\newcommand{\notin}{\mathop{&notin;}}
+\newcommand{\ni}{\mathop{&ni;}}
+\newcommand{\prod}{\mathop{&prod;}}
+\newcommand{\sum}{\mathop{&sum;}}
+\newcommand{\ast}{\mathop{&ast;}}
+\newcommand{\equiv}{\mathop{&equiv;}}
+\newcommand{\sim}{\mathop{&sim;}}
+\newcommand{\oplus}{\mathchar{&oplus;}}
+\newcommand{\cap}{\mathop{&cap;}}
+\newcommand{\cup}{\mathop{&cup;}}
+\newcommand{\rfloor}{\mathop{&rfloor;}}
+\newcommand{\euro}{\mathchar{&euro;}}
+\newcommand{\int}{\mathop{&int;}}
+\newcommand{\cong}{\mathop{&cong;}}
+\newcommand{\ne}{\mathop{&ne;}}
+\newcommand{\le}{\mathop{&le;}}
+\newcommand{\ge}{\mathop{&ge;}}
+\newcommand{\otimes}{\mathop{&otimes;}}
+\newcommand{\perp}{\mathop{&perp;}}
 \newcommand{\alpha}{\mathchar{&alpha;}}
-\newcommand{\beta}{&beta;}
-\newcommand{\gamma}{&gamma;}
-\newcommand{\delta}{&delta;}
-\newcommand{\epsilon}{&epsilon;}
-\newcommand{\zeta}{&zeta;}
-\newcommand{\eta}{&eta;}
-\newcommand{\theta}{&theta;}
-\newcommand{\iota}{&iota;}
-\newcommand{\kappa}{&kappa;}
-\newcommand{\lambda}{&lambda;}
-\newcommand{\mu}{&mu;}
-\newcommand{\nu}{&nu;}
-\newcommand{\xi}{&xi;}
-\newcommand{\omicron}{&omicron;}
-\newcommand{\pi}{&pi;}
-\newcommand{\rho}{&rho;}
-\newcommand{\sigma}{&sigma;}
-\newcommand{\tau}{&tau;}
-\newcommand{\upsilon}{&upsilon;}
-\newcommand{\phi}{&phi;}
-\newcommand{\chi}{&chi;}
-\newcommand{\psi}{&psi;}
-\newcommand{\omega}{&omega;}
+\newcommand{\beta}{\mathchar{&beta;}}
+\newcommand{\gamma}{\mathchar{&gamma;}}
+\newcommand{\delta}{\mathchar{&delta;}}
+\newcommand{\epsilon}{\mathchar{&epsilon;}}
+\newcommand{\zeta}{\mathchar{&zeta;}}
+\newcommand{\eta}{\mathchar{&eta;}}
+\newcommand{\theta}{\mathchar{&theta;}}
+\newcommand{\iota}{\mathchar{&iota;}}
+\newcommand{\kappa}{\mathchar{&kappa;}}
+\newcommand{\lambda}{\mathchar{&lambda;}}
+\newcommand{\mu}{\mathchar{&mu;}}
+\newcommand{\nu}{\mathchar{&nu;}}
+\newcommand{\xi}{\mathchar{&xi;}}
+\newcommand{\omicron}{\mathchar{&omicron;}}
+\newcommand{\pi}{\mathchar{&pi;}}
+\newcommand{\rho}{\mathchar{&rho;}}
+\newcommand{\sigma}{\mathchar{&sigma;}}
+\newcommand{\tau}{\mathchar{&tau;}}
+\newcommand{\upsilon}{\mathchar{&upsilon;}}
+\newcommand{\phi}{\mathchar{&phi;}}
+\newcommand{\chi}{\mathchar{&chi;}}
+\newcommand{\psi}{\mathchar{&psi;}}
+\newcommand{\omega}{\mathchar{&omega;}}

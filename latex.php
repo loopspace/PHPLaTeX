@@ -21,7 +21,6 @@ $commands = array();
 $primitives = array();
 $counters = array();
 $conditionals = array();
-$mode = "text";
 
 /*
  * Error function: should be more used
@@ -83,12 +82,19 @@ function nexttok (&$latex)
 	  // XHTML tag, get the rest and pass on
 	  list($tag,$latex) = explode(">",$latex,2);
 	  $tag = "<" . $tag . ">";
+	  // is it a basic MathML tag?
+	  if (preg_match('/^<m[ino]\b/',$tag))
+	    {
+	      // yes, read in whole tag and contents as a single token
+	      list($contents,$latex) = explode(">",$latex,2);
+	      $tag = $tag . $contents . ">";
+	    }
 	  return $tag;
 	}
       elseif ($firstchar == "&")
 	{
 	  // possible HTML or MathML entity, get the rest
-	  if (preg_match('/^([A-Za-z]+|[#0-9]+);/',$latex))
+	  if (preg_match('/^([A-Za-z]+|##0-9]+|#x[A-Fa-f0-9]+);/',$latex))
 	    {
 	      list($entity,$latex) = explode(";",$latex,2);
 	      return "&" . $entity . ";";
@@ -156,7 +162,7 @@ function expandtok ($token,&$latex)
   global $defs;
   global $commands;
   global $primitives;
-  global $mode;
+  global $conditionals;
   // get first character of the token
 
   $firstchar = substr($token,0,1);
@@ -276,6 +282,11 @@ function expandtok ($token,&$latex)
    *  return array(0,"<" . $tag . ">");
    *}
    */
+  elseif ($firstchar == "~")
+    {
+      // non-breaking space
+      return array(0,"&nbsp;");
+    }
   elseif ($firstchar == "\n")
     {
       // strip off leading whitespace, if this whitespace contains another newline then return \par, otherwise return a single space
@@ -290,61 +301,74 @@ function expandtok ($token,&$latex)
 	  return array(1," ");
 	}
     }
-  elseif (($firstchar == "{") and ($mode == "math"))
+  elseif ($firstchar == "{")
     {
-      // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
-      $latex = $firstchar . $latex;
-      $base = nextgrp($latex);
-      $nexttok = nexttok($latex);
-      if ($nexttok == '^')
+      if ($conditionals{"mmode"})
 	{
-	  // superscript, do we have a subscript?
-	  $sup = nextgrp($latex);
-	  $nexttok = nexttok($latex);
-	  if ($nexttok == '_')
-	    {
-	      // also have subscript
-	      $sub = nextgrp($latex);
-	      $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
-	    }
-	  else
-	    {
-	      $return = '<msup><mrow>' . $base . '</mrow><mrow>' . $sup . '</mrow></msup>' . $nexttok;
-	    }
-	}
-      elseif ($nexttok == '_')
-	{
-	  $sub = nextgrp($latex);
-	  $nexttok = nexttok($latex);
-	  if ($nexttok == '^')
-	    {
-	      // also have subscript
-	      $sup = nextgrp($latex);
-	      $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
-	    }
-	  else
-	    {
-	      $return = '<msub><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow></msub>' . $nexttok;
-	    }
-	}
-      else
-	{
-	  // neither sub or sup, replace token
-	  $return = '<mrow>' . $nextgrp . '</mrow>' . $nexttok;
-	}
-      return array(1,$return);
-    }
-  else
-    {
-      if ($mode == "math")
-	{
+	  // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
+	  $latex = $firstchar . $latex;
+	  $base = nextgrp($latex);
 	  $nexttok = nexttok($latex);
 	  if ($nexttok == '^')
 	    {
 	      // superscript, do we have a subscript?
 	      $sup = nextgrp($latex);
 	      $nexttok = nexttok($latex);
-	      $mod = 1;
+	      if ($nexttok == '_')
+		{
+		  // also have subscript
+		  $sub = nextgrp($latex);
+		  $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		}
+	      else
+		{
+		  $return = '<msup><mrow>' . $base . '</mrow><mrow>' . $sup . '</mrow></msup>' . $nexttok;
+		}
+	    }
+	  elseif ($nexttok == '_')
+	    {
+	      $sub = nextgrp($latex);
+	      $nexttok = nexttok($latex);
+	      if ($nexttok == '^')
+		{
+		  // also have subscript
+		  $sup = nextgrp($latex);
+		  $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		}
+	      else
+		{
+		  $return = '<msub><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow></msub>' . $nexttok;
+		}
+	    }
+	  else
+	    {
+	      // neither sub or sup, replace token
+	      $return = '<mrow>' . $nextgrp . '</mrow>' . $nexttok;
+	    }
+	  return array(1,$return);
+	}
+      else
+	{
+	  // out of math mode, no grouping looked for, { does nothing
+	  return '';
+	}
+    }
+  elseif ($firstchar == "}")
+    {
+      // if we get a }, should just ignore it
+      return '';
+    }
+  else
+    {
+      if ($conditionals{"mmode"})
+	{
+	  $mod = 1;
+	  $nexttok = nexttok($latex);
+	  if ($nexttok == '^')
+	    {
+	      // superscript, do we have a subscript?
+	      $sup = nextgrp($latex);
+	      $nexttok = nexttok($latex);
 	      if ($nexttok == '_')
 		{
 		  // also have subscript
@@ -360,7 +384,6 @@ function expandtok ($token,&$latex)
 	    {
 	      $sub = nextgrp($latex);
 	      $nexttok = nexttok($latex);
-	      $mod = 1;
 	      if ($nexttok == '^')
 		{
 		  // also have subscript
@@ -379,11 +402,11 @@ function expandtok ($token,&$latex)
 	      // enclose character in appropriate tags
 	      if (preg_match('/^[A-Za-z]*$/',$token))
 		{
-		  $return = '<mi>' . $token . '</mi>';
+		  $return = '\mathchar{' . $token . '}';
 		}
 	      elseif (preg_match('/^[0-9]*$/',$token))
 		{
-		  $return = '<mn>' . $token . '</mn>';
+		  $return = '\mathnum{' . $token . '}';
 		}
 	      elseif (preg_match('/^\s*$/',$token))
 		{
@@ -391,14 +414,13 @@ function expandtok ($token,&$latex)
 		}
 	      elseif (preg_match('/^[+=-]*$/',$token))
 		{
-		  $return = '<mo>' . $token . '</mo>';
+		  $return = '\mathop{' . $token . '}';
 		}
 	      else
 		{
 		  $return = $token;
+		  $mod = 0;
 		}
-
-	      $mod = 0;
 	    }
 	  return array($mod,$return);
 
@@ -456,7 +478,7 @@ if (is_dir($primitivedir) and is_readable($primitivedir))
     while (false !== ($file = readdir($handle)))
       {
 	$file = $primitivedir . $file;
-	if (is_file($file) and is_readable($file))
+	if (is_file($file) and is_readable($file) and preg_match('/\.php$/', $file))
 	  {
 	    $primitive = file_get_contents($file);
 	    list($name,$function) = explode("\n",$primitive,2);

@@ -30,10 +30,7 @@ print '<?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>'
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
-               "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd" [
-  <!ENTITY mathml "http://www.w3.org/1998/Math/MathML">
-]>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
 <html xmlns="http://www.w3.org/1999/xhtml">  
   <head>
     <title>PHPLaTeX Demo Page</title> 
@@ -42,7 +39,7 @@ print '<?xml version="1.0"?>
 
 <form action="<?php print $_SERVER['PHP_SELF'] ?>" method="post">
 <p>
-<textarea name="latex" rows="20" cols="50"><?php print $source ?></textarea>
+<textarea name="latex" rows="20" cols="50"><?php print htmlspecialchars($source) ?></textarea>
 </p>
 <input type="hidden" name="testslashes" value="\test" />
 <input type="submit" value="send" />
