@@ -52,6 +52,7 @@ print '<?xml version="1.0"?>
 
 <?php print processLaTeX ($source) ?>
 
+
 </p>
 
 </body>

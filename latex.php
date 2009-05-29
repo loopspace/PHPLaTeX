@@ -433,6 +433,79 @@ function expandtok ($token,&$latex)
 }
 
 /*
+ * Expand a string and estimate its width
+ */
+
+function getWidthOf ($string)
+{
+  $expanded = processLaTeX($string);
+  $textwidth = 80; // maximum width, global variable?
+  $width = 0;
+  $expanded = trim($expanded);
+  // default is one unit, rules should be more complicated to deal with fracs and newlines
+  $rule = array(
+		"mi" => 1,
+		"mo" => 1.5,
+		"mn" => 1
+		);
+  
+  while ($expanded)
+    {
+      // strip off first char
+      $char = substr($expanded,0,1);
+      $expanded = substr($expanded,1);
+      if ($char == "<")
+	{
+	  // tag
+	  if (preg_match('/^([a-z]+)/',$expanded,$type))
+	    {
+	      // opening tag
+	      $tags[] = $type[1]; // push tag onto stack
+	    }
+	  elseif (preg_match('/^\/([a-z]+)/',$expanded,$type))
+	    {
+	      // closing tag, ought to check for balance
+	      unset($tags[count($tags)-1]);
+	    }
+	  else
+	    {
+	      // errk.  Something that wasn't an opening or closing tag
+	    }
+	  // delete rest of tag from string
+	  list($junk,$expanded) = explode(">",$expanded,2);
+	  while (preg_match('/\\$/',$junk))
+	    {
+	      // make sure the > wasn't escaped (is this the right thing to match?)
+	      list($junk,$expanded) = explode(">",$expanded,2);
+	    }
+	}
+      else
+	{
+	  if ($char == "&")
+	    {
+	      // entity
+	      list($entity,$expanded) = explode(";",$expanded,2);
+	    }
+	  if (preg_match('/\s/',$char))
+	    {
+	      // whitespace
+	      ltrim($expanded);
+	    }
+	  if (array_key_exists($tags[count($tags) - 1],$rule))
+	    {
+	      $width = $width + $rule[$tags[count($tags)-1]];
+	    }
+	  else
+	    {
+	      $width++;
+	    }
+	}
+    }
+  return min($textwidth,$width);
+}
+
+
+/*
  * Process a string consisting of LaTeX commands
  *  Strip off tokens, expanding them one by one.
  *  If the expansion actually does something, replace them at the front
