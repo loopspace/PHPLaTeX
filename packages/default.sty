@@ -3,7 +3,10 @@
 \newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\#1true}{\true{#1}}\newcommand{\#1false}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
-\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML'>\mmodetrue}
+\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline">\mmodetrue}
+
+\newcommand{\[}{\par<math xmlns='http://www.w3.org/1998/Math/MathML' display="block">\mmodetrue}
+\newcommand{\]}{</math>\mmodefalse\par}
 
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}

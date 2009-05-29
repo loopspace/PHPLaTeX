@@ -538,6 +538,7 @@ function processLaTeX (&$latex)
 	  $processed = $processed . $extoken;
 	}
     }
+  //  return preg_replace('/>/',">\n",$processed);
   return $processed;
 }
 

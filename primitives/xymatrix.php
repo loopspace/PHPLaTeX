@@ -8,7 +8,6 @@ $dim = array(
 $nexttok = nexttok($latex);
 while ($nexttok != "{")
   {
-    print "and here";
     $args = $args . $nexttok;
     $nexttok = nexttok($latex);
   }
@@ -34,7 +33,7 @@ $svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="0" refY="5"
 $m = 0;
 $n = 0;
 $maxwidth = 1;
-$maxheight = 3;
+$maxheight = 2.5;
 
 // due to not vertically centering our entries, need a vertical fudge
 $fudgeheight = 1/2;
@@ -67,14 +66,12 @@ while ($matrix)
 	  }
 	else
 	  {
-	    //	    print $nexttok . ":" . htmlspecialchars($matrix) . "<br />";
-
 	    // append to current entry
 	    $entry[$m][$n] = $entry[$m][$n] . $nexttok;
-	    $nexttok = nexttok($matrix);
 	  }
+	$nexttok = nexttok($matrix);
       }
-    $entry[$m][$n] = trim($entry[$m][$n]);
+    $entry[$m][$n] = '\(' . trim($entry[$m][$n]) . '\)';
     $width[$m][$n] = (getWidthOf($entry[$m][$n]) + 2); // margin of error
     $height[$m][$n] = $maxheight; // need getHeightOf here
 
@@ -200,10 +197,10 @@ for($i = 0; $i < count($arrows);$i++)
     $oy = $sx - $ex;
     // scale so that $ox >= $xoffset and $oy >= $yoffset
 
-    $nx = round($xoffset*$ox/($ox*$ox + $oy*$oy)*20)/20;
-    $ny = round($xoffset*$oy/($ox*$ox + $oy*$oy)*20)/20;
-    $lx += $nx;
-    $ly += $ny;
+    $nx = round($ox/($ox*$ox + $oy*$oy)*20)/20;
+    $ny = round($oy/($ox*$ox + $oy*$oy)*20)/20;
+    $lx += 10*$nx;
+    $ly += 10*$ny - $fudgeheight;
 
 	$svg .= '<foreignObject x="'
 	  . $lx
@@ -227,7 +224,7 @@ for($i = 0; $i < count($arrows);$i++)
 
 $svg .= '</svg>' . "\n";
 
-print '<pre>' . htmlspecialchars($svg) . '</pre>';
+//print '<pre>' . htmlspecialchars($svg) . '</pre>';
 
 $latex = $svg . "\0" . $latex;
 return;
