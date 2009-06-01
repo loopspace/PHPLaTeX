@@ -8,7 +8,17 @@ if (array_key_exists($if,$conditionals))
     $nextgrp = nextgrp($latex);
     while (($nextgrp != '\\else') and ($nextgrp != '\\fi'))
       {
-	$then = $then . $nextgrp;
+	$then .= $nextgrp;
+	// ifs have to group so if we have a new if, slurp in everything until the fi
+	// should an '\ifsth .. \fi' be considered as a group?  test this
+	if (preg_match('/^\\\\if/',$nextgrp))
+	  {
+	    while ($nextgrp != '\\fi')
+	      {
+		$nextgrp = nextgrp($latex);
+		$then .= $nextgrp;
+	      }
+	  }
 	$nextgrp = nextgrp($latex);
       }
     if ($nextgrp == '\\else')
@@ -17,6 +27,14 @@ if (array_key_exists($if,$conditionals))
 	while ($nextgrp != '\\fi')
 	  {
 	    $else = $else . $nextgrp;
+	    if (preg_match('/^\\\\if/',$nextgrp))
+	      {
+		while ($nextgrp != '\\fi')
+		  {
+		    $nextgrp = nextgrp($latex);
+		    $else .= $nextgrp;
+		  }
+	      }
 	    $nextgrp = nextgrp($latex);
 	  }
       }

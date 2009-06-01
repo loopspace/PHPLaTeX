@@ -1,0 +1,13 @@
+ cat itex2MML.l | perl -lne '/"\\(\\[^"]*)"/ and print "\$\$" . $1
+ . "\$\$"' > ~/tmp/itex_commands
+
+(for f in $(cat itex2MML.l | perl -lne '/"\\(\\[^"]*)"/ and print "\$\$" . $1 . "\$\$"' ); do
+print $f | itex2MML
+done) > ~/tmp/itex_result
+
+cat ~/tmp/itex_result | perl -ne '/\$\$(.*)\$\$/ and $cmd = $1; if
+(/<m([ino]) ?([^>]*)>([^<]*)<\/m/) {$type = $1; $opt = $2; $res = $3;
+print "\\newcommand{$cmd}"; if ($opt) {print "[$opt]"}; print
+"{\\math"; if($type eq "i") {print "char"}; if ($type eq "n") {print
+"num"}; if ($type eq "o") {print "op"}; print "{$res}}\n";};' >
+~/public_html/PHPLaTeX/packages/itex.sty

@@ -3,10 +3,26 @@
 \newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\#1true}{\true{#1}}\newcommand{\#1false}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
-\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline">\mmodetrue}
+\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline"><mrow>\mmodetrue}
+\newcommand{\[}{\par<math xmlns='http://www.w3.org/1998/Math/MathML' display="block"><mrow>\mmodetrue}
+\newcommand{\]}{</mrow></math>\mmodefalse\par}
 
-\newcommand{\[}{\par<math xmlns='http://www.w3.org/1998/Math/MathML' display="block">\mmodetrue}
-\newcommand{\]}{</math>\mmodefalse\par}
+\newif{array}
+\newcommand{\amporcol}{\ifarray </mtd><mtd>\else &amp;\fi}
+\newenvironment{array}[1][]{\ifmmode <mrow><mtable #1><mtr><mtd>\arraytrue\fi}{\arrayfalse</mtd></mtr></mtable></mrow>}
+\newenvironment{matrix}{\array[rowspacing="0.5ex"]}{\endarray}
+\newenvironment{pmatrix}{\left(\begin{matrix}}{\end{matrix}\right)}
+\newenvironment{bmatrix}{\left[\begin{matrix}}{\end{matrix}\right]}
+\newenvironment{Bmatrix}{\left\lbrace\begin{matrix}}{\end{matrix}\right\rbrace}
+\newenvironment{vmatrix}{\left\lvert\begin{matrix}}{\end{matrix}\right\rvert}
+\newenvironment{Vmatrix}{\left\lVert\begin{matrix}}{\end{matrix}\right\rVert}
+
+\newenvironment{smallmatrix}{<mstyle scriptlevel="2">\matrix}{\endmatrix</mstyle>}
+
+\newenvironment{cases}{<mrow>\left\lbrace\array[columnalign="left left"]}{\endarray</mrow>}
+\newenvironment{aligned}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
+\newenvironment{gathered}{\array[rowspacing="1.0ex"]}{\endarray}
+\newenvironment{split}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
 
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
@@ -19,6 +35,7 @@
 \newcounter{subsection}
 \newcounter{subsubsection}
 
+\newcommand{\newline}{\ifmmode\ifarray </mtd></mtr><mtr><mtd>\fi\else<br />\fi}
 \newcommand{\par}{</p><p>}
 \newcommand{\emph}[1]{<i>#1</i>}
 \newcommand{\textbf}[1]{<strong>#1</strong>}
@@ -34,19 +51,32 @@
 % Not sure why this works, but it does ...
 \newcommand{\ }{ }
 
-\newcommand{\mathop}[1]{\ifmmode<mo>#1</mo>\else #1\fi}
-\newcommand{\mathnum}[1]{\ifmmode<mn>#1</mn>\else #1\fi}
-\newcommand{\mathchar}[1]{\ifmmode<mi>#1</mi>\else #1\fi}
-\newcommand{\text}[1]{\ifmmode<mtext>\mmodefalse #1\mmodetrue</mtext>\else #1\fi}
-\newcommand{\frac}[2]{<mfrac><mrow>#1</mrow><mrow>#2</mrow></mfrac>}
+\newif{stretchy}
+\stretchyfalse
+
+\newcommand{\mathop}[2][]{\ifmmode<mo #1>#2</mo>\else #2\fi}
+\newcommand{\mathnum}[2][]{\ifmmode<mn #1>#2</mn>\else #2\fi}
+\newcommand{\mathchar}[2][]{\ifmmode<mi #1>#2</mi>\else #2\fi}
+% double braces are needed here otherwise \left[ doesn't work properly
+% this is probably a BUG
+\newcommand{\mathparen}[1]{\ifstretchy\mathop{{#1}}\else\mathop[stretchy="false"]{#1}\fi}
+\newcommand{\left}[1]{\stretchytrue #1\stretchyfalse}
+\newcommand{\right}[1]{\stretchytrue #1\stretchyfalse}
+
+\newcommand{\text}[2][]{\ifmmode<mtext #1>\mmodefalse #2\mmodetrue</mtext>\else #2\fi}
+\newcommand{\frac}[3][]{<mfrac #1><mrow>#2</mrow><mrow>#3</mrow></mfrac>}
 
 \newcommand{\sqrt}[1]{<msqrt>#1</msqrt>}
 \newcommand{\root}[2]{<mroot><mrow>#1</mrow><mrow>#2</mrow></mroot>}
 
-
+\newcommand{\!}{<mspace width="-.5em" />}
+\newcommand{\negspace}{\!}
 \newcommand{\,}{<mspace width="1em" />}
-\newcommand{\;}{<mspace width="1em" />}
+\newcommand{\thinspace}{\,}
 \newcommand{\:}{<mspace width="1em" />}
+\newcommand{\medspace}{\:}
+\newcommand{\;}{<mspace width="1em" />}
+\newcommand{\thickspace}{\;}
 \newcommand{\quad}{<mspace width="1em" />}
 \newcommand{\qquad}{<mspace width="1em" />}
 
@@ -101,7 +131,6 @@
 \newcommand{\prime}{\mathchar{&prime;}}
 \newcommand{\nabla}{\mathchar{&nabla;}}
 \newcommand{\forall}{\mathchar{&forall;}}
-\newcommand{\exists}{\mathchar{&exist;}}
 \newcommand{\times}{\mathop{&times;}}
 \newcommand{\notin}{\mathop{&notin;}}
 \newcommand{\ni}{\mathop{&ni;}}
@@ -120,6 +149,8 @@
 \newcommand{\ne}{\mathop{&ne;}}
 \newcommand{\le}{\mathop{&le;}}
 \newcommand{\ge}{\mathop{&ge;}}
+\newcommand{\gt}{\mathop{&gt;}}
+\newcommand{\lt}{\mathop{&lt;}}
 \newcommand{\otimes}{\mathop{&otimes;}}
 \newcommand{\perp}{\mathop{&perp;}}
 \newcommand{\alpha}{\mathchar{&alpha;}}
@@ -146,3 +177,13 @@
 \newcommand{\chi}{\mathchar{&chi;}}
 \newcommand{\psi}{\mathchar{&psi;}}
 \newcommand{\omega}{\mathchar{&omega;}}
+
+\newcommand{\lvert}{\mathparen{&VerticalBar;}}
+\newcommand{\rvert}{\mathparen{&VerticalBar;}}
+\newcommand{\lVert}{\mathparen{&DoubleVerticalBar;}}
+\newcommand{\rVert}{\mathparen{&DoubleVerticalBar;}}
+
+\newcommand{\lbrace}{\mathparen{&#123;}}
+\newcommand{\rbrace}{\mathparen{&#125;}}
+\newcommand{\lbracket}{\mathparen{&#91;}}
+\newcommand{\rbracket}{\mathparen{&#93;}}

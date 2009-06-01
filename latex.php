@@ -94,7 +94,7 @@ function nexttok (&$latex)
       elseif ($firstchar == "&")
 	{
 	  // possible HTML or MathML entity, get the rest
-	  if (preg_match('/^([A-Za-z]+|##0-9]+|#x[A-Fa-f0-9]+);/',$latex))
+	  if (preg_match('/^([A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);/',$latex))
 	    {
 	      list($entity,$latex) = explode(";",$latex,2);
 	      return "&" . $entity . ";";
@@ -243,18 +243,20 @@ function expandtok ($token,&$latex)
 		  if ($nexttok == "[")
 		    {
 		      // specified by user, slurp in until closing brace
-		      $nextgrp = nextgrp($latex);
+		      $nexttok = nexttok($latex);
 		      $arg = "";
-		      while ($nextgrp != "]")
+		      while ($nexttok != "]")
 			{
-			  $arg = $arg . $nextgrp;
+			  $latex = $nexttok . "\0" . $latex;
 			  $nextgrp = nextgrp($latex);
+			  $arg = $arg . $nextgrp;
+			  $nexttok = nexttok($latex);
 			}
 		    }
 		  else
 		    {
 		      // put the token back on the stream, wasn't wanted, and use default instead
-		      $latex = $nexttok . $latex;
+		      $latex = $nexttok . "\0" . $latex;
 		      $arg = $opts[($i+1)];
 		    }
 		}
@@ -272,6 +274,8 @@ function expandtok ($token,&$latex)
 	  // command is not known, just return it unexpanded
 	  return array(0,$token);
 	}
+
+      // end of: if($firstchar == "\\")
     }
   /*  elseif ($firstchar == "<")
    *{
@@ -303,6 +307,7 @@ function expandtok ($token,&$latex)
     }
   elseif ($firstchar == "{")
     {
+      // grouping, if in math mode need to look for super or subscripts
       if ($conditionals{"mmode"})
 	{
 	  // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
@@ -343,7 +348,7 @@ function expandtok ($token,&$latex)
 	  else
 	    {
 	      // neither sub or sup, replace token
-	      $return = '<mrow>' . $nextgrp . '</mrow>' . $nexttok;
+	      $return = '<mrow>' . $base . '</mrow>' . $nexttok;
 	    }
 	  return array(1,$return);
 	}
@@ -352,11 +357,17 @@ function expandtok ($token,&$latex)
 	  // out of math mode, no grouping looked for, { does nothing
 	  return '';
 	}
+      // end of: if ($firstchar == "{")
     }
   elseif ($firstchar == "}")
     {
       // if we get a }, should just ignore it
       return '';
+    }
+  elseif ($token == "&")
+    {
+      // can't test on first char here as this is used for entities
+      return array(1,'\amporcol');
     }
   else
     {
@@ -415,6 +426,10 @@ function expandtok ($token,&$latex)
 	      elseif (preg_match('/^[+=-]*$/',$token))
 		{
 		  $return = '\mathop{' . $token . '}';
+		}
+	      elseif (preg_match('/^[(){}\[\]]/',$token))
+		{
+		  $return = '\mathparen{' . $token . '}';
 		}
 	      else
 		{
@@ -538,7 +553,12 @@ function processLaTeX (&$latex)
 	  $processed = $processed . $extoken;
 	}
     }
-  //  return preg_replace('/>/',">\n",$processed);
+// somehow want to add in some newlines to make the code look prettier, but do so without actually changing any content.
+//    $processed = preg_replace('/>/',">\n",$processed);
+//    $processed = preg_replace('/</',"\n<",$processed);
+//    $processed = preg_replace('/(\n\s*)+/',"\n",$processed);
+//    $processed = preg_replace('/<mi>\n/','<mi>',$processed);
+//    $processed = preg_replace('/\n<\/mi>/','</mi>',$processed);
   return $processed;
 }
 
@@ -563,5 +583,13 @@ if (is_dir($primitivedir) and is_readable($primitivedir))
 	  }
       }
   }
+
+// due to the vaguaries of getting tokens, can't define \\ properly yet
+
+$commands["\\"] = array(
+			"args" => 0,
+			"opts" => array(),
+			"defn" => '\newline'
+			);
 
 ?>
