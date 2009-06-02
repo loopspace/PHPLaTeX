@@ -1,6 +1,7 @@
 <?php
 
 include("latex.php");
+initialise();
 
 // Main program starts here
 

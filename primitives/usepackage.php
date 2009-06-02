@@ -1,5 +1,5 @@
 // name: usepackage
-$package = nextgrp($latex); // get package name
+$package = stripgrp(nextgrp($latex)); // get package name
 // check that $package is safe!
 if (preg_match("/^\\w+$/s",$package))
 {

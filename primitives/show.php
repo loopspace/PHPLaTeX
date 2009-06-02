@@ -2,7 +2,7 @@
 global $primitives;
 global $defs;
 global $commands;
-$name = nextgrp($latex);
+$name = stripgrp(nextgrp($latex));
 $name = ltrim($name,'\\');
 print '<pre>' . htmlspecialchars($name);
 if (array_key_exists($name,$primitives))
@@ -24,7 +24,7 @@ elseif (array_key_exists($name,$commands))
   }
 else
   {
-    print  "is unknown";
+    print  " is unknown";
   }
 print '</pre>';
 return;

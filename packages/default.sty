@@ -1,6 +1,6 @@
 \newcommand{\begin}[1]{\csname #1\endcsname}
 \newcommand{\end}[1]{\csname end#1\endcsname}
-\newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\#1true}{\true{#1}}\newcommand{\#1false}{\false{#1}}\csname #1false\endcsname}
+\newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\csname #1true\encsname}{\true{#1}}\newcommand{\csname #1false\endcsname}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
 \newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline"><mrow>\mmodetrue}

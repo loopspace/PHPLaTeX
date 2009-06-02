@@ -1,14 +1,14 @@
 // name: newcommand
 global $commands;
-$name = nextgrp($latex); // first argument is name of command
-$nextgrp = nextgrp($latex); // next is either defn or says we have arguments
+$name = stripgrp(nextgrp($latex)); // first argument is name of command
+$nextgrp = stripgrp(nextgrp($latex)); // next is either defn or says we have arguments
 if ($nextgrp == "[")
   {
     // have arguments, how many?
-    $num = nextgrp($latex);
+    $num = stripgrp(nextgrp($latex));
     nextgrp($latex); // ought to be a "]", should test this
     // should test for numeric here also
-    $nextgrp = nextgrp($latex); // either optional first argument or defn
+    $nextgrp = stripgrp(nextgrp($latex)); // either optional first argument or defn
     if ($nextgrp == "[")
       {
 	// option argument specified
@@ -21,7 +21,7 @@ if ($nextgrp == "[")
 	    $nextgrp = nextgrp($latex);
 	  }
 	$optarray = array("1" => $opt);
-	$defn = nextgrp($latex);
+	$defn = stripgrp(nextgrp($latex));
       }
     else
       {

@@ -1,6 +1,6 @@
 // name: if
 global $conditionals;
-$if = nextgrp($latex);
+$if = stripgrp(nextgrp($latex));
 if (array_key_exists($if,$conditionals))
   {
     $then = "";

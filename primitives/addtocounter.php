@@ -1,5 +1,5 @@
 // name: addtocounter
 global $counters;
-$name = nextgrp($latex);
+$name = stripgrp(nextgrp($latex));
 $counter[$name]++;
 return;

@@ -1,5 +1,5 @@
 // name: refstepcounter
 global $counters;
-$name = nextgrp($latex);
+$name = stripgrp(nextgrp($latex));
 $counters[$name]++;
 return;

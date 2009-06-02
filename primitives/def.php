@@ -1,6 +1,6 @@
 // name: def
 global $defs;
-$name = nextgrp($latex); // first argument is name of command
+$name = stripgrp(nextgrp($latex)); // first argument is name of command
 $nexttok = nexttok($latex);
 $pattern = "";
 while($nexttok != "{")
@@ -9,7 +9,7 @@ while($nexttok != "{")
     $nexttok = nexttok($latex);
   }
 $latex = $nexttok . $latex;
-$defn = nextgrp($latex);
+$defn = stripgrp(nextgrp($latex));
 // strip off slashes if needed
 // need the four slashes as we are already inside a quoted string
 $name = ltrim($name,"\\\\");

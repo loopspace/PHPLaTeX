@@ -19,7 +19,7 @@ if ($args)
   }
 // TODO: convert lengths (should be global function) 
 $latex = $nexttok . $latex;
-$matrix = nextgrp($latex);
+$matrix = stripgrp(nextgrp($latex));
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">' . "\n";
 
 $svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="0" refY="5" 
@@ -56,7 +56,7 @@ while ($matrix)
 	    	$nexttok = nexttok($matrix);
 	      }
 	    $matrix = $nexttok . "\0" . $matrix;
-	    $label =  nextgrp($matrix);
+	    $label =  stripgrp(nextgrp($matrix));
 	    $arrows[] = array(
 			      "row" => $m,
 			      "col" => $n,

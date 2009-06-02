@@ -26,9 +26,18 @@ $conditionals = array();
  * Error function: should be more used
  */
 
-function error ($message)
+function LaTeXError ($message,$fatal)
 {
-  print "<br /><strong>Error:&nbsp;</strong>" . $message . "<br />";
+  if ($fatal)
+    {
+      print "<br /><strong>PHPLaTeX Error:&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+      exit;
+    }
+  else
+    {
+      print "<br /><strong>PHPLaTeX Warning:&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+    }
+  return;
 }
 
 /*
@@ -111,7 +120,8 @@ function nexttok (&$latex)
     }
   else
     {
-      return;
+      // nothing left on stream, signal this to caller
+      return NULL;
     }
 }
 
@@ -121,6 +131,7 @@ function nexttok (&$latex)
  * 
  * Question: do we return the group still grouped or do we remove the
  *  outermost grouping?
+ * Answer: grouped.
  */
 
 function nextgrp (&$latex)
@@ -130,27 +141,46 @@ function nextgrp (&$latex)
 
   if ($firstchar != "")
     {
+      $group = $firstchar;
       if (($firstchar == "{") or ($firstchar == "\\bgroup"))
 	{
-	  $c = 0;
-	  $nexttok = "";
-	  while($c >= 0)
+	  $c = 1;
+	  while($c > 0)
 	    {
-	      $group = $group . $nexttok;
-	      $nexttok = nexttok($latex);
-	      $test = str_replace(array('\{','\}'),'',$group . $nexttok);
+	      $group .= nexttok($latex); // should be safe to append without nulls
+	      $test = str_replace(array('\{','\}'),'',$group);
 	      $test = preg_replace('/\\bgroup\b/','{',$test);
 	      $test = preg_replace('/\\egroup\b/','}',$test);
        
 	      $c = substr_count($test, '{') - substr_count($test,'}');
 	    }
 	}
-      else
-	{
-	  $group = $firstchar;
-	}
+    }
+  else
+    {
+      LaTeXError("Input ended prematurely",1);
     }
   return $group;
+}
+
+/*
+ * strips off outermost grouping safely
+ */
+
+function stripgrp ($group)
+{
+  if (preg_match('/^{/',$group) and preg_match('/[^\\\\]}$/',$group))
+    {
+      return substr($group,1,(strlen($group) - 2));
+    }
+  elseif (preg_match('/^\\bgroup\b/',$group) and preg_match('/\\egroup$/',$group))
+    {
+      return substr($group,6,(strlen($group) - 14));
+    }
+  else
+    {
+      return $group;
+    }
 }
 
 /*
@@ -216,8 +246,10 @@ function expandtok ($token,&$latex)
 		  else
 		    {
 		      // no delimiter, slurp in next group only
-		      $arg = nextgrp($latex);
+		      $arg = stripgrp(nextgrp($latex));
 		    }
+		  // protect token delimitation
+		  $arg = "\0" . $arg . "\0";
 		  $defn=str_replace("#" . $num, $arg, $defn);
 		}
 	    }
@@ -262,8 +294,10 @@ function expandtok ($token,&$latex)
 		}
 	      else
 		{
-		  $arg = nextgrp($latex);
+		  $arg = stripgrp(nextgrp($latex));
 		}
+	      // protect token delimitation
+	      $arg = "\0" . $arg . "\0";
 	      $defn=str_replace("#" . ($i+1), $arg, $defn);
 	    }
 	  // return expanded command
@@ -312,17 +346,17 @@ function expandtok ($token,&$latex)
 	{
 	  // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
 	  $latex = $firstchar . $latex;
-	  $base = nextgrp($latex);
+	  $base = stripgrp(nextgrp($latex));
 	  $nexttok = nexttok($latex);
 	  if ($nexttok == '^')
 	    {
 	      // superscript, do we have a subscript?
-	      $sup = nextgrp($latex);
+	      $sup = stripgrp(nextgrp($latex));
 	      $nexttok = nexttok($latex);
 	      if ($nexttok == '_')
 		{
 		  // also have subscript
-		  $sub = nextgrp($latex);
+		  $sub = stripgrp(nextgrp($latex));
 		  $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
 		}
 	      else
@@ -332,12 +366,12 @@ function expandtok ($token,&$latex)
 	    }
 	  elseif ($nexttok == '_')
 	    {
-	      $sub = nextgrp($latex);
+	      $sub = stripgrp(nextgrp($latex));
 	      $nexttok = nexttok($latex);
 	      if ($nexttok == '^')
 		{
 		  // also have subscript
-		  $sup = nextgrp($latex);
+		  $sup = stripgrp(nextgrp($latex));
 		  $return = '<msubsup><mrow>' . $base . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
 		}
 	      else
@@ -378,12 +412,12 @@ function expandtok ($token,&$latex)
 	  if ($nexttok == '^')
 	    {
 	      // superscript, do we have a subscript?
-	      $sup = nextgrp($latex);
+	      $sup = stripgrp(nextgrp($latex));
 	      $nexttok = nexttok($latex);
 	      if ($nexttok == '_')
 		{
 		  // also have subscript
-		  $sub = nextgrp($latex);
+		  $sub = stripgrp(nextgrp($latex));
 		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
 		}
 	      else
@@ -393,12 +427,12 @@ function expandtok ($token,&$latex)
 	    }
 	  elseif ($nexttok == '_')
 	    {
-	      $sub = nextgrp($latex);
+	      $sub = stripgrp(nextgrp($latex));
 	      $nexttok = nexttok($latex);
 	      if ($nexttok == '^')
 		{
 		  // also have subscript
-		  $sup = nextgrp($latex);
+		  $sup = stripgrp(nextgrp($latex));
 		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
 		}
 	      else
@@ -564,32 +598,37 @@ function processLaTeX (&$latex)
 
 // primitives
 
-$primitivedir = dirname($_SERVER["SCRIPT_FILENAME"]) ."/primitives/";
+function initialise ()
+{
+  global $primitives;
+  $primitivedir = dirname($_SERVER["SCRIPT_FILENAME"]) ."/primitives/";
 
-if (is_dir($primitivedir) and is_readable($primitivedir))
-  {
-    $handle = opendir($primitivedir);
-    while (false !== ($file = readdir($handle)))
-      {
-	$file = $primitivedir . $file;
-	if (is_file($file) and is_readable($file) and preg_match('/\.php$/', $file))
-	  {
-	    $primitive = file_get_contents($file);
-	    list($name,$function) = explode("\n",$primitive,2);
-	    // actual name is last non-whitespace part of first line
-	    // perhaps should have something better than this ...
-	    $name = preg_replace('/^.*\s+(\S+)\s*$/','\1',$name);
-	    $primitives[$name] = create_function('&$latex',$function);
-	  }
-      }
-  }
+  if (is_dir($primitivedir) and is_readable($primitivedir))
+    {
+      $handle = opendir($primitivedir);
+      while (false !== ($file = readdir($handle)))
+	{
+	  $file = $primitivedir . $file;
+	  if (is_file($file) and is_readable($file) and preg_match('/\.php$/', $file))
+	    {
+	      $primitive = file_get_contents($file);
+	      list($name,$function) = explode("\n",$primitive,2);
+	      // actual name is last non-whitespace part of first line
+	      // perhaps should have something better than this ...
+	      $name = preg_replace('/^.*\s+(\S+)\s*$/','\1',$name);
+	      $primitives[$name] = create_function('&$latex',$function);
+	    }
+	}
+    }
 
-// due to the vaguaries of getting tokens, can't define \\ properly yet
+  // due to the vaguaries of getting tokens, can't define \\ properly yet
 
-$commands["\\"] = array(
-			"args" => 0,
-			"opts" => array(),
-			"defn" => '\newline'
-			);
+  $commands["\\"] = array(
+			  "args" => 0,
+			  "opts" => array(),
+			  "defn" => '\newline'
+			  );
+  return;
+}
 
 ?>
