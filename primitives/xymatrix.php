@@ -33,7 +33,7 @@ $svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="0" refY="5"
 $m = 0;
 $n = 0;
 $maxwidth = 1;
-$maxheight = 2.5;
+$maxheight = 3.5;
 
 // due to not vertically centering our entries, need a vertical fudge
 $fudgeheight = 1/2;
@@ -49,14 +49,87 @@ while ($matrix)
 	    // got an arrow
 	    $arrow = "";
 	    $label = "";
-	    $nexttok = nexttok($matrix);
-	    while ($nexttok != '{')
+	    $inarrow = 1;
+	    // ignore spaces
+	    while ($inarrow)
 	      {
-		$arrow .= $nexttok;
-	    	$nexttok = nexttok($matrix);
+		do {
+		  $nexttok = nexttok($matrix);
+		} while ($nexttok == ' ');
+
+		if ($nexttok == '^')
+		  {
+		    // label above
+		    do {
+		      $nexttok = nexttok($matrix);
+		    } while ($nexttok == ' ');
+
+		    if ($nexttok == '<')
+		      {
+			// displacement of label
+			$upperdisplacement .= $nexttok;
+		      }
+		    $upperlabel = nextgrp($matrix);
+		  }
+		elseif ($nexttok == '_')
+		  {
+		    // label below
+		    $lowerlabel = nextgrp($matrix);
+		  }
+		elseif ($nexttok == '|')
+		  {
+		    // label in middle
+		    $midlabel = nextgrp($matrix);
+		  }
+		elseif ($nexttok == '@')
+		  {
+		    // lots of possibilities
+		    $nexttok = nexttok($matrix);
+		    if ($nexttok == '/')
+		      {
+			// curving
+			$nexttok = nexttok($matrix);
+			while ($nexttok != '/')
+			  {
+			    $curving .= $nexttok;
+			    $nexttok = nexttok($matrix);
+			  }
+		      }
+		    elseif ($nexttok == '(')
+		      {
+			// also curving
+			$nexttok = nexttok($matrix);
+			while ($nexttok != ')')
+			  {
+			    $curving .= $nexttok;
+			    $nexttok = nexttok($matrix);
+			  }
+		      }
+		    elseif ($nexttok == '{')
+		      {
+			// style
+			$matrix = $nexttok . $matrix;
+			$style = nextgrp($matrix);
+		      }
+		    elseif (($nexttok == '^') or ($nexttok == '_') or ($nexttok == '2') or ($nexttok == '3'))
+		      {
+			// style again
+			$stylevariant = $nexttok;
+			$style = nextgrp($matrix);
+		      }
+		    elseif ($nexttok == '<')
+		      {
+			$nexttok = nexttok($matrix);
+			while ($nexttok != '>')
+			  {
+			    $displacement .= $nexttok;
+			    $nexttok = nexttok($matrix);
+			  }
+		      }
+		  }      
 	      }
+
 	    $matrix = $nexttok . "\0" . $matrix;
-	    $label =  stripgrp(nextgrp($matrix));
 	    $arrows[] = array(
 			      "row" => $m,
 			      "col" => $n,
@@ -224,7 +297,7 @@ for($i = 0; $i < count($arrows);$i++)
 
 $svg .= '</svg>' . "\n";
 
-//print '<pre>' . htmlspecialchars($svg) . '</pre>';
+print '<pre>' . htmlspecialchars($svg) . '</pre>';
 
 $latex = $svg . "\0" . $latex;
 return;

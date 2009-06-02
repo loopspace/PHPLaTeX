@@ -8,6 +8,13 @@ while ($nexttok != "\\endcsname")
     $name = $name . $nexttok;
     $nexttok = nexttok($latex);
   }
-list($mod,$extoken) = expandtok("\\" . $name,$latex);
-$latex = $extoken . "\0" . $latex;
+// remove nulls
+$name = preg_replace('/\0/','',$name);
+//list($mod,$extoken) = expandtok("\\" . $name,$latex);
+$latex = "\\" . $name . "\0" . $latex;
 return;
+
+/*
+ * \csname command\endcsname
+ * Produces \command
+ */

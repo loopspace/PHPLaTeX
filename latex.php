@@ -21,6 +21,9 @@ $commands = array();
 $primitives = array();
 $counters = array();
 $conditionals = array();
+$lineno = 1;
+$maxops = 10000;
+$ops = 0;
 
 /*
  * Error function: should be more used
@@ -28,14 +31,16 @@ $conditionals = array();
 
 function LaTeXError ($message,$fatal)
 {
+  global $lineno;
   if ($fatal)
     {
-      print "<br /><strong>PHPLaTeX Error:&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+      print "<br /><strong>PHPLaTeX Error at or near line " . $lineno . ":&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+      print "</p></body></html>";
       exit;
     }
   else
     {
-      print "<br /><strong>PHPLaTeX Warning:&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+      print "<br /><strong>PHPLaTeX Warning at or near line " . $lineno . ":&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
     }
   return;
 }
@@ -49,6 +54,12 @@ function LaTeXError ($message,$fatal)
 
 function nexttok (&$latex)
 {
+  global $lineno;
+  global $maxops;
+  global $ops;
+  $ops++;
+  if ($ops > $maxops)
+    LaTeXError("Capacity exceeded by nexttok.",1);
   // Silently ignore nulls: we use them as separators
   do {
     $firstchar = substr($latex,0,1);
@@ -83,7 +94,8 @@ function nexttok (&$latex)
       elseif ($firstchar == "%")
 	{
 	  // comment, ignore rest of line and recall ourselves
-	  $latex = preg_replace('/^.*/','',$latex);
+	  $latex = preg_replace('/^.*\n?/','',$latex);
+	  $lineno++;
 	  return nexttok($latex);
 	}
       elseif ($firstchar == "<")
@@ -98,6 +110,8 @@ function nexttok (&$latex)
 	      list($contents,$latex) = explode(">",$latex,2);
 	      $tag = $tag . $contents . ">";
 	    }
+	  // replace any nulls that may have snuck in
+	  $tag = str_replace("\0",'',$tag);
 	  return $tag;
 	}
       elseif ($firstchar == "&")
@@ -112,6 +126,11 @@ function nexttok (&$latex)
 	    {
 	      return $firstchar;
 	    }
+	}
+      elseif ($firstchar == "\n")
+	{
+	  $lineno++;
+	  return $firstchar;
 	}
       else
 	{
@@ -136,6 +155,12 @@ function nexttok (&$latex)
 
 function nextgrp (&$latex)
 {
+  global $maxops;
+  global $ops;
+  $ops++;
+  if ($ops > $maxops)
+    LaTeXError("Capacity exceeded by nextgrp.",1);
+
   $firstchar = nexttok($latex);
   $group = "";
 
@@ -193,6 +218,12 @@ function expandtok ($token,&$latex)
   global $commands;
   global $primitives;
   global $conditionals;
+  global $maxops;
+  global $ops;
+  $ops++;
+  if ($ops > $maxops)
+    LaTeXError("Capacity exceeded by expandtok.",1);
+
   // get first character of the token
 
   $firstchar = substr($token,0,1);
@@ -306,6 +337,7 @@ function expandtok ($token,&$latex)
       else
 	{
 	  // command is not known, just return it unexpanded
+	  LaTeXError("Unknown command: " . $token,0);
 	  return array(0,$token);
 	}
 
@@ -332,7 +364,7 @@ function expandtok ($token,&$latex)
       $latex = preg_replace('/^\s*/s','',$latex);
       if (substr_count($whitespace[1],"\n") > 0)
 	{
-	  return array(1,"\\par");
+	  return array(1,"</p><p>");
 	}
       else
 	{
@@ -588,11 +620,13 @@ function processLaTeX (&$latex)
 	}
     }
 // somehow want to add in some newlines to make the code look prettier, but do so without actually changing any content.
-//    $processed = preg_replace('/>/',">\n",$processed);
-//    $processed = preg_replace('/</',"\n<",$processed);
-//    $processed = preg_replace('/(\n\s*)+/',"\n",$processed);
-//    $processed = preg_replace('/<mi>\n/','<mi>',$processed);
-//    $processed = preg_replace('/\n<\/mi>/','</mi>',$processed);
+//  $tags = array("p","mrow","br");
+//  foreach ($tags as $tag)
+  //   {
+  //   $processed = preg_replace("/(<$tag\b[^>]*>)/","\n$1\n",$processed);
+  //   $processed = preg_replace("/(<\/$tag>)/","\n$1\n",$processed);
+  //  }
+  //  $processed = preg_replace('/\n\n+/s',"\n",$processed);
   return $processed;
 }
 

@@ -1,6 +1,6 @@
 \newcommand{\begin}[1]{\csname #1\endcsname}
 \newcommand{\end}[1]{\csname end#1\endcsname}
-\newcommand{\newif}[1]{\newcommand{\if#1}{\if{#1}}\newcommand{\csname #1true\encsname}{\true{#1}}\newcommand{\csname #1false\endcsname}{\false{#1}}\csname #1false\endcsname}
+\newcommand{\newif}[1]{\expandafter\newcommand\expandafter{\csname if#1\endcsname}{\if{#1}}\expandafter\newcommand\expandafter{\csname #1true\endcsname}{\true{#1}}\expandafter\newcommand\expandafter{\csname #1false\endcsname}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
 \newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline"><mrow>\mmodetrue}
@@ -51,17 +51,20 @@
 % Not sure why this works, but it does ...
 \newcommand{\ }{ }
 
-\newif{stretchy}
-\stretchyfalse
 
+\def\parensize{stretchy="false"}
 \newcommand{\mathop}[2][]{\ifmmode<mo #1>#2</mo>\else #2\fi}
 \newcommand{\mathnum}[2][]{\ifmmode<mn #1>#2</mn>\else #2\fi}
 \newcommand{\mathchar}[2][]{\ifmmode<mi #1>#2</mi>\else #2\fi}
-% double braces are needed here otherwise \left[ doesn't work properly
-% this is probably a BUG
-\newcommand{\mathparen}[1]{\ifstretchy\mathop{{#1}}\else\mathop[stretchy="false"]{#1}\fi}
-\newcommand{\left}[1]{\stretchytrue #1\stretchyfalse}
-\newcommand{\right}[1]{\stretchytrue #1\stretchyfalse}
+\newcommand{\mathparen}[1]{\expandafter\mathop\expandafter[\parensize]{#1}}
+\newcommand{\left}[1]{\def\parensize{} #1\def\parensize{stretchy="false"}}
+\newcommand{\right}[1]{\def\parensize{} #1\def\parensize{stretchy="false"}}
+\newcommand{\big}[1]{\def\parensize{minsize="1.2em" maxsize="1.2em"} #1\def\parensize{}}
+\newcommand{\Big}[1]{\def\parensize{minsize="1.8em" maxsize="1.8em"} #1\def\parensize{}}
+\newcommand{\bigg}[1]{\def\parensize{minsize="2.4em" maxsize="2.4em"} #1\def\parensize{}}
+\newcommand{\Bigg}[1]{\def\parensize{minsize="3em" maxsize="3em"} #1\def\parensize{}}
+
+
 
 \newcommand{\text}[2][]{\ifmmode<mtext #1>\mmodefalse #2\mmodetrue</mtext>\else #2\fi}
 \newcommand{\frac}[3][]{<mfrac #1><mrow>#2</mrow><mrow>#3</mrow></mfrac>}
@@ -144,7 +147,7 @@
 \newcommand{\cup}{\mathop{&cup;}}
 \newcommand{\rfloor}{\mathop{&rfloor;}}
 \newcommand{\euro}{\mathchar{&euro;}}
-\newcommand{\int}{\mathop{&int;}}
+\newcommand{\int}{\mathop{&Integral;}}
 \newcommand{\cong}{\mathop{&cong;}}
 \newcommand{\ne}{\mathop{&ne;}}
 \newcommand{\le}{\mathop{&le;}}
