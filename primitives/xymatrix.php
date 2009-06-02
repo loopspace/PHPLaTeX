@@ -47,46 +47,78 @@ while ($matrix)
 	if ($nexttok == '\\ar')
 	  {
 	    // got an arrow
-	    $arrow = "";
-	    $label = "";
 	    $inarrow = 1;
-	    // ignore spaces
+	    $upperdisplacement = "";
+	    $upperlabel = "";
+	    $lowerdisplacement = "";
+	    $lowerlabel = "";
+	    $middledisplacement = "";
+	    $middlelabel = "";
+	    $curving = "";
+	    $stylevariant = "";
+	    $style = "";
+	    $displacement = "";
+	    $control = "";
+	    $swap = 0;
+	    $dash = 0;
+	    $target = "";
+
 	    while ($inarrow)
 	      {
-		do {
-		  $nexttok = nexttok($matrix);
-		} while ($nexttok == ' ');
-
+		// ignore spaces
+		$matrix = ltrim($matrix," ");
+		$nexttok = nexttok($matrix);
+		//		print htmlspecialchars($nexttok) . "<br />";
 		if ($nexttok == '^')
 		  {
+		    print "label above<br />";
 		    // label above
-		    do {
-		      $nexttok = nexttok($matrix);
-		    } while ($nexttok == ' ');
-
-		    if ($nexttok == '<')
+		    // displacement syntax: (< *){0,2}|(> *){0,2}
+		    $matrix = ltrim($matrix," ");
+		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
 		      {
-			// displacement of label
-			$upperdisplacement .= $nexttok;
+			$upperdisplacement = $matches[0];
+			$matrix = substr($matrix,strlen($upperdisplacement));
 		      }
+		    $matrix = ltrim($matrix," ");
 		    $upperlabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '_')
 		  {
+		    print "label below<br />";
 		    // label below
+		    // displacement syntax: (< *){0,2}|(> *){0,2}
+		    $matrix = ltrim($matrix," ");
+		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
+		      {
+			$lowerdisplacement = $matches[0];
+			$matrix = substr($matrix,strlen($upperdisplacement));
+		      }
+		    $matrix = ltrim($matrix," ");
 		    $lowerlabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '|')
 		  {
+		    print "label middle<br />";
 		    // label in middle
-		    $midlabel = nextgrp($matrix);
+		    // displacement syntax: (< *){0,2}|(> *){0,2}
+		    ltrim($matrix," ");
+		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
+		      {
+			$middledisplacement = $matches[0];
+			$matrix = substr($matrix,strlen($upperdisplacement));
+		      }
+		    ltrim($matrix," ");
+		    $middlelabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '@')
 		  {
 		    // lots of possibilities
+		    $matrix = ltrim($matrix," ");
 		    $nexttok = nexttok($matrix);
 		    if ($nexttok == '/')
 		      {
+			print "curving<br />";
 			// curving
 			$nexttok = nexttok($matrix);
 			while ($nexttok != '/')
@@ -101,24 +133,29 @@ while ($matrix)
 			$nexttok = nexttok($matrix);
 			while ($nexttok != ')')
 			  {
+			    print "curving<br />";
 			    $curving .= $nexttok;
 			    $nexttok = nexttok($matrix);
 			  }
 		      }
 		    elseif ($nexttok == '{')
 		      {
+			print "style<br />";
 			// style
 			$matrix = $nexttok . $matrix;
 			$style = nextgrp($matrix);
 		      }
 		    elseif (($nexttok == '^') or ($nexttok == '_') or ($nexttok == '2') or ($nexttok == '3'))
 		      {
+			print "style<br />";
 			// style again
 			$stylevariant = $nexttok;
 			$style = nextgrp($matrix);
 		      }
 		    elseif ($nexttok == '<')
 		      {
+			print "displacement<br />";
+			// displacement
 			$nexttok = nexttok($matrix);
 			while ($nexttok != '>')
 			  {
@@ -126,16 +163,79 @@ while ($matrix)
 			    $nexttok = nexttok($matrix);
 			  }
 		      }
-		  }      
+		    elseif ($nexttok == "'")
+		      {
+			print "control<br />";
+			// control points
+			$matrix = ltrim($matrix," ");
+			$control = nextgrp($matrix);
+		      }
+		    elseif ($nexttok == "?")
+		      {
+			print "swap<br />";
+			// swap above and belo
+			$swap = 1;
+		      }
+		    elseif ($nexttok == "!")
+		      {
+			print "dash<br />";
+			// dashed stem
+			$dash = 1;
+		      }
+		  }
+		elseif ($nexttok == "[")
+		  {
+		    print "target<br />";
+		    // target
+		    $nexttok = nexttok($matrix);
+		    while ($nexttok != "]")
+		      {
+			$target .= $nexttok;
+			$nexttok = nexttok($matrix);
+		      }
+		  }
+		else
+		  {
+		    print "end of arrow<br />";
+		    $inarrow = 0;
+		  }
 	      }
 
 	    $matrix = $nexttok . "\0" . $matrix;
 	    $arrows[] = array(
 			      "row" => $m,
 			      "col" => $n,
-			      "arrow" => $arrow,
-			      "label" => '\(' . $label . '\)'
+			      "upperdisplacement" => $upperdisplacement,
+			      "upperlabel" => $upperlabel,
+			      "lowerdisplacement" => $lowerdisplacement,
+			      "lowerlabel" => $lowerlabel,
+			      "middledisplacement" => $middledisplacement,
+			      "middlelabel" => $middlelabel,
+			      "curving" => $curving,
+			      "stylevariant" => $stylevariant,
+			      "style" => $style,
+			      "displacement" => $displacement,
+			      "control" => $control,
+			      "swap" => $swap,
+			      "dash" => $dash,
+			      "target" => $target
 			      );
+	    print "upperdisplacement:" . htmlspecialchars($upperdisplacement) . "<br />";
+	    print "upperlabel:" . htmlspecialchars($upperlabel) . "<br />";
+	    print "lowerdisplacement:" . htmlspecialchars($lowerdisplacement) . "<br />";
+	    print "lowerlabel:" . htmlspecialchars($lowerlabel) . "<br />";
+	    print "middledisplacement:" . htmlspecialchars($middledisplacement) . "<br />";
+	    print "middlelabel:" . htmlspecialchars($middlelabel) . "<br />";
+	    print "curving:" . htmlspecialchars($curving) . "<br />";
+	    print "stylevariant:" . htmlspecialchars($stylevariant) . "<br />";
+	    print "style:" . htmlspecialchars($style) . "<br />";
+	    print "displacement:" . htmlspecialchars($displacement) . "<br />";
+	    print "control:" . htmlspecialchars($control) . "<br />";
+	    print "swap:" . htmlspecialchars($swap) . "<br />";
+	    print "dash:" . htmlspecialchars($dash) . "<br />";
+	    print "target:" . htmlspecialchars($target) . "<br />";
+
+
 	  }
 	else
 	  {
@@ -196,11 +296,24 @@ for($i = 0; $i < count($arrows);$i++)
     // starting entry
     $sm = $arrows[$i]["row"];
     $sn = $arrows[$i]["col"];
-    // displacement
-    preg_match('/\[([^\]]*)\]/',$arrows[$i]["arrow"],$disp);
+    $upperdisplacement = $arrows[$i]["upperdisplacement"];
+    $upperlabel = $arrows[$i]["upperlabel"];
+    $lowerdisplacement = $arrows[$i]["lowerdisplacement"];
+    $lowerlabel = $arrows[$i]["lowerlabel"];
+    $middledisplacement = $arrows[$i]["middledisplacement"];
+    $middlelabel = $arrows[$i]["middlelabel"];
+    $curving = $arrows[$i]["curving"];
+    $stylevariant = $arrows[$i]["stylevariant"];
+    $style = $arrows[$i]["style"];
+    $displacement = $arrows[$i]["displacement"];
+    $control = $arrows[$i]["control"];
+    $swap = $arrows[$i]["swap"];
+    $dash = $arrows[$i]["dash"];
+
+
     // final entry
-    $en = $sn + substr_count(strtolower($disp[1]),"r") - substr_count(strtolower($disp[1]),"l");
-    $em = $sm + substr_count(strtolower($disp[1]),"d") - substr_count(strtolower($disp[1]),"u");
+    $en = $sn + substr_count(strtolower($target),"r") - substr_count(strtolower($target),"l");
+    $em = $sm + substr_count(strtolower($target),"d") - substr_count(strtolower($target),"u");
     // need to compute "anchors" for source and target
     // horizontally
     if ($en > $sn)
@@ -289,7 +402,7 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex,height:'
 	  . ($labelheight -1)
 	  . 'ex" align="center">'
-	  . $arrows[$i]["label"]
+	  . "\(" . $upperlabel . "\)"
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
