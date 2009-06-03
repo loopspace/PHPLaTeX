@@ -20,20 +20,13 @@ if ($args)
 // TODO: convert lengths (should be global function) 
 $latex = $nexttok . $latex;
 $matrix = stripgrp(nextgrp($latex));
-$svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">' . "\n";
-
-$svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="0" refY="5" 
-      markerUnits="strokeWidth"
-      markerWidth="10" markerHeight="10"
-      orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" />
-    </marker></defs>' . "\n";
 
 // build a matrix of entries
 $m = 0;
 $n = 0;
 $maxwidth = 1;
 $maxheight = 3.5;
+$numcols = 0;
 
 // due to not vertically centering our entries, need a vertical fudge
 $fudgeheight = 1/2;
@@ -59,7 +52,7 @@ while ($matrix)
 	    $style = "";
 	    $displacement = "";
 	    $control = "";
-	    $swap = 0;
+	    $swap = 1;
 	    $dash = 0;
 	    $target = "";
 
@@ -75,7 +68,7 @@ while ($matrix)
 		    // label above
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
-		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$upperdisplacement = $matches[0];
 			$matrix = substr($matrix,strlen($upperdisplacement));
@@ -89,10 +82,10 @@ while ($matrix)
 		    // label below
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
-		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$lowerdisplacement = $matches[0];
-			$matrix = substr($matrix,strlen($upperdisplacement));
+			$matrix = substr($matrix,strlen($lowerdisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
 		    $lowerlabel = nextgrp($matrix);
@@ -103,10 +96,10 @@ while ($matrix)
 		    // label in middle
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    ltrim($matrix," ");
-		    if (preg_match('/(((< *){0,2}|(> *){0,2})(\([\.0-9]+\)))|!{[^;]+;[^}]+}/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$middledisplacement = $matches[0];
-			$matrix = substr($matrix,strlen($upperdisplacement));
+			$matrix = substr($matrix,strlen($middledisplacement));
 		      }
 		    ltrim($matrix," ");
 		    $middlelabel = nextgrp($matrix);
@@ -152,16 +145,12 @@ while ($matrix)
 			$stylevariant = $nexttok;
 			$style = nextgrp($matrix);
 		      }
-		    elseif ($nexttok == '<')
+		    elseif (preg_match('/^</',$nexttok))
 		      {
+			// nexttok thinks that (x)html tags are a single token so actually gets all of this in one go
 			print "displacement<br />";
 			// displacement
-			$nexttok = nexttok($matrix);
-			while ($nexttok != '>')
-			  {
-			    $displacement .= $nexttok;
-			    $nexttok = nexttok($matrix);
-			  }
+			$displacement = substr($nexttok,1,strlen($nexttok)-2);
 		      }
 		    elseif ($nexttok == "'")
 		      {
@@ -174,7 +163,7 @@ while ($matrix)
 		      {
 			print "swap<br />";
 			// swap above and belo
-			$swap = 1;
+			$swap = -1;
 		      }
 		    elseif ($nexttok == "!")
 		      {
@@ -220,6 +209,7 @@ while ($matrix)
 			      "dash" => $dash,
 			      "target" => $target
 			      );
+	    print "source: $m $n<br />";
 	    print "upperdisplacement:" . htmlspecialchars($upperdisplacement) . "<br />";
 	    print "upperlabel:" . htmlspecialchars($upperlabel) . "<br />";
 	    print "lowerdisplacement:" . htmlspecialchars($lowerdisplacement) . "<br />";
@@ -258,12 +248,29 @@ while ($matrix)
     elseif ($nexttok == '\\\\')
       {
 	$m++;
+	if ($n > $numcols)
+	  $numcols = $n;
 	$n = 0;
       }
   }
 $dim["row"] = ($dim["row"] + $maxwidth);
 $dim["col"] = ($dim["col"] + $maxheight);
+$numrows = count($matrix);
 
+$svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
+$svg .= 'width="' 
+  . 2*($dim["row"]*$numrows) 
+  . 'ex" height="' 
+  . 2*($dim["col"]*$numcols) 
+  . 'ex">'
+  . "\n";
+
+$svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="10" markerHeight="10"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker></defs>' . "\n";
 
 for($m = 0;$m < count($entry);$m++)
   {
@@ -309,7 +316,7 @@ for($i = 0; $i < count($arrows);$i++)
     $control = $arrows[$i]["control"];
     $swap = $arrows[$i]["swap"];
     $dash = $arrows[$i]["dash"];
-
+    $target = $arrows[$i]["target"];
 
     // final entry
     $en = $sn + substr_count(strtolower($target),"r") - substr_count(strtolower($target),"l");
@@ -357,8 +364,25 @@ for($i = 0; $i < count($arrows);$i++)
     $sy += $fudgeheight;
     $ey += $fudgeheight;
 
+    // direction of arrow
+    $bx = $ex - $sx;
+    $by = $ey - $sy;
+    $ax = round($bx/sqrt($bx*$bx + $by*$by)*20)/20;
+    $ay = round($by/sqrt($bx*$bx + $by*$by)*20)/20;
+
+    // orthogonal direction
+    $ox = $ey - $sy;
+    $oy = $sx - $ex;
+    $nx = round($ox/sqrt($ox*$ox + $oy*$oy)*20)/20;
+    $ny = round($oy/sqrt($ox*$ox + $oy*$oy)*20)/20;
+
+    $sx += $nx * MakeEx($displacement);
+    $sy += $ny * MakeEx($displacement);
+    $ex += $nx * MakeEx($displacement);
+    $ey += $ny * MakeEx($displacement);
+
     // draw arrow
-    $svg .= '<line x1="'
+    $svg .= '<g transform="scale(1ex)"><line x1="'
       . $sx
       . 'ex" y1="'
       . $sy
@@ -367,6 +391,7 @@ for($i = 0; $i < count($arrows);$i++)
       . 'ex" y2="'
       . $ey
       . 'ex" stroke="black" stroke-width="1" marker-end="url(#arrow)" />'
+      . '</g>'
       . "\n";
 
     // position label
@@ -376,17 +401,38 @@ for($i = 0; $i < count($arrows);$i++)
     $yoffset="2";
 
     // midpoints of lines
-    $lx = (($sx + $ex)/2 - $labelwidth/2);
-    $ly = (($sy + $ey)/2 - $labelheight/2 - $fudgeheight);
-    // orthogonal direction
-    $ox = $ey - $sy;
-    $oy = $sx - $ex;
+    $mx = (($sx + $ex)/2 - $labelwidth/2);
+    $my = (($sy + $ey)/2 - $labelheight/2 - $fudgeheight);
     // scale so that $ox >= $xoffset and $oy >= $yoffset
 
-    $nx = round($ox/($ox*$ox + $oy*$oy)*20)/20;
-    $ny = round($oy/($ox*$ox + $oy*$oy)*20)/20;
-    $lx += 10*$nx;
-    $ly += 10*$ny - $fudgeheight;
+    if ($upperlabel)
+      {
+	$ux = $mx + $nx*$swap + $ax*MakeEx($upperdisplacement);
+	$uy = $my + ($ny - $fudgeheight)*$swap + $ax*MakeEx($upperdisplacement);
+
+	$svg .= '<foreignObject x="'
+	  . $ux
+	  . 'ex" y="'
+	  . $uy
+	  . 'ex" width="'
+	  . $labelwidth
+	  . 'ex" height="'
+	  . $labelheight
+	  . 'ex">'
+	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
+	  . $labelwidth
+	  . 'ex,height:'
+	  . ($labelheight -1)
+	  . 'ex" align="center">'
+	  . "\(" . $upperlabel . "\)"
+	  . '</div></body>'
+	  . '</foreignObject>'
+	  . "\n";
+      }
+    if ($lowerlabel)
+      {
+	$lx = $mx - $nx*$swap;
+	$ly = $my - ($ny - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject x="'
 	  . $lx
@@ -402,10 +448,11 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex,height:'
 	  . ($labelheight -1)
 	  . 'ex" align="center">'
-	  . "\(" . $upperlabel . "\)"
+	  . "\(" . $lowerlabel . "\)"
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
+      }
   }
 
 $svg .= '</svg>' . "\n";

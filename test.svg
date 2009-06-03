@@ -1,7 +1,6 @@
-<?xml version="1.0" standalone="yes"?>
-<svg xmlns="http://www.w3.org/2000/svg">
-<foreignObject x="0" y="0" width="100" height="150">hello</foreignObject>
-<foreignObject x="20" y="0" width="100" height="150"> world </foreignObject>
-<foreignObject x="0" y="20"> greetings </foreignObject>
-<foreignObject x="20" y="20"> earthlings</foreignObject>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="8ex" height="5ex" viewBox="0 0 8 5">
+<g transform="scale(1)"><line x1="0" y1="0" x2="7" y2="8.25" stroke="black" stroke-width=".1"/></g>
 </svg>

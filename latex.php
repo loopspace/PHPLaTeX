@@ -587,6 +587,21 @@ function getWidthOf ($string)
 
 
 /*
+ * Convert lengths into multiples of 'ex'
+ */
+
+function MakeEx($length)
+{
+  preg_match('/(-?\d*)(\D*)/',$length,$matches);
+  $dist = $matches[1];
+  $type = $matches[2];
+  if ($type == 'ex')
+    {
+      return $dist;
+    }
+}
+
+/*
  * Process a string consisting of LaTeX commands
  *  Strip off tokens, expanding them one by one.
  *  If the expansion actually does something, replace them at the front
