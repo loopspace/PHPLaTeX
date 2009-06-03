@@ -257,11 +257,14 @@ $dim["row"] = ($dim["row"] + $maxwidth);
 $dim["col"] = ($dim["col"] + $maxheight);
 $numrows = count($matrix);
 
+$svgwidth = 2*($dim["row"]*$numrows);
+$svgheight =  2*($dim["col"]*$numcols);
+
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
 $svg .= 'width="' 
-  . 2*($dim["row"]*$numrows) 
+  . $svgwidth
   . 'ex" height="' 
-  . 2*($dim["col"]*$numcols) 
+  . $svgheight
   . 'ex">'
   . "\n";
 
@@ -346,7 +349,7 @@ for($i = 0; $i < count($arrows);$i++)
       {
 	// target is below source
 	$sy = ($sm * $dim["col"]) + $maxheight - ($maxheight - $height[$sm][$sn])/2;
-	$ey = ($em * $dim["col"]) + ($maxheigh - $height[$em][$en])/2;
+	$ey = ($em * $dim["col"]) + ($maxheight - $height[$em][$en])/2;
       }
     elseif ($em < $sm)
       {
@@ -381,17 +384,30 @@ for($i = 0; $i < count($arrows);$i++)
     $ex += $nx * MakeEx($displacement);
     $ey += $ny * MakeEx($displacement);
 
+    // midpoints of lines
+    $mx = ($sx + $ex)/2;
+    $my = ($sy + $ey)/2;
+
     // draw arrow
-    $svg .= '<g transform="scale(1ex)"><line x1="'
+    // This is a bit of a cludge to rescale the arrow so that '1px' becomes '1ex'.  This is needed because the 'path' element only takes bare units.
+    $svg .= '<svg width="'
+      . $svgwidth
+      . 'ex" height="'
+      . $svgheight
+      . 'ex" viewBox="0 0 '
+      . $svgwidth
+      . ' '
+      . $svgheight
+      . '"><path d="M '
       . $sx
-      . 'ex" y1="'
+      . ' '
       . $sy
-      . 'ex" x2="'
+      . ' L '
       . $ex
-      . 'ex" y2="'
+      . ' '
       . $ey
-      . 'ex" stroke="black" stroke-width="1" marker-end="url(#arrow)" />'
-      . '</g>'
+      . '" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />'
+      . '</svg>'
       . "\n";
 
     // position label
@@ -400,15 +416,10 @@ for($i = 0; $i < count($arrows);$i++)
     $xoffset="1";
     $yoffset="2";
 
-    // midpoints of lines
-    $mx = (($sx + $ex)/2 - $labelwidth/2);
-    $my = (($sy + $ey)/2 - $labelheight/2 - $fudgeheight);
-    // scale so that $ox >= $xoffset and $oy >= $yoffset
-
     if ($upperlabel)
       {
-	$ux = $mx + $nx*$swap + $ax*MakeEx($upperdisplacement);
-	$uy = $my + ($ny - $fudgeheight)*$swap + $ax*MakeEx($upperdisplacement);
+	$ux = $mx - $labelwidth/2 + $nx*$swap + $ax*MakeEx($upperdisplacement);
+	$uy = $my - $labelheight/2 - $fudgeheight + ($ny - $fudgeheight)*$swap + $ax*MakeEx($upperdisplacement);
 
 	$svg .= '<foreignObject x="'
 	  . $ux
@@ -431,7 +442,7 @@ for($i = 0; $i < count($arrows);$i++)
       }
     if ($lowerlabel)
       {
-	$lx = $mx - $nx*$swap;
+	$lx = $mx - $labelwidth/2 - $nx*$swap;
 	$ly = $my - ($ny - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject x="'
