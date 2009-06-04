@@ -26,6 +26,11 @@ $maxops = 10000;
 $ops = 0;
 $fontsize = 10; // number of pts in an em
 
+$debuglevel = 2; // debugging level
+$debugmsg = "";
+$warnings = "";
+$errors = "";
+
 /*
  * Error function: should be more used
  */
@@ -33,18 +38,56 @@ $fontsize = 10; // number of pts in an em
 function LaTeXError ($message,$fatal)
 {
   global $lineno;
+  global $errors;
+  global $warnings;
   if ($fatal)
     {
-      print "<br /><strong>PHPLaTeX Error at or near line " . $lineno . ":&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
-      print "</p></body></html>";
-      exit;
+      $errors .= "\nLine " . $lineno . ": " . $message;
+      exitGracefully(1);
     }
   else
     {
-      print "<br /><strong>PHPLaTeX Warning at or near line " . $lineno . ":&nbsp;</strong>" . htmlspecialchars($message) . "<br />";
+      $warnings .= "\nLine " . $lineno . ": " . $message;
     }
   return;
 }
+
+function LaTeXdebug ($message,$level)
+{
+  global $debuglevel;
+  global $debugmsg;
+  if ($level <= $debuglevel)
+    {
+      $debugmsg .= "\n" . $message;
+    }
+}
+
+/*
+ * Perhaps not quite how we want to do it ...
+ */
+
+function exitGracefully ($really = 0)
+{
+  global $debugmsg;
+  global $warnings;
+  global $errors;
+
+  print '<br /><strong>PHPLaTeX Warnings:</strong>';
+  print '<pre>' . htmlspecialchars($warnings) . '</pre>';
+  print '<br /><strong>PHPLaTeX Debugging Messages:</strong>';
+  print '<pre>' . htmlspecialchars($debugmsg) . '</pre>';
+  print '<br /><strong>PHPLaTeX Errors:</strong>';
+  print '<pre>' . htmlspecialchars($errors) . '</pre>';
+
+  if ($really)
+    {
+      print '</p></body></html>';
+      exit;
+    }
+  return;
+}
+  
+
 
 /*
  * Gets the next token from the stream
@@ -101,19 +144,34 @@ function nexttok (&$latex)
 	}
       elseif ($firstchar == "<")
 	{
-	  // XHTML tag, get the rest and pass on
-	  list($tag,$latex) = explode(">",$latex,2);
-	  $tag = "<" . $tag . ">";
-	  // is it a basic MathML tag?
-	  if (preg_match('/^<m[ino]\b/',$tag))
+	  // potentially an XHTML tag, test next (genuine) character, should be a lowercase letter
+	  $nextchar = substr($latex,0,1);
+	  while ($nextchar === "\0")
 	    {
-	      // yes, read in whole tag and contents as a single token
-	      list($contents,$latex) = explode(">",$latex,2);
-	      $tag = $tag . $contents . ">";
+	    $latex = substr($latex,1);
+	    $nextchar = substr($latex,0,1);
 	    }
-	  // replace any nulls that may have snuck in
-	  $tag = str_replace("\0",'',$tag);
-	  return $tag;
+
+	  if (preg_match('/[a-z]/',$nextchar))
+	    {
+	      // XHTML tag, get the rest and pass on
+	      list($tag,$latex) = explode(">",$latex,2);
+	      $tag = "<" . $tag . ">";
+	      // is it a basic MathML tag?
+	      if (preg_match('/^<m[ino]\b/',$tag))
+		{
+		  // yes, read in whole tag and contents as a single token
+		  list($contents,$latex) = explode(">",$latex,2);
+		  $tag = $tag . $contents . ">";
+		}
+	      // replace any nulls that may have snuck in
+	      $tag = str_replace("\0",'',$tag);
+	      return $tag;
+	    }
+	  else
+	    {
+	      return $firstchar;
+	    }
 	}
       elseif ($firstchar == "&")
 	{

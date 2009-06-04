@@ -52,7 +52,7 @@ print '<?xml version="1.0"?>
 <p>
 
 <?php print processLaTeX ($source) ?>
-
+  <?php exitGracefully() ?>
 
 </p>
 

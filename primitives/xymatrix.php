@@ -61,10 +61,10 @@ while ($matrix)
 		// ignore spaces
 		$matrix = ltrim($matrix," ");
 		$nexttok = nexttok($matrix);
-		//		print htmlspecialchars($nexttok) . "<br />";
+		//		LaTeXdebug($nexttok,1);
 		if ($nexttok == '^')
 		  {
-		    print "label above<br />";
+		    LaTeXdebug("label above",1);
 		    // label above
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
@@ -78,7 +78,7 @@ while ($matrix)
 		  }
 		elseif ($nexttok == '_')
 		  {
-		    print "label below<br />";
+		    LaTeXdebug("label below",1);
 		    // label below
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
@@ -92,7 +92,7 @@ while ($matrix)
 		  }
 		elseif ($nexttok == '|')
 		  {
-		    print "label middle<br />";
+		    LaTeXdebug("label middle",1);
 		    // label in middle
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    ltrim($matrix," ");
@@ -111,7 +111,7 @@ while ($matrix)
 		    $nexttok = nexttok($matrix);
 		    if ($nexttok == '/')
 		      {
-			print "curving<br />";
+			LaTeXdebug("curving",1);
 			// curving
 			$nexttok = nexttok($matrix);
 			while ($nexttok != '/')
@@ -126,21 +126,21 @@ while ($matrix)
 			$nexttok = nexttok($matrix);
 			while ($nexttok != ')')
 			  {
-			    print "curving<br />";
+			    LaTeXdebug("curving",1);
 			    $curving .= $nexttok;
 			    $nexttok = nexttok($matrix);
 			  }
 		      }
 		    elseif ($nexttok == '{')
 		      {
-			print "style<br />";
+			LaTeXdebug("style",1);
 			// style
 			$matrix = $nexttok . $matrix;
 			$style = nextgrp($matrix);
 		      }
 		    elseif (($nexttok == '^') or ($nexttok == '_') or ($nexttok == '2') or ($nexttok == '3'))
 		      {
-			print "style<br />";
+			LaTeXdebug("style",1);
 			// style again
 			$stylevariant = $nexttok;
 			$style = nextgrp($matrix);
@@ -148,33 +148,33 @@ while ($matrix)
 		    elseif (preg_match('/^</',$nexttok))
 		      {
 			// nexttok thinks that (x)html tags are a single token so actually gets all of this in one go
-			print "displacement<br />";
+			LaTeXdebug("displacement",1);
 			// displacement
 			$displacement = substr($nexttok,1,strlen($nexttok)-2);
 		      }
 		    elseif ($nexttok == "'")
 		      {
-			print "control<br />";
+			LaTeXdebug("control",1);
 			// control points
 			$matrix = ltrim($matrix," ");
 			$control = nextgrp($matrix);
 		      }
 		    elseif ($nexttok == "?")
 		      {
-			print "swap<br />";
+			LaTeXdebug("swap",1);
 			// swap above and belo
 			$swap = -1;
 		      }
 		    elseif ($nexttok == "!")
 		      {
-			print "dash<br />";
+			LaTeXdebug("dash",1);
 			// dashed stem
 			$dash = 1;
 		      }
 		  }
 		elseif ($nexttok == "[")
 		  {
-		    print "target<br />";
+		    LaTeXdebug("target",1);
 		    // target
 		    $nexttok = nexttok($matrix);
 		    while ($nexttok != "]")
@@ -185,7 +185,7 @@ while ($matrix)
 		  }
 		else
 		  {
-		    print "end of arrow<br />";
+		    LaTeXdebug("end of arrow",1);
 		    $inarrow = 0;
 		  }
 	      }
@@ -209,21 +209,21 @@ while ($matrix)
 			      "dash" => $dash,
 			      "target" => $target
 			      );
-	    print "source: $m $n<br />";
-	    print "upperdisplacement:" . htmlspecialchars($upperdisplacement) . "<br />";
-	    print "upperlabel:" . htmlspecialchars($upperlabel) . "<br />";
-	    print "lowerdisplacement:" . htmlspecialchars($lowerdisplacement) . "<br />";
-	    print "lowerlabel:" . htmlspecialchars($lowerlabel) . "<br />";
-	    print "middledisplacement:" . htmlspecialchars($middledisplacement) . "<br />";
-	    print "middlelabel:" . htmlspecialchars($middlelabel) . "<br />";
-	    print "curving:" . htmlspecialchars($curving) . "<br />";
-	    print "stylevariant:" . htmlspecialchars($stylevariant) . "<br />";
-	    print "style:" . htmlspecialchars($style) . "<br />";
-	    print "displacement:" . htmlspecialchars($displacement) . "<br />";
-	    print "control:" . htmlspecialchars($control) . "<br />";
-	    print "swap:" . htmlspecialchars($swap) . "<br />";
-	    print "dash:" . htmlspecialchars($dash) . "<br />";
-	    print "target:" . htmlspecialchars($target) . "<br />";
+	    LaTeXdebug("source: $m $n",1);
+	    LaTeXdebug("upperdisplacement: " . $upperdisplacement,1);
+	    LaTeXdebug("upperlabel: " . $upperlabel,1);
+	    LaTeXdebug("lowerdisplacement: " . $lowerdisplacement,1);
+	    LaTeXdebug("lowerlabel: " . $lowerlabel,1);
+	    LaTeXdebug("middledisplacement: " . $middledisplacement,1);
+	    LaTeXdebug("middlelabel: " . $middlelabel,1);
+	    LaTeXdebug("curving: " . $curving,1);
+	    LaTeXdebug("stylevariant: " . $stylevariant,1);
+	    LaTeXdebug("style: " . $style,1);
+	    LaTeXdebug("displacement: " . $displacement,1);
+	    LaTeXdebug("control: " . $control,1);
+	    LaTeXdebug("swap: " . $swap,1);
+	    LaTeXdebug("dash: " . $dash,1);
+	    LaTeXdebug("target: " . $target,1);
 
 
 	  }
@@ -268,12 +268,128 @@ $svg .= 'width="'
   . 'ex">'
   . "\n";
 
-$svg .= '<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" 
-      markerUnits="strokeWidth"
-      markerWidth="10" markerHeight="10"
-      orient="auto">
+$svg .= '<defs>
+    <marker id="filledArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
       <path d="M 0 0 L 10 5 L 0 10 z" />
-    </marker></defs>' . "\n";
+    </marker>
+    <marker id="basicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
+    </marker>
+    <marker id="doubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" />
+    </marker>
+    <marker id="barArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
+      <path d="M 10 0 L 10 10" fill="none" />
+    </marker>
+    <marker id="bardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" />
+      <path d="M 15 0 L 15 10" fill="none" />
+    </marker>
+    <marker id="parenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 Q 10 5 L 0 10" fill="none" />
+    </marker>
+    <marker id="reversebasicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
+    </marker>
+    <marker id="reversedoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" />
+    </marker>
+    <marker id="reversebarArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
+      <path d="M 0 0 L 0 10" fill="none" />
+    </marker>
+    <marker id="reversebardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" />
+      <path d="M 0 0 L 0 10" fill="none" />
+    </marker>
+    <marker id="reverseparenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 5 0 Q -5 5 L 5 10" fill="none" />
+    </marker>
+    <marker id="reverseslashArrow" viewBox="0 0 5 10" refX="2.5" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 5 10" fill="none" />
+    </marker>
+    <marker id="doubleslashArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 5 10" fill="none" />
+      <path d="M 5 0 L 10 10" fill="none" />
+    </marker>
+    <marker id="crossArrow" viewBox="0 0 10 10" refX="5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 10" fill="none" />
+      <path d="M 10 0 L 10 0" fill="none" />
+    </marker>
+    <marker id="plusArrow" viewBox="0 0 10 10" refX="5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 5 0 L 5 10" fill="none" />
+      <path d="M 0 5 L 10 5" fill="none" />
+    </marker>
+    <marker id="vbarArrow" viewBox="0 0 5 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 2.5 0 L 2.5 10" fill="none" />
+    </marker>
+    <marker id="doublevbarArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 2.5 0 L 2.5 10" fill="none" />
+      <path d="M 7.5 0 L 7.5 10" fill="none" />
+    </marker>
+    <marker id="circleArrow" viewBox="0 0 10 10" refX="0" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <circle cs="5" cy="5" r="5" fill="none" />
+    </marker>
+  </defs>' . "\n";
 
 for($m = 0;$m < count($entry);$m++)
   {
@@ -399,15 +515,16 @@ for($i = 0; $i < count($arrows);$i++)
       . ' '
       . $svgheight
       . '">'
-      . "\n"
-      . '<path d="';
+      . "\n";
+
+    $arrowpath = '<path d="';
 
     // If curving, define a quadratic bezier with control point defined by offsetting the midpoint by the normal vector
     if ($curving)
       {
 	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
 	  {
-	    print "$dirs[1] $dirs[2]";
+	    LaTeXdebug("$dirs[1] $dirs[2]",1);
 	    // Need to recompute the anchors
 	    // horizontally
 	    if (stripos($dirs[1],"r") !== FALSE)
@@ -488,7 +605,7 @@ for($i = 0; $i < count($arrows);$i++)
 	    $cey += $fudgeheight;
 	    $cntl = 4;
 
-	    $svg .= 'M '
+	    $arrowpath .= 'M '
 	      . $csx
 	      . ' '
 	      . $csy
@@ -529,7 +646,7 @@ for($i = 0; $i < count($arrows);$i++)
 	      }
 
 	    // should we displace the start and finish slightly?
-	    $svg .= 'M '
+	    $arrowpath .= 'M '
 	      . $sx
 	      . ' '
 	      . $sy
@@ -545,7 +662,7 @@ for($i = 0; $i < count($arrows);$i++)
       }
     else
       {
-	$svg .= 'M '
+	$arrowpath .= 'M '
 	  . $sx
 	  . ' '
 	  . $sy
@@ -555,7 +672,51 @@ for($i = 0; $i < count($arrows);$i++)
 	  . $ey;
       }
 
-    $svg .= '" fill="none" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />'
+    // assemble style
+    if ($style)
+      {
+	$vars = array();
+	$types = array();
+	$style = stripgrp($style);
+	while ($style)
+	  {
+	    // format is [^_]?token
+	    $firstchar = substr($style,0,1);
+	    if (($firstchar == '^') or ($firstchar == '_'))
+	      {
+		$vars[] = $firstchar;
+		$style = substr($style,1);
+	      }
+	    else
+	      {
+		$vars[] = $stylevariant;
+	      }
+	    $types[] = stripgrp(nextgrp($style));
+	  }
+	if (count($types) == 1)
+	  {
+	    $headvar = $vars[0];
+	    $stemvar = $tailvar = $stylevariant;
+	    $head = $types[0];
+	    $stem = '-';
+	    $tail = '';
+	  }
+	else
+	  {
+	    list($tail,$stem,$head) = $types;
+	    list($tailvar,$stemvar,$headvar) = $vars;
+	  }
+
+      }
+    else
+      {
+      }
+    
+
+
+    $arrowpath .= '" fill="none" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />';
+
+    $svg .= $arrowpath
       . '</svg>'
       . "\n";
 
@@ -617,7 +778,7 @@ for($i = 0; $i < count($arrows);$i++)
 
 $svg .= '</svg>' . "\n";
 
-print '<pre>' . htmlspecialchars($svg) . '</pre>';
+LaTeXdebug($svg,1);
 
 $latex = $svg . "\0" . $latex;
 return;
