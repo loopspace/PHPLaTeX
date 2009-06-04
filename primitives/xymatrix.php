@@ -279,117 +279,138 @@ $svg .= '<defs>
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="doubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+    <marker id="doubleArrow" viewBox="0 0 15 10" refX="10" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="15" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
-      <path d="M 5 0 L 15 5 L 5 10" fill="none" />
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="barArrow" viewBox="0 0 10 10" refX="10" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
-      <path d="M 10 0 L 10 10" fill="none" />
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 10 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="bardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+    <marker id="bardoubleArrow" viewBox="0 0 15 10" refX="10" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="15" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" />
-      <path d="M 5 0 L 15 5 L 5 10" fill="none" />
-      <path d="M 15 0 L 15 10" fill="none" />
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 15 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="parenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="5" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 Q 10 5 L 0 10" fill="none" />
+      <path d="M 0 0 Q 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="reversebasicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+    <marker id="reversebasicArrow" viewBox="0 0 10 10" refX="0" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="reversedoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+    <marker id="reversedoubleArrow" viewBox="0 0 15 10" refX="5" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="15" markerHeight="10"
 	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
-      <path d="M 15 0 L 5 5 L 15 10" fill="none" />
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="reversebarArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+    <marker id="reversebarArrow" viewBox="0 0 10 10" refX="0" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
-      <path d="M 0 0 L 0 10" fill="none" />
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="reversebardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+    <marker id="reversebardoubleArrow" viewBox="0 0 15 10" refX="5" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="15" markerHeight="10"
 	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" />
-      <path d="M 15 0 L 5 5 L 15 10" fill="none" />
-      <path d="M 0 0 L 0 10" fill="none" />
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="reverseparenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="5" markerHeight="10"
 	    orient="auto">
-      <path d="M 5 0 Q -5 5 L 5 10" fill="none" />
+      <path d="M 5 0 Q -5 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
-    <marker id="reverseslashArrow" viewBox="0 0 5 10" refX="2.5" refY="5" 
+    <marker id="slashArrow" viewBox="0 0 5 10" refX="2.5" refY="5" 
 	    markerUnits="strokeWidth"
 	    markerWidth="5" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 5 10" fill="none" />
+      <path d="M 5 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="doubleslashArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 5 10" fill="none" />
-      <path d="M 5 0 L 10 10" fill="none" />
+      <path d="M 0 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="crossArrow" viewBox="0 0 10 10" refX="5" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 0 0 L 10 10" fill="none" />
-      <path d="M 10 0 L 10 0" fill="none" />
+      <path d="M 0 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 10 0 L 10 0" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="plusArrow" viewBox="0 0 10 10" refX="5" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 5 0 L 5 10" fill="none" />
-      <path d="M 0 5 L 10 5" fill="none" />
+      <path d="M 5 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 5 L 10 5" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="vbarArrow" viewBox="0 0 5 10" refX="2.5" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="5" markerHeight="10"
 	    orient="auto">
-      <path d="M 2.5 0 L 2.5 10" fill="none" />
+      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="doublevbarArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <path d="M 2.5 0 L 2.5 10" fill="none" />
-      <path d="M 7.5 0 L 7.5 10" fill="none" />
+      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 7.5 0 L 7.5 10" fill="none" stroke="black" stroke-width="1" />
     </marker>
     <marker id="circleArrow" viewBox="0 0 10 10" refX="0" refY="5"
 	    markerUnits="strokeWidth"
 	    markerWidth="10" markerHeight="10"
 	    orient="auto">
-      <circle cs="5" cy="5" r="5" fill="none" />
+      <circle cs="5" cy="5" r="5" fill="none" stroke="black" stroke-width="1" />
     </marker>
-  </defs>' . "\n";
+</defs>' . "\n";
+
+$arrowheads = array(
+		    "filledArrow" => "filledArrow",
+		    ">" => "basicArrow",
+		    ">>" => "doubleArrow",
+		    ">|" => "barArrow",
+		    "|>>" => "bardoubleArrow",
+		    ")" => "parenthesisArrow",
+		    "<" => "reversebasicArrow",
+		    "<<" => "reversedoubleArrow",
+		    "|<" => "reversebarArrow",
+		    "|<<" => "reversebardoubleArrow",
+		    "(" => "reverseparenthesisArrow",
+		    "/" => "slashArrow",
+		    "//" => "doubleslashArrow",
+		    "x" => "crossArrow",
+		    "+" => "plusArrow",
+		    "|" => "vbarArrow",
+		    "||" => "doublevbarArrow",
+		    "o" => "circleArrow"
+		    );
 
 for($m = 0;$m < count($entry);$m++)
   {
@@ -710,11 +731,78 @@ for($i = 0; $i < count($arrows);$i++)
       }
     else
       {
+	$tailvar = $stemvar = $headvar = "";
+	$tail = "";
+	$stem = "-";
+	$head = ">";
       }
     
+    if (array_key_exists($head,$arrowheads))
+      {
+	$markerend = $arrowheads[$head];
+      }
+    else
+      {
+	$markerend = "";
+      }
+    if (array_key_exists($tail,$arrowheads))
+      {
+	$markerstart = $arrowheads[$tail];
+      }
+    else
+      {
+	$markerstart = "";
+      }
 
+    $arrowpath .= '" fill="none" ';
 
-    $arrowpath .= '" fill="none" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />';
+    if (($stem == '--') or ($stem == '=='))
+      {
+	$arrowpath .= ' stroke-dasharray="1,1" ';
+      }
+    elseif (($stem == '.') or ($stem == ':'))
+      {
+	$arrowpath .= ' stroke-dasharray=".5,1.5" ';
+      }
+
+    if (($stem == '=') or ($stem == '==') or ($stem == ':') or ($stylevariant == 2))
+      {
+	$basicarrow = $arrowpath;
+	$arrowpath .= ' stroke="black" stroke-width=".5" />' . "\n";
+	$arrowpath .= $basicarrow;
+	$arrowpath .= ' stroke="white" stroke-width=".3" />' . "\n";
+	$arrowpath .= $basicarrow;
+      }
+    elseif ($stylevariant == 3)
+      {
+	$basicarrow = $arrowpath;
+	$arrowpath .= ' stroke="black" stroke-width=".7" />' . "\n";
+	$arrowpath .= $basicarrow;
+	$arrowpath .= ' stroke="white" stroke-width=".5" />' . "\n";
+	$arrowpath .= $basicarrow;
+	$arrowpath .= ' stroke="black" stroke-width=".1" />' . "\n";
+	$arrowpath .= $basicarrow;
+      }
+    elseif (($stem == '-') or ($stem == '--') or ($stem == '.'))
+      {
+	$arrowpath .= ' stroke="black" ';
+      }
+
+    $arrowpath .= ' stroke-width=".1" ';
+
+    if ($markerstart)
+      {
+	$arrowpath .= 'marker-start="url(#'
+	  . $markerstart
+	  . ')" ';
+      }
+    if ($markerend)
+      {
+	$arrowpath .= 'marker-end="url(#'
+	  . $markerend
+	  . ')" ';
+      }
+    $arrowpath .= ' />';
 
     $svg .= $arrowpath
       . '</svg>'
@@ -725,6 +813,9 @@ for($i = 0; $i < count($arrows);$i++)
     $labelheight="3";
     $xoffset="1";
     $yoffset="2";
+
+    // quadratic bezier function:
+    // B(t) = (1-t)^2 P_0 + 2(1 - t)t P_1 + t^2 P_2
 
     if ($upperlabel)
       {
