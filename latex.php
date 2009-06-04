@@ -24,6 +24,7 @@ $conditionals = array();
 $lineno = 1;
 $maxops = 10000;
 $ops = 0;
+$fontsize = 10; // number of pts in an em
 
 /*
  * Error function: should be more used
@@ -588,10 +589,13 @@ function getWidthOf ($string)
 
 /*
  * Convert lengths into multiples of 'ex'
+ * These are interpreted as TeX lengths, not CSS lengths
+ * Basically, we view 'ex' as being the same in both systems
  */
 
 function MakeEx($length)
 {
+  global $fontsize;
   preg_match('/(-?\d*)(\D*)/',$length,$matches);
   $dist = $matches[1];
   $type = $matches[2];
@@ -599,6 +603,20 @@ function MakeEx($length)
     {
       return $dist;
     }
+  elseif ($type == 'em')
+    {
+      return ($dist*151/90);
+    }
+  elseif ($type == 'pt')
+    {
+      return ($dist*151/(90*$fontsize));
+    }
+  elseif ($type == 'px')
+    {
+      return ($dist*151/(90*$fontsize));
+    }
+
+  return $dist;
 }
 
 /*

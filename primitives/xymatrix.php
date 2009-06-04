@@ -398,15 +398,164 @@ for($i = 0; $i < count($arrows);$i++)
       . $svgwidth
       . ' '
       . $svgheight
-      . '"><path d="M '
-      . $sx
-      . ' '
-      . $sy
-      . ' L '
-      . $ex
-      . ' '
-      . $ey
-      . '" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />'
+      . '">'
+      . "\n"
+      . '<path d="';
+
+    // If curving, define a quadratic bezier with control point defined by offsetting the midpoint by the normal vector
+    if ($curving)
+      {
+	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
+	  {
+	    print "$dirs[1] $dirs[2]";
+	    // Need to recompute the anchors
+	    // horizontally
+	    if (stripos($dirs[1],"r") !== FALSE)
+	      {
+		// arrow should leave source to the right
+		$csx = ($sn * $dim["row"]) + $maxwidth - ($maxwidth - $width[$sm][$sn])/2;
+		$ccsx = 1;
+	      }
+	    elseif (stripos($dirs[1],"l") !== FALSE)
+	      {
+		// arrow should leave source to the left
+		$csx = ($sn * $dim["row"]) + ($maxwidth - $width[$sm][$sn])/2;
+		$ccsx = -1;
+	      }
+	    else
+	      {
+		// arrow leaves in the middle
+		$csx = ($sn * $dim["row"]) + $maxwidth/2;
+		$ccsx = 0;
+	      }
+	    if (stripos($dirs[2],"r") !== FALSE)
+	      {
+		// arrow should enter target from the right
+		$cex = ($en * $dim["row"]) + $maxwidth - ($maxwidth - $width[$em][$en])/2;
+		$ccex = -1;
+	      }
+	    elseif (stripos($dirs[2],"l") !== FALSE)
+	      {
+		// arrow should enter target from the left
+		$cex = ($en * $dim["row"]) + ($maxwidth - $width[$em][$en])/2;
+		$ccex = 1;
+	      }
+	    else
+	      {
+		// arrow arrives in the middle
+		$cex = ($en * $dim["row"]) + $maxwidth/2;
+		$ccex = 0;
+	      }
+	    // vertically
+	    if (stripos($dirs[1],"d") !== FALSE)
+	      {
+		// arrow should leave source downwards
+		$csy = ($sm * $dim["col"]) + $maxheight - ($maxheight - $height[$sm][$sn])/2;
+		$ccsy = 1;
+	      }
+	    elseif (stripos($dirs[1],"u") !== FALSE)
+	      {
+		// arrow should leave source upwards
+		$csy = ($sm * $dim["col"]) + ($maxheight - $height[$sm][$sn])/2;
+		$ccsy = -1;
+	      }
+	    else
+	      {
+		// arrow should leave source in the middle
+		$csy = ($sm * $dim["col"]) + $maxheight/2;
+		$ccsy = 0;
+	      }
+	    if (stripos($dirs[2],"d") !== FALSE)
+	      {
+		// arrow should enter target from below
+		$cey = ($em * $dim["col"]) + $maxheight - ($maxheight - $height[$em][$en])/2;
+		$ccey = 1;
+	      }
+	    elseif (stripos($dirs[2],"u") !== FALSE)
+	      {
+		// arrow should enter target from above
+		$cey = ($em * $dim["col"]) + ($maxheight - $height[$em][$en])/2;
+		$ccey = -1;
+	      }
+	    else
+	      {
+		// arrow should enter target in the middle
+		$cey = ($em * $dim["col"]) + $maxheight/2;
+		$ccey = 0;
+	      }
+
+	    $csy += $fudgeheight;
+	    $cey += $fudgeheight;
+	    $cntl = 4;
+
+	    $svg .= 'M '
+	      . $csx
+	      . ' '
+	      . $csy
+	      . ' C '
+	      . ($csx + $ccsx*$cntl)
+	      . ' '
+	      . ($csy + $ccsy*$cntl)
+	      . ' '
+	      . ($cex + $ccex*$cntl)
+	      . ' '
+	      . ($cey + $ccey*$cntl)
+	      . ' '
+	      . $cex
+	      . ' '
+	      . $cey;
+	    
+	  }
+	else
+	  {
+	    $type = substr($curving,0,1);
+	    if ($type == "_")
+	      {
+	    $dir = -1;
+	      }
+	    else
+	      {
+		$dir = 1;
+	      }
+	    $length = substr($curving,1);
+	    $length = trim($length);
+	    if ($length)
+	      {
+		$scale = MakeEx($length);
+	      }
+	    else
+	      {
+		$scale = 1;
+	      }
+
+	    // should we displace the start and finish slightly?
+	    $svg .= 'M '
+	      . $sx
+	      . ' '
+	      . $sy
+	      . ' Q '
+	      . ($mx + $dir*$scale*$nx)
+	      . ' '
+	      . ($my + $dir*$scale*$ny)
+	      . ' '
+	      . $ex
+	      . ' '
+	      . $ey;
+	  }
+      }
+    else
+      {
+	$svg .= 'M '
+	  . $sx
+	  . ' '
+	  . $sy
+	  . ' L '
+	  . $ex
+	  . ' '
+	  . $ey;
+      }
+
+    $svg .= '" fill="none" stroke="black" stroke-width=".1" marker-end="url(#arrow)" />'
       . '</svg>'
       . "\n";
 
