@@ -566,8 +566,7 @@ function expandtok ($token,&$latex)
 
 	}
       // no expansion to be done
-      // TODO: add support for ^ and _ in math mode
-      // any other "special" characters?
+      // TODO: any other "special" characters?
       return array(0,$token);
     }
 }
@@ -576,45 +575,90 @@ function expandtok ($token,&$latex)
  * Expand a string and estimate its width
  */
 
+/*
+ * Array to override automatic width calculation
+ */
+
+$charWidths = array();
+
+function charWidth ($char)
+{
+  global $charWidths;
+  // gets a string of characters or entities and returns their (approximate) length
+  $length = 0;
+  while ($char)
+    {
+      if (preg_match('/^(&(?:[A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);)(.*)/',$char,$matches))
+	{
+	  // entity
+	  $char = $matches[2];
+	  if (array_key_exists($matches[1],$charWidths))
+	    {
+	      $length += $charWidths[$matches[1]];
+	    }
+	  else
+	    {
+	      $length += 1;
+	    }
+	}
+      else
+	{
+	  $firstchar = substr($char,0,1);
+	  $char = substr($char,1);
+	  if (array_key_exists($firstchar,$charWidths))
+	    {
+	      $length += $charWidths[$char];
+	    }
+	  else
+	    {
+	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
+		{
+		  $length += 1.5;
+		}
+	      else
+		{
+		  $length += 1;
+		}
+	    }
+	}
+    }
+  return $length;
+}
+
+/*
+ * Need these to be global so that we can refer to them in a
+ * function-within-a-function (limited scoping rules of PHP)
+ */
+
+$widthRule = array(
+		"mi" => create_function(
+					'$contents',
+					'return charWidth($contents);'
+					),
+		"mo" => create_function(
+					'$contents',
+					'return (charWidth($contents) + 1);'
+					),
+		"mn" => create_function(
+					'$contents',
+					'return charWidth($contents);'
+					),
+		"mrow" => create_function(
+					  '$contents',
+					  'return array_sum(explode(" ",$contents));'
+					  ),
+		"mfrac" => create_function(
+					   '$contents',
+					   'return max(explode(" ",$contents));'
+					   )
+		);
+
+
 function getWidthOf ($string)
 {
   $expanded = processLaTeX($string);
   $textwidth = 80; // maximum width, global variable?
   $width = 0;
-
-  // default is one unit, rules should be more complicated to deal with fracs and newlines
-  $rule = array(
-		"mi" => create_function(
-					'$contents',
-					'$contents = preg_replace(\'/&([A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);/\',"x",eval($contents));
-$contents = preg_replace(\'/\s/\',"",$contents);
-return strlen($contents);'
-					),
-		"mo" => create_function(
-					'$contents',
-					'$contents = preg_replace(\'/&([A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);/\',"x",eval($contents));
-$contents = preg_replace(\'/\s/\',"",$contents);
-return (strlen($contents)+1);'
-					),
-		"mn" => create_function(
-					'$contents',
-					'$contents = preg_replace(\'/&([A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);/\',"x",eval($contents));
-$contents = preg_replace(\'/\s/\',"",$contents);
-return strlen($contents);'
-					),
-		"mrow" => create_function(
-					  '$contents',
-					  'return array_sum(explode(eval($contents)," "));'
-					  ),
-		"mfrac" => create_function(
-					   '$contents',
-					   'return max(explode(eval($contents)," "));'
-					   ),
-		"math" => create_function(
-					  '$contents',
-					  'return eval($contents);'
-					  )
-		);
   
   // Need to go through and compute lengths
 
@@ -623,20 +667,29 @@ return strlen($contents);'
 
   while ($a != $b)
     {
+  LaTeXdebug($a,1);
+
       $b = $a;
-      $a = preg_replace(
+      $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
-			'\$rule["$1"]("$2")',
+			create_function(
+					'$matches',
+					'
+global $widthRule;
+if (array_key_exists($matches[1], $widthRule))
+{
+return " " . $widthRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return $matches[2];
+}
+'),
 			$b);
     }
 
   LaTeXdebug($a,1);
-
-  LaTeXdebug($b,1);
-
-  $width = eval($a);
-  //  LaTeXdebug($width,1);
-  return min($textwidth,$width);
+  return min($textwidth,$a);
 }
 
 
