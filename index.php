@@ -43,6 +43,8 @@ print '<?xml version="1.0"?>
 <textarea name="latex" rows="20" cols="50"><?php print htmlspecialchars($source) ?></textarea>
 </p>
 <input type="hidden" name="testslashes" value="\test" />
+  <div>View Source:
+<input type="checkbox" name="source" value="off" /></div>
 <input type="submit" value="send" />
 <input type="reset" />
 </form>
@@ -51,8 +53,19 @@ print '<?xml version="1.0"?>
 
 <p>
 
-<?php print processLaTeX ($source) ?>
-  <?php exitGracefully() ?>
+<?php
+  $result = processLaTeX ($source);
+
+  print $result;
+
+  if ($_REQUEST["source"])
+    {
+      print '<pre>';
+      print htmlspecialchars($result);
+      print '</pre>';
+    }
+exitGracefully()
+?>
 
 </p>
 

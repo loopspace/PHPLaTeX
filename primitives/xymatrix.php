@@ -68,13 +68,13 @@ while ($matrix)
 		    // label above
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
-		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$upperdisplacement = $matches[0];
 			$matrix = substr($matrix,strlen($upperdisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
-		    $upperlabel = nextgrp($matrix);
+		    $upperlabel = '\(' . nextgrp($matrix) . '\)';
 		  }
 		elseif ($nexttok == '_')
 		  {
@@ -82,13 +82,13 @@ while ($matrix)
 		    // label below
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    $matrix = ltrim($matrix," ");
-		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$lowerdisplacement = $matches[0];
 			$matrix = substr($matrix,strlen($lowerdisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
-		    $lowerlabel = nextgrp($matrix);
+		    $lowerlabel = '\(' . nextgrp($matrix) . '\)';
 		  }
 		elseif ($nexttok == '|')
 		  {
@@ -96,13 +96,13 @@ while ($matrix)
 		    // label in middle
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
 		    ltrim($matrix," ");
-		    if (preg_match('/!{[^;]+;[^}]+}|(?:> *>?|< *<?)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
+		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
 			$middledisplacement = $matches[0];
 			$matrix = substr($matrix,strlen($middledisplacement));
 		      }
 		    ltrim($matrix," ");
-		    $middlelabel = nextgrp($matrix);
+		    $middlelabel = '\(' . nextgrp($matrix) . '\)';
 		  }
 		elseif ($nexttok == '@')
 		  {
@@ -255,7 +255,8 @@ while ($matrix)
   }
 $dim["row"] = ($dim["row"] + $maxwidth);
 $dim["col"] = ($dim["col"] + $maxheight);
-$numrows = count($matrix);
+$numrows = count($entry);
+$numcols += 1;
 
 $svgwidth = 2*($dim["row"]*$numrows);
 $svgheight =  2*($dim["col"]*$numcols);
@@ -458,6 +459,103 @@ for($i = 0; $i < count($arrows);$i++)
     $dash = $arrows[$i]["dash"];
     $target = $arrows[$i]["target"];
 
+
+    /*
+     * Coordinate summary:
+     *
+     * $sn,$sm matrix coordinates of starting entry
+     * $en,$em matrix coordinates of final entry
+     * $sx,$sy x,y-coordinates of start of arrow
+     * $ex,$ey x,y-coordinates of end of arrow
+     * $bx,$by arrow vector
+     * $ax,$ay normalised arrow vector
+     * $ox,$oy orthogonal arrow vector
+     * $nx,$ny normalised orthogonal arrow vector
+     * $mx,$my x,y-coordinates of midpoint of arrow
+     * $lux,$luy x,y-coordinates of upper label
+     * $llx,$lly x,y-coordinates of lower label
+     * $lmx,$lmy x,y-coordinates of middle label
+     * $csx,$csy x,y-coordinates of start of arrow (bezier cubic)
+     * $cex,$cey x,y-coordinates of end of arrow (bezier cubic)
+     * $ccsx,$ccsx x,y-coordinates of first control pt (bezier cubic)
+     * $ccex,$ccyx x,y-coordinates of second control pt (bezier cubic)
+
+     */
+
+    // convert label displacements into distances
+    // for simplicity, we vary xymatrix's displacements a little 
+    // 1. the label positions are always relative to the curve, not the
+    //    midpoints of the entries
+    // 2. the offsets (> and <) are relative to the length of the
+    //    curve, not absolute distances.
+    $jot = .1;
+    if ($upperdisplacement)
+      {
+	// The first > or < is to anchor it at the relevant end
+	$uin = (substr_count($upperdisplacement,"<") - 1)*$jot;
+	$uout = 1 - (substr_count($upperdisplacement,">") - 1)*$jot;
+	if (preg_match('/\((\.[0-9]+)\)/',$upperdisplacement,$matches))
+	  {
+	    $udisp = $uin + ($uout - $uin)*$matches[1];
+	  }
+	elseif (substr($upperdisplacement,0,1) == "<")
+	  {
+	    $udisp = $uin;
+	  }
+	else
+	  {
+	    $udisp = $uout;
+	  }
+      }
+    else
+      {
+	$udisp = .5;
+      }
+    if ($lowerdisplacement)
+      {
+	// The first > or < is to anchor it at the relevant end
+	$lin = (substr_count($lowerdisplacement,"<") - 1)*$jot;
+	$lout = 1 - (substr_count($lowerdisplacement,">") - 1)*$jot;
+	if (preg_match('/\((\.[0-9]+)\)/',$lowerdisplacement,$matches))
+	  {
+	    $ldisp = $lin + ($lout - $lin)*$matches[1];
+	  }
+	elseif (substr($lowerdisplacement,0,1) == "<")
+	  {
+	    $ldisp = $lin;
+	  }
+	else
+	  {
+	    $ldisp = $lout;
+	  }
+      }
+    else
+      {
+	$ldisp = .5;
+      }
+    if ($middledisplacement)
+      {
+	// The first > or < is to anchor it at the relevant end
+	$min = (substr_count($middledisplacement,"<") - 1)*$jot;
+	$mout = 1 - (substr_count($middledisplacement,">") - 1)*$jot;
+	if (preg_match('/\((\.[0-9]+)\)/',$middledisplacement,$matches))
+	  {
+	    $mdisp = $min + ($mout - $min)*$matches[1];
+	  }
+	elseif (substr($middledisplacement,0,1) == "<")
+	  {
+	    $mdisp = $min;
+	  }
+	else
+	  {
+	    $mdisp = $mout;
+	  }
+      }
+    else
+      {
+	$mdisp = .5;
+      }
+
     // final entry
     $en = $sn + substr_count(strtolower($target),"r") - substr_count(strtolower($target),"l");
     $em = $sm + substr_count(strtolower($target),"d") - substr_count(strtolower($target),"u");
@@ -540,11 +638,13 @@ for($i = 0; $i < count($arrows);$i++)
 
     $arrowpath = '<path d="';
 
-    // If curving, define a quadratic bezier with control point defined by offsetting the midpoint by the normal vector
+    // If curving, define a bezier 
+    // we also need to define the (x,y) coordinates of the labels so need to know the displacements
     if ($curving)
       {
 	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
 	  {
+	    // cubic bezier curve
 	    LaTeXdebug("$dirs[1] $dirs[2]",1);
 	    // Need to recompute the anchors
 	    // horizontally
@@ -643,9 +743,17 @@ for($i = 0; $i < count($arrows);$i++)
 	      . ' '
 	      . $cey;
 	    
+	    // compute the positions of the labels (along the curves, shifting them off the curve is done later)
+	    $lux = (1 - $udisp)*(1 - $udisp)*(1 - $udisp)*$csx + 3*(1 - $udisp)*(1 - $udisp)*$udisp*($csx + $ccsx*$cntl) + 3*(1 - $udisp)*$udisp*$udisp*($cex + $ccex*$cntl) + $udisp*$udisp*$udisp*$cex;
+	    $luy = (1 - $udisp)*(1 - $udisp)*(1 - $udisp)*$csy + 3*(1 - $udisp)*(1 - $udisp)*$udisp*($csy + $ccsy*$cntl) + 3*(1 - $udisp)*$udisp*$udisp*($cey + $ccey*$cntl) + $udisp*$udisp*$udisp*$cey;
+	    $llx = (1 - $ldisp)*(1 - $ldisp)*(1 - $ldisp)*$csx + 3*(1 - $ldisp)*(1 - $ldisp)*$ldisp*($csx + $ccsx*$cntl) + 3*(1 - $ldisp)*$ldisp*$ldisp*($cex + $ccex*$cntl) + $ldisp*$ldisp*$ldisp*$cex;
+	    $lly = (1 - $ldisp)*(1 - $ldisp)*(1 - $ldisp)*$csy + 3*(1 - $ldisp)*(1 - $ldisp)*$ldisp*($csy + $ccsy*$cntl) + 3*(1 - $ldisp)*$ldisp*$ldisp*($cey + $ccey*$cntl) + $ldisp*$ldisp*$ldisp*$cey;
+	    $lmx = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csx + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csx + $ccsx*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cex + $ccex*$cntl) + $mdisp*$mdisp*$mdisp*$cex;
+	    $lmy = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csy + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csy + $ccsy*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cey + $ccey*$cntl) + $mdisp*$mdisp*$mdisp*$cey;
 	  }
 	else
 	  {
+	    // symmetric quadratic bezier curve
 	    $type = substr($curving,0,1);
 	    if ($type == "_")
 	      {
@@ -679,6 +787,15 @@ for($i = 0; $i < count($arrows);$i++)
 	      . $ex
 	      . ' '
 	      . $ey;
+
+	    // compute label positions
+	    $lux = (1 - $udisp)*(1 - $udisp)*$sx + 2*(1 - $udisp)*$udisp*($mx + $dir*$scale*$nx) + $udisp*$udisp*$ex;
+	    $luy = (1 - $udisp)*(1 - $udisp)*$sy + 2*(1 - $udisp)*$udisp*($my + $dir*$scale*$ny) + $udisp*$udisp*$ey;
+	    $llx = (1 - $ldisp)*(1 - $ldisp)*$sx + 2*(1 - $ldisp)*$ldisp*($mx + $dir*$scale*$nx) + $ldisp*$ldisp*$ex;
+	    $lly = (1 - $ldisp)*(1 - $ldisp)*$sy + 2*(1 - $ldisp)*$ldisp*($my + $dir*$scale*$ny) + $ldisp*$ldisp*$ey;
+	    $lmx = (1 - $mdisp)*(1 - $mdisp)*$sx + 2*(1 - $mdisp)*$mdisp*($mx + $dir*$scale*$nx) + $mdisp*$mdisp*$ex;
+	    $lmy = (1 - $mdisp)*(1 - $mdisp)*$sy + 2*(1 - $mdisp)*$mdisp*($my + $dir*$scale*$ny) + $mdisp*$mdisp*$ey;
+
 	  }
       }
     else
@@ -691,6 +808,13 @@ for($i = 0; $i < count($arrows);$i++)
 	  . $ex
 	  . ' '
 	  . $ey;
+	// compute label positions
+	$lux = $sx + $udisp*($ex - $sx);
+	$luy = $sy + $udisp*($ey - $sy);
+	$llx = $sx + $ldisp*($ex - $sx);
+	$lly = $sy + $ldisp*($ey - $sy);
+	$lmx = $sx + $mdisp*($ex - $sx);
+	$lmy = $sy + $mdisp*($ey - $sy);
       }
 
     // assemble style
@@ -808,59 +932,56 @@ for($i = 0; $i < count($arrows);$i++)
       . '</svg>'
       . "\n";
 
-    // position label
-    $labelwidth="10";
-    $labelheight="3";
-    $xoffset="1";
-    $yoffset="2";
-
-    // quadratic bezier function:
-    // B(t) = (1-t)^2 P_0 + 2(1 - t)t P_1 + t^2 P_2
-
     if ($upperlabel)
       {
-	$ux = $mx - $labelwidth/2 + $nx*$swap + $ax*MakeEx($upperdisplacement);
-	$uy = $my - $labelheight/2 - $fudgeheight + ($ny - $fudgeheight)*$swap + $ax*MakeEx($upperdisplacement);
+	$upperlabelwidth = getWidthOf($upperlabel);
+	$upperlabelheight = "3.5";
+
+	$svg .= '<circle cx="' . $lux . 'ex" cy="' . $luy . 'ex" r="1" stroke="black" stroke-width="1" />' . "\n";
+	$lux += - $upperlabelwidth/2 + $nx*$swap;
+	$luy += - $upperlabelheight/2 - $fudgeheight + ($ny - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject x="'
-	  . $ux
+	  . $lux
 	  . 'ex" y="'
-	  . $uy
+	  . $luy
 	  . 'ex" width="'
-	  . $labelwidth
+	  . ($upperlabelwidth + 2)
 	  . 'ex" height="'
-	  . $labelheight
+	  . $upperlabelheight
 	  . 'ex">'
 	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
-	  . $labelwidth
+	  . $upperlabelwidth
 	  . 'ex,height:'
-	  . ($labelheight -1)
+	  . ($upperlabelheight -1)
 	  . 'ex" align="center">'
-	  . "\(" . $upperlabel . "\)"
+	  . $upperlabel
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
       }
     if ($lowerlabel)
       {
-	$lx = $mx - $labelwidth/2 - $nx*$swap;
-	$ly = $my - ($ny - $fudgeheight)*$swap;
+	$lowerlabelwidth = getWidthOf($lowerlabel);
+	$lowerlabelheight = "3";
+	$llx += - $lowerlabelwidth/2 - $nx*$swap;
+	$lly += - ($ny - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject x="'
-	  . $lx
+	  . $llx
 	  . 'ex" y="'
-	  . $ly
+	  . $lly
 	  . 'ex" width="'
-	  . $labelwidth
+	  . ($lowerlabelwidth + 1)
 	  . 'ex" height="'
-	  . $labelheight
+	  . $lowerlabelheight
 	  . 'ex">'
 	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
-	  . $labelwidth
+	  . $lowerlabelwidth
 	  . 'ex,height:'
-	  . ($labelheight -1)
+	  . ($lowerlabelheight -1)
 	  . 'ex" align="center">'
-	  . "\(" . $lowerlabel . "\)"
+	  . $lowerlabel
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
@@ -868,8 +989,6 @@ for($i = 0; $i < count($arrows);$i++)
   }
 
 $svg .= '</svg>' . "\n";
-
-LaTeXdebug($svg,1);
 
 $latex = $svg . "\0" . $latex;
 return;

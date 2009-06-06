@@ -1,6 +1,6 @@
-// name: addtocounter
+// name: setcounter
 global $counters;
 $name = stripgrp(nextgrp($latex));
 $amount = stripgrp(nextgrp($latex));
-$counters[$name] += $amount;
+$counters[$name] = $amount;
 return;

@@ -25,40 +25,20 @@ $lineno = 1;
 $maxops = 10000;
 $ops = 0;
 $fontsize = 10; // number of pts in an em
-
-$debuglevel = 2; // debugging level
 $debugmsg = "";
-$warnings = "";
-$errors = "";
 
 /*
  * Error function: should be more used
  */
 
-function LaTeXError ($message,$fatal)
-{
-  global $lineno;
-  global $errors;
-  global $warnings;
-  if ($fatal)
-    {
-      $errors .= "\nLine " . $lineno . ": " . $message;
-      exitGracefully(1);
-    }
-  else
-    {
-      $warnings .= "\nLine " . $lineno . ": " . $message;
-    }
-  return;
-}
-
 function LaTeXdebug ($message,$level)
 {
-  global $debuglevel;
+  global $lineno;
+  global $counters;
   global $debugmsg;
-  if ($level <= $debuglevel)
+  if ($level <= $counters["debug"])
     {
-      $debugmsg .= "\n" . $message;
+      $debugmsg .= "\nLine " . $lineno . ": " . $message;
     }
 }
 
@@ -69,15 +49,12 @@ function LaTeXdebug ($message,$level)
 function exitGracefully ($really = 0)
 {
   global $debugmsg;
-  global $warnings;
-  global $errors;
 
-  print '<br /><strong>PHPLaTeX Warnings:</strong>';
-  print '<pre>' . htmlspecialchars($warnings) . '</pre>';
-  print '<br /><strong>PHPLaTeX Debugging Messages:</strong>';
-  print '<pre>' . htmlspecialchars($debugmsg) . '</pre>';
-  print '<br /><strong>PHPLaTeX Errors:</strong>';
-  print '<pre>' . htmlspecialchars($errors) . '</pre>';
+  if ($debugmsg)
+    {
+      print '<br /><strong>PHPLaTeX Debugging Messages:</strong>';
+      print '<pre>' . htmlspecialchars($debugmsg) . '</pre>';
+    }
 
   if ($really)
     {
@@ -103,7 +80,10 @@ function nexttok (&$latex)
   global $ops;
   $ops++;
   if ($ops > $maxops)
-    LaTeXError("Capacity exceeded by nexttok.",1);
+    {
+      LaTeXdebug("Capacity exceeded by nexttok.",0);
+      exitGracefully(1);
+    }
   // Silently ignore nulls: we use them as separators
   do {
     $firstchar = substr($latex,0,1);
@@ -152,7 +132,7 @@ function nexttok (&$latex)
 	    $nextchar = substr($latex,0,1);
 	    }
 
-	  if (preg_match('/[a-z]/',$nextchar))
+	  if (preg_match('/[\/a-z]/',$nextchar))
 	    {
 	      // XHTML tag, get the rest and pass on
 	      list($tag,$latex) = explode(">",$latex,2);
@@ -218,7 +198,10 @@ function nextgrp (&$latex)
   global $ops;
   $ops++;
   if ($ops > $maxops)
-    LaTeXError("Capacity exceeded by nextgrp.",1);
+    {
+      LaTeXdebug("Capacity exceeded by nextgrp.",0);
+      exitGracefully(1);
+    }
 
   $firstchar = nexttok($latex);
   $group = "";
@@ -242,7 +225,8 @@ function nextgrp (&$latex)
     }
   else
     {
-      LaTeXError("Input ended prematurely",1);
+      LaTeXdebug("Input ended prematurely",0);
+      exitGracefully(1);
     }
   return $group;
 }
@@ -281,7 +265,10 @@ function expandtok ($token,&$latex)
   global $ops;
   $ops++;
   if ($ops > $maxops)
-    LaTeXError("Capacity exceeded by expandtok.",1);
+    {
+      LaTeXdebug("Capacity exceeded by expandtok.",0);
+      exitGracefully(1);
+    }
 
   // get first character of the token
 
@@ -396,7 +383,7 @@ function expandtok ($token,&$latex)
       else
 	{
 	  // command is not known, just return it unexpanded
-	  LaTeXError("Unknown command: " . $token,0);
+	  LaTeXdebug("Unknown command: " . $token,1);
 	  return array(0,$token);
 	}
 
@@ -665,6 +652,32 @@ function getWidthOf ($string)
   $a = trim($expanded);  
   $b = "";
 
+  // first replace single tags
+  while ($a != $b)
+    {
+  LaTeXdebug($a,1);
+
+      $b = $a;
+      $a = preg_replace_callback(
+				 '/<([a-z]+)([^>]*)\/>/',
+				 create_function(
+						 '$matches',
+						 '
+global $widthRule;
+if (array_key_exists($matches[1], $widthRule))
+{
+return " " . $widthRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return " 0 ";
+}
+'),
+			$b);
+    }
+
+  $b = "";
+
   while ($a != $b)
     {
   LaTeXdebug($a,1);
@@ -689,7 +702,7 @@ return $matches[2];
     }
 
   LaTeXdebug($a,1);
-  return min($textwidth,$a);
+  return trim(min($textwidth,$a));
 }
 
 
@@ -758,14 +771,15 @@ function processLaTeX (&$latex)
 	  $processed = $processed . $extoken;
 	}
     }
+  $processed = trim($processed);
 // somehow want to add in some newlines to make the code look prettier, but do so without actually changing any content.
-//  $tags = array("p","mrow","br");
-//  foreach ($tags as $tag)
-  //   {
-  //   $processed = preg_replace("/(<$tag\b[^>]*>)/","\n$1\n",$processed);
-  //   $processed = preg_replace("/(<\/$tag>)/","\n$1\n",$processed);
-  //  }
-  //  $processed = preg_replace('/\n\n+/s',"\n",$processed);
+  $tags = array("p","mrow","br","svg","math","body","path","marker","defs","foreignObject");
+  foreach ($tags as $tag)
+    {
+      $processed = preg_replace("/(<$tag\b[^>]*>)/","\n$1\n",$processed);
+      $processed = preg_replace("/(<\/$tag>)/","\n$1\n",$processed);
+    }
+  $processed = preg_replace('/\n[\s\n]+/s',"\n",$processed);
   return $processed;
 }
 
@@ -796,11 +810,14 @@ function initialise ()
 
   // due to the vaguaries of getting tokens, can't define \\ properly yet
 
-  $commands["\\"] = array(
+  $commands['\\'] = array(
 			  "args" => 0,
 			  "opts" => array(),
 			  "defn" => '\newline'
 			  );
+
+  $preamble = '\newcounter{debug}';
+  processLaTeX($preamble);
   return;
 }
 
