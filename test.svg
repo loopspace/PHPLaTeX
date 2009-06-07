@@ -2,8 +2,12 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100ex" height="19ex">
-<rect x="1ex" y="1ex" width="20ex" height="3ex" stroke="black" fill="none"/>
-<foreignObject x="1ex" y="1ex" width="20ex" height="3ex">
+<rect x="1ex" y="1ex" width="20ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="1ex" y="1ex" width="20ex" height="5ex">
+<body xmlns="http://www.w3.org/1999/xhtml"><div align="center" style="position:relative"><div align="center" style="top:50%, height:3ex, margin-top:-1.5ex">hello</div></div></body>
+</foreignObject>
+<rect x="30ex" y="1ex" width="20ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="30ex" y="1ex" width="20ex" height="5ex">
 <body xmlns="http://www.w3.org/1999/xhtml"><div align="center">hello</div></body>
 </foreignObject>
 </svg>
