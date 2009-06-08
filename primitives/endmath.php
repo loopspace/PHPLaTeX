@@ -1,3 +1,3 @@
 // name: )
-$latex = "\\mmodefalse</mrow></math>" . $latex;
+$latex = "\\mmodefalse</mrow></mstyle></math>" . $latex;
 return;

@@ -1,0 +1,26 @@
+\documentclass{webpage}
+
+\title{PHPLaTeX}
+
+\begin{document}
+
+\section{Introduction}
+
+PHPLaTeX is a program for converting LaTeX documents into XHTML+MathML+SVG.
+It's main selling points are that it is written entirely in PHP and that it attempts to mimic the basic TeX method of parsing a document by reading and expanding tokens.
+The main consequence of the first of these is that it is extremely portable.
+The main consequence of the second is that it can handle macro expansion.
+
+Not everything is implemented yet, and things that are may not be implemented fully.
+A full list of the currently available commands, together with some notes on specific commands, is given at the end.
+
+\section{Commands}
+
+\subsection{Primitives}
+
+Primitives are PHP functions.
+They generally need to muck around with the internals of the system and so need access to the ``lower level'' of the program.
+
+\showAllCommands
+
+\end{document}

@@ -1,0 +1,33 @@
+\newenvironment{matrix}{\array[rowspacing="0.5ex"]}{\endarray}
+\newenvironment{pmatrix}{\left(\begin{matrix}}{\end{matrix}\right)}
+\newenvironment{bmatrix}{\left[\begin{matrix}}{\end{matrix}\right]}
+\newenvironment{Bmatrix}{\left\lbrace\begin{matrix}}{\end{matrix}\right\rbrace}
+\newenvironment{vmatrix}{\left\lvert\begin{matrix}}{\end{matrix}\right\rvert}
+\newenvironment{Vmatrix}{\left\lVert\begin{matrix}}{\end{matrix}\right\rVert}
+
+\newenvironment{smallmatrix}{<mstyle scriptlevel="2">\matrix}{\endmatrix</mstyle>}
+
+\newenvironment{cases}{<mrow>\left\lbrace\array[columnalign="left left"]}{\endarray</mrow>}
+\newenvironment{aligned}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
+\newenvironment{gathered}{\array[rowspacing="1.0ex"]}{\endarray}
+\newenvironment{split}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
+\newcommand{\mathbb}[1]{\entity{#1opf}}
+\newcommand{\mathcal}[1]{\entity{#1scr}}
+\newcommand{\mathfrak}[1]{\entity{#1fr}}
+
+\newcommand{\big}[1]{\def\parensize{minsize="1.2em" maxsize="1.2em"} #1\def\parensize{}}
+\newcommand{\Big}[1]{\def\parensize{minsize="1.8em" maxsize="1.8em"} #1\def\parensize{}}
+\newcommand{\bigg}[1]{\def\parensize{minsize="2.4em" maxsize="2.4em"} #1\def\parensize{}}
+\newcommand{\Bigg}[1]{\def\parensize{minsize="3em" maxsize="3em"} #1\def\parensize{}}
+
+\newcommand{\text}[2][]{\ifmmode<mtext #1>\mmodefalse #2\mmodetrue</mtext>\else #2\fi}
+
+\newcommand{\lvert}{\mathparen{&VerticalBar;}}
+\newcommand{\rvert}{\mathparen{&VerticalBar;}}
+\newcommand{\lVert}{\mathparen{&DoubleVerticalBar;}}
+\newcommand{\rVert}{\mathparen{&DoubleVerticalBar;}}
+
+\newcommand{\lbrace}{\mathparen{&#123;}}
+\newcommand{\rbrace}{\mathparen{&#125;}}
+\newcommand{\lbracket}{\mathparen{&#91;}}
+\newcommand{\rbracket}{\mathparen{&#93;}}

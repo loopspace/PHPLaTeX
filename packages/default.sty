@@ -1,28 +1,22 @@
+\newenvironment{document}{<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml"><head>\doctitle</head><body><p>}{</p></body></html>}
+
+\newcommand{\title}[1]{\def\doctitle{<title>#1</title>}}
+\def\doctitle{}
 \newcommand{\begin}[1]{\csname #1\endcsname}
 \newcommand{\end}[1]{\csname end#1\endcsname}
 \newcommand{\newif}[1]{\expandafter\newcommand\expandafter{\csname if#1\endcsname}{\if{#1}}\expandafter\newcommand\expandafter{\csname #1true\endcsname}{\true{#1}}\expandafter\newcommand\expandafter{\csname #1false\endcsname}{\false{#1}}\csname #1false\endcsname}
 
 \newif{mmode}
-\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline"><mrow>\mmodetrue}
-\newcommand{\[}{\par<math xmlns='http://www.w3.org/1998/Math/MathML' display="block"><mrow>\mmodetrue}
-\newcommand{\]}{</mrow></math>\mmodefalse\par}
+\newcommand{\(}{<math xmlns='http://www.w3.org/1998/Math/MathML' display="inline"><mstyle displaystyle="false"><mrow>\mmodetrue}
+\newcommand{\[}{\par<math xmlns='http://www.w3.org/1998/Math/MathML' display="block"><mstyle displaystyle="true"><mrow>\mmodetrue}
+\newcommand{\]}{</mrow></mstyle></math>\mmodefalse\par}
 
 \newif{array}
 \newcommand{\amporcol}{\ifarray </mtd><mtd>\else &amp;\fi}
 \newenvironment{array}[1][]{\ifmmode <mrow><mtable #1><mtr><mtd>\arraytrue\fi}{\arrayfalse</mtd></mtr></mtable></mrow>}
-\newenvironment{matrix}{\array[rowspacing="0.5ex"]}{\endarray}
-\newenvironment{pmatrix}{\left(\begin{matrix}}{\end{matrix}\right)}
-\newenvironment{bmatrix}{\left[\begin{matrix}}{\end{matrix}\right]}
-\newenvironment{Bmatrix}{\left\lbrace\begin{matrix}}{\end{matrix}\right\rbrace}
-\newenvironment{vmatrix}{\left\lvert\begin{matrix}}{\end{matrix}\right\rvert}
-\newenvironment{Vmatrix}{\left\lVert\begin{matrix}}{\end{matrix}\right\rVert}
-
-\newenvironment{smallmatrix}{<mstyle scriptlevel="2">\matrix}{\endmatrix</mstyle>}
-
-\newenvironment{cases}{<mrow>\left\lbrace\array[columnalign="left left"]}{\endarray</mrow>}
-\newenvironment{aligned}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
-\newenvironment{gathered}{\array[rowspacing="1.0ex"]}{\endarray}
-\newenvironment{split}{\array[columnalign="right left right left right left right left right left" columnspacing="0em"]}{\endarray}
 
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
@@ -39,19 +33,15 @@
 \newcommand{\par}{</p><p>}
 \newcommand{\emph}[1]{<i>#1</i>}
 \newcommand{\textbf}[1]{<strong>#1</strong>}
-% There should be a ``\csname'' for entities ...
+
 \newcommand{\"}[1]{\entity{#1uml}}
 \newcommand{\`}[1]{\entity{#1grave}}
 \newcommand{\'}[1]{\entity{#1acute}}
 \newcommand{\^}[1]{\entity{#1circ}}
 \newcommand{\~}[1]{\entity{#1tilde}}
 \newcommand{\c}[1]{\entity{#1cedil}}
-\newcommand{\mathbb}[1]{\entity{#1opf}}
-\newcommand{\mathcal}[1]{\entity{#1scr}}
-\newcommand{\mathfrak}[1]{\entity{#1fr}}
 % Not sure why this works, but it does ...
 \newcommand{\ }{ }
-
 
 \def\parensize{stretchy="false"}
 \newcommand{\mathop}[2][]{\ifmmode<mo #1>#2</mo>\else #2\fi}
@@ -60,19 +50,14 @@
 \newcommand{\mathparen}[1]{\expandafter\mathop\expandafter[\parensize]{#1}}
 \newcommand{\left}[1]{\def\parensize{} #1\def\parensize{stretchy="false"}}
 \newcommand{\right}[1]{\def\parensize{} #1\def\parensize{stretchy="false"}}
-\newcommand{\big}[1]{\def\parensize{minsize="1.2em" maxsize="1.2em"} #1\def\parensize{}}
-\newcommand{\Big}[1]{\def\parensize{minsize="1.8em" maxsize="1.8em"} #1\def\parensize{}}
-\newcommand{\bigg}[1]{\def\parensize{minsize="2.4em" maxsize="2.4em"} #1\def\parensize{}}
-\newcommand{\Bigg}[1]{\def\parensize{minsize="3em" maxsize="3em"} #1\def\parensize{}}
 
 
-
-\newcommand{\text}[2][]{\ifmmode<mtext #1>\mmodefalse #2\mmodetrue</mtext>\else #2\fi}
 \newcommand{\frac}[3][]{<mfrac #1><mrow>#2</mrow><mrow>#3</mrow></mfrac>}
 
 \newcommand{\sqrt}[1]{<msqrt>#1</msqrt>}
 \newcommand{\root}[2]{<mroot><mrow>#1</mrow><mrow>#2</mrow></mroot>}
 
+\newcommand{\rule}[2]{<mspace width="#1" height="#2" style="background-color: black" />}
 \newcommand{\!}{<mspace width="-.5em" />}
 \newcommand{\negspace}{\!}
 \newcommand{\,}{<mspace width="1em" />}
@@ -139,7 +124,7 @@
 \newcommand{\notin}{\mathop{&notin;}}
 \newcommand{\ni}{\mathop{&ni;}}
 \newcommand{\prod}{\mathop{&prod;}}
-\newcommand{\sum}{\mathop{&sum;}}
+\newcommand{\sum}{\mathop[movablelimits="true"]{&sum;}}
 \newcommand{\ast}{\mathop{&ast;}}
 \newcommand{\equiv}{\mathop{&equiv;}}
 \newcommand{\sim}{\mathop{&sim;}}
@@ -181,13 +166,3 @@
 \newcommand{\chi}{\mathchar{&chi;}}
 \newcommand{\psi}{\mathchar{&psi;}}
 \newcommand{\omega}{\mathchar{&omega;}}
-
-\newcommand{\lvert}{\mathparen{&VerticalBar;}}
-\newcommand{\rvert}{\mathparen{&VerticalBar;}}
-\newcommand{\lVert}{\mathparen{&DoubleVerticalBar;}}
-\newcommand{\rVert}{\mathparen{&DoubleVerticalBar;}}
-
-\newcommand{\lbrace}{\mathparen{&#123;}}
-\newcommand{\rbrace}{\mathparen{&#125;}}
-\newcommand{\lbracket}{\mathparen{&#91;}}
-\newcommand{\rbracket}{\mathparen{&#93;}}

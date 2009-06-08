@@ -1,0 +1,16 @@
+2009-06-08  Andrew Stacey  <andrew.stacey@math.ntnu.no>
+
+	* primitives/documentclass.php: for now, just swallows the class name.
+
+	* latex.php (initialise): default.sty is automatically loaded
+	(expandtok): implemented largeop switch for super and subscripts
+	(uses array $isLargeOp).
+
+	* form.html: Calls convert.php on the text in the text box.
+
+	* convert.php: Created.  Converts a string and displays it.
+	Can also load a file from the 'doc' directory.
+
+	* packages/default.sty: split off amsmath specific stuff into
+	amsmath.sty, added 'document' environment and 'title' command
+

@@ -25,7 +25,8 @@ $matrix = stripgrp(nextgrp($latex));
 $m = 0;
 $n = 0;
 $maxwidth = 1;
-$maxheight = 3.5;
+$maxheight = 2.5;
+$maxdepth = 2;
 $numcols = 0;
 
 // due to not vertically centering our entries, need a vertical fudge
@@ -74,7 +75,7 @@ while ($matrix)
 			$matrix = substr($matrix,strlen($upperdisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
-		    $upperlabel = '\(' . nextgrp($matrix) . '\)';
+		    $upperlabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '_')
 		  {
@@ -88,7 +89,7 @@ while ($matrix)
 			$matrix = substr($matrix,strlen($lowerdisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
-		    $lowerlabel = '\(' . nextgrp($matrix) . '\)';
+		    $lowerlabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '|')
 		  {
@@ -102,7 +103,7 @@ while ($matrix)
 			$matrix = substr($matrix,strlen($middledisplacement));
 		      }
 		    ltrim($matrix," ");
-		    $middlelabel = '\(' . nextgrp($matrix) . '\)';
+		    $middlelabel = nextgrp($matrix);
 		  }
 		elseif ($nexttok == '@')
 		  {
@@ -234,9 +235,10 @@ while ($matrix)
 	  }
 	$nexttok = nexttok($matrix);
       }
-    $entry[$m][$n] = '\(' . trim($entry[$m][$n]) . '\)';
-    $width[$m][$n] = (getWidthOf($entry[$m][$n]) + 2); // margin of error
-    $height[$m][$n] = $maxheight; // need getHeightOf here
+    $entry[$m][$n] = trim($entry[$m][$n]);
+    $width[$m][$n] = (getWidthOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
+    $height[$m][$n] = $maxheight; // need getHeightOf here, and depth
+    $depth[$m][$n] = $maxdepth;
 
     if ($width[$m][$n] > $maxwidth)
       $maxwidth = $width[$m][$n];
@@ -254,7 +256,7 @@ while ($matrix)
       }
   }
 $dim["row"] = ($dim["row"] + $maxwidth);
-$dim["col"] = ($dim["col"] + $maxheight);
+$dim["col"] = ($dim["col"] + $maxheight + $maxdepth);
 $numrows = count($entry);
 $numcols += 1;
 
@@ -424,14 +426,15 @@ for($m = 0;$m < count($entry);$m++)
 	  . 'ex" width="'
 	  . $maxwidth
 	  . 'ex" height="'
-	  . $maxheight
+	  . ($maxheight + $maxdepth)
 	  . 'ex">'
-	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
-	  . $maxwidth
-	  . 'ex,height:'
-	  . ($maxheight -1)
-	  . 'ex" align="center">'
+	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div align="center">'
+	  . '\('
+	  . '\rule{0ex}{'
+	  . $maxheight
+	  . 'ex}'
 	  . $entry[$m][$n]
+	  . '\)'
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
@@ -583,20 +586,20 @@ for($i = 0; $i < count($arrows);$i++)
     if ($em > $sm)
       {
 	// target is below source
-	$sy = ($sm * $dim["col"]) + $maxheight - ($maxheight - $height[$sm][$sn])/2;
-	$ey = ($em * $dim["col"]) + ($maxheight - $height[$em][$en])/2;
+	$sy = ($sm * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
+	$ey = ($em * $dim["col"]) + ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
       }
     elseif ($em < $sm)
       {
 	// target is above source
-	$sy = ($sm * $dim["col"]) + ($maxheight - $height[$sm][$sn])/2;
-	$ey = ($em * $dim["col"]) + $maxheight - ($maxheight - $height[$em][$en])/2;
+	$sy = ($sm * $dim["col"]) + ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
+	$ey = ($em * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
       }
     else
       {
 	// target is in same row as source
-	$sy = ($sm * $dim["col"]) + $maxheight/2;
-	$ey = ($sm * $dim["col"]) + $maxheight/2;
+	$sy = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
+	$ey = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
       }
 
     $sy += $fudgeheight;
@@ -688,37 +691,37 @@ for($i = 0; $i < count($arrows);$i++)
 	    if (stripos($dirs[1],"d") !== FALSE)
 	      {
 		// arrow should leave source downwards
-		$csy = ($sm * $dim["col"]) + $maxheight - ($maxheight - $height[$sm][$sn])/2;
+		$csy = ($sm * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
 		$ccsy = 1;
 	      }
 	    elseif (stripos($dirs[1],"u") !== FALSE)
 	      {
 		// arrow should leave source upwards
-		$csy = ($sm * $dim["col"]) + ($maxheight - $height[$sm][$sn])/2;
+		$csy = ($sm * $dim["col"]) + ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
 		$ccsy = -1;
 	      }
 	    else
 	      {
 		// arrow should leave source in the middle
-		$csy = ($sm * $dim["col"]) + $maxheight/2;
+		$csy = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
 		$ccsy = 0;
 	      }
 	    if (stripos($dirs[2],"d") !== FALSE)
 	      {
 		// arrow should enter target from below
-		$cey = ($em * $dim["col"]) + $maxheight - ($maxheight - $height[$em][$en])/2;
+		$cey = ($em * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
 		$ccey = 1;
 	      }
 	    elseif (stripos($dirs[2],"u") !== FALSE)
 	      {
 		// arrow should enter target from above
-		$cey = ($em * $dim["col"]) + ($maxheight - $height[$em][$en])/2;
+		$cey = ($em * $dim["col"]) + ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
 		$ccey = -1;
 	      }
 	    else
 	      {
 		// arrow should enter target in the middle
-		$cey = ($em * $dim["col"]) + $maxheight/2;
+		$cey = ($em * $dim["col"]) + ($maxheight + $maxdepth)/2;
 		$ccey = 0;
 	      }
 
@@ -934,10 +937,10 @@ for($i = 0; $i < count($arrows);$i++)
 
     if ($upperlabel)
       {
-	$upperlabelwidth = getWidthOf($upperlabel);
+	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)');
 	$upperlabelheight = "3.5";
 
-	$svg .= '<circle cx="' . $lux . 'ex" cy="' . $luy . 'ex" r="1" stroke="black" stroke-width="1" />' . "\n";
+//	$svg .= '<circle cx="' . $lux . 'ex" cy="' . $luy . 'ex" r="1" stroke="black" stroke-width="1" />' . "\n";
 	$lux += - $upperlabelwidth/2 + $nx*$swap;
 	$luy += - $upperlabelheight/2 - $fudgeheight + ($ny - $fudgeheight)*$swap;
 
@@ -955,14 +958,16 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex,height:'
 	  . ($upperlabelheight -1)
 	  . 'ex" align="center">'
+	  . '\('
 	  . $upperlabel
+	  . '\)'
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";
       }
     if ($lowerlabel)
       {
-	$lowerlabelwidth = getWidthOf($lowerlabel);
+	$lowerlabelwidth = getWidthOf('\(' . $lowerlabel . '\)');
 	$lowerlabelheight = "3";
 	$llx += - $lowerlabelwidth/2 - $nx*$swap;
 	$lly += - ($ny - $fudgeheight)*$swap;
@@ -981,7 +986,9 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex,height:'
 	  . ($lowerlabelheight -1)
 	  . 'ex" align="center">'
+	  . '\('
 	  . $lowerlabel
+	  . '\)'
 	  . '</div></body>'
 	  . '</foreignObject>'
 	  . "\n";

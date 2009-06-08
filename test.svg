@@ -45,11 +45,12 @@
 </math>
 </div></body>
 </foreignObject>
-<rect x="45ex" y="1ex" width="10ex" height="5ex" stroke="black" fill="none"/>
+<rect x="45ex" y="1ex" width="10ex" height="3ex" stroke="black" fill="none"/>
 <foreignObject x="45ex" y="1ex" width="10ex" height="5ex">
-<body xmlns="http://www.w3.org/1999/xhtml"><div align="center"><math xmlns='http://www.w3.org/1998/Math/MathML' display="block">
+<body xmlns="http://www.w3.org/1999/xhtml">
+<div align="center"><math xmlns='http://www.w3.org/1998/Math/MathML' display="block">
 <mrow>
-<mspace height="3ex" linebreak="nobreak" />
+<mspace height="3ex" width="1ex" style="background-color:black" linebreak="nobreak" />
 <mi >&sum;</mi>
 </mrow>
 <mrow>

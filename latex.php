@@ -26,6 +26,7 @@ $maxops = 10000;
 $ops = 0;
 $fontsize = 10; // number of pts in an em
 $debugmsg = "";
+$isLargeOp = array();
 
 /*
  * Error function: should be more used
@@ -263,6 +264,7 @@ function expandtok ($token,&$latex)
   global $conditionals;
   global $maxops;
   global $ops;
+  global $isLargeOp;
   $ops++;
   if ($ops > $maxops)
     {
@@ -487,6 +489,18 @@ function expandtok ($token,&$latex)
 	{
 	  $mod = 1;
 	  $nexttok = nexttok($latex);
+	  if (array_key_exists($token,$isLargeOp))
+	    {
+	      $suptag = 'mover';
+	      $subtag = 'munder';
+	      $subsuptag = 'munderover';
+	    }
+	  else
+	    {
+	      $suptag = 'msup';
+	      $subtag = 'msub';
+	      $subsuptag = 'msubsup';
+	    }
 	  if ($nexttok == '^')
 	    {
 	      // superscript, do we have a subscript?
@@ -496,11 +510,11 @@ function expandtok ($token,&$latex)
 		{
 		  // also have subscript
 		  $sub = stripgrp(nextgrp($latex));
-		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		  $return = '<' . $subsuptag . '><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></' . $subsuptag . '>';
 		}
 	      else
 		{
-		  $return = '<msup><mrow>' . $token . '</mrow><mrow>' . $sup . '</mrow></msup>' . $nexttok;
+		  $return = '<' . $suptag . '><mrow>' . $token . '</mrow><mrow>' . $sup . '</mrow></' . $suptag . '>' . $nexttok;
 		}
 	    }
 	  elseif ($nexttok == '_')
@@ -511,11 +525,11 @@ function expandtok ($token,&$latex)
 		{
 		  // also have subscript
 		  $sup = stripgrp(nextgrp($latex));
-		  $return = '<msubsup><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></msubsup>';
+		  $return = '<' . $subsuptag . '><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow><mrow>' . $sup . '</mrow></' . $subsuptag . '>';
 		}
 	      else
 		{
-		  $return = '<msub><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow></msub>' . $nexttok;
+		  $return = '<' . $subtag . '><mrow>' . $token . '</mrow><mrow>' . $sub . '</mrow></' . $subtag . '>' . $nexttok;
 		}
 	    }
 	  else
@@ -780,6 +794,8 @@ function processLaTeX (&$latex)
       $processed = preg_replace("/(<\/$tag>)/","\n$1\n",$processed);
     }
   $processed = preg_replace('/\n[\s\n]+/s',"\n",$processed);
+
+  // would be nice to validate text now.
   return $processed;
 }
 
@@ -816,7 +832,7 @@ function initialise ()
 			  "defn" => '\newline'
 			  );
 
-  $preamble = '\newcounter{debug}';
+  $preamble = '\newcounter{debug}\usepackage{default}';
   processLaTeX($preamble);
   return;
 }
