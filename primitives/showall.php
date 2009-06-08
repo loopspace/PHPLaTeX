@@ -12,7 +12,7 @@ $thelot .= 'Defs:' . "\n";
 foreach ($defs as $name => $def)
 {
   $thelot .= htmlspecialchars($name)
-    . "\n"
+    . "<br />"
     . htmlspecialchars($def["pattern"])
     . "\n"
     . htmlspecialchars($def["defn"])

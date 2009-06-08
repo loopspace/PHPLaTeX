@@ -5,6 +5,10 @@
 	* latex.php (initialise): default.sty is automatically loaded
 	(expandtok): implemented largeop switch for super and subscripts
 	(uses array $isLargeOp).
+	(expandtok): Changed switch for super and subscripts to test for
+	'movablelimits' - doesn't seem to display correctly in inline
+	mode, though.
+	(initialise): added $commands to global list so that \\ works properly
 
 	* form.html: Calls convert.php on the text in the text box.
 

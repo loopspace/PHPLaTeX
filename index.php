@@ -54,6 +54,7 @@ print '<?xml version="1.0"?>
 <p>
 
 <?php
+  $source = '\outputtrue' . "\0" . $source;
   $result = processLaTeX ($source);
 
   print $result;

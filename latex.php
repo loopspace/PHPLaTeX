@@ -26,7 +26,6 @@ $maxops = 10000;
 $ops = 0;
 $fontsize = 10; // number of pts in an em
 $debugmsg = "";
-$isLargeOp = array();
 
 /*
  * Error function: should be more used
@@ -264,7 +263,6 @@ function expandtok ($token,&$latex)
   global $conditionals;
   global $maxops;
   global $ops;
-  global $isLargeOp;
   $ops++;
   if ($ops > $maxops)
     {
@@ -412,7 +410,14 @@ function expandtok ($token,&$latex)
       $latex = preg_replace('/^\s*/s','',$latex);
       if (substr_count($whitespace[1],"\n") > 0)
 	{
-	  return array(1,"</p><p>");
+	  if ($conditionals["output"])
+	    {
+	      return array(1,"</p><p>");
+	    }
+	  else
+	    {
+	      return array(1,"\0");
+	    }
 	}
       else
 	{
@@ -489,7 +494,7 @@ function expandtok ($token,&$latex)
 	{
 	  $mod = 1;
 	  $nexttok = nexttok($latex);
-	  if (array_key_exists($token,$isLargeOp))
+	  if (preg_match('/<mo[^>]*movablelimits="true"/',$token))
 	    {
 	      $suptag = 'mover';
 	      $subtag = 'munder';
@@ -804,6 +809,7 @@ function processLaTeX (&$latex)
 function initialise ()
 {
   global $primitives;
+  global $commands;
   $primitivedir = dirname($_SERVER["SCRIPT_FILENAME"]) ."/primitives/";
 
   if (is_dir($primitivedir) and is_readable($primitivedir))
@@ -826,13 +832,13 @@ function initialise ()
 
   // due to the vaguaries of getting tokens, can't define \\ properly yet
 
-  $commands['\\'] = array(
+  $commands["\\"] = array(
 			  "args" => 0,
 			  "opts" => array(),
 			  "defn" => '\newline'
 			  );
 
-  $preamble = '\newcounter{debug}\usepackage{default}';
+  $preamble = '\newcounter{debug}\usepackage{default}\newif{output}';
   processLaTeX($preamble);
   return;
 }

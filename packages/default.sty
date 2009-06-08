@@ -1,7 +1,7 @@
 \newenvironment{document}{<?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml"><head>\doctitle</head><body><p>}{</p></body></html>}
+<html xmlns="http://www.w3.org/1999/xhtml"><head>\doctitle</head><body><p>\outputtrue}{\outputfalse</p></body></html>}
 
 \newcommand{\title}[1]{\def\doctitle{<title>#1</title>}}
 \def\doctitle{}
@@ -21,13 +21,16 @@
 \newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
 \newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
 
-\newcommand{\section}[1]{\refstepcounter{section}<h1>\thesection\ #1</h1>}
-\newcommand{\subsection}[1]{\refstepcounter{subsection}<h2>\thesubsection\   #1</h2>}
-\newcommand{\subsubsection}[1]{\refstepcounter{subsubsection}<h3>\thesubsubsection\   #1</h3>}
+\newcommand{\section}[1]{\refstepcounter{section}</p><h1>\thesection\ #1</h1><p>}
+\newcommand{\subsection}[1]{\refstepcounter{subsection}</p><h2>\thesubsection\   #1</h2><p>}
+\newcommand{\subsubsection}[1]{\refstepcounter{subsubsection}</p><h3>\thesubsubsection\   #1</h3><p>}
 
 \newcounter{section}
 \newcounter{subsection}
 \newcounter{subsubsection}
+\newcommand{\thesubsection}{\usecounter{section}.\usecounter{subsection}}
+\newcommand{\thesubsubsection}{\usecounter{section}.\usecounter{subsection}.\usecounter{thesubsubsection}}
+
 
 \newcommand{\newline}{\ifmmode\ifarray </mtd></mtr><mtr><mtd>\fi\else<br />\fi}
 \newcommand{\par}{</p><p>}
@@ -123,7 +126,7 @@
 \newcommand{\times}{\mathop{&times;}}
 \newcommand{\notin}{\mathop{&notin;}}
 \newcommand{\ni}{\mathop{&ni;}}
-\newcommand{\prod}{\mathop{&prod;}}
+\newcommand{\prod}{\mathop[movablelimits="true"]{&prod;}}
 \newcommand{\sum}{\mathop[movablelimits="true"]{&sum;}}
 \newcommand{\ast}{\mathop{&ast;}}
 \newcommand{\equiv}{\mathop{&equiv;}}
@@ -133,7 +136,7 @@
 \newcommand{\cup}{\mathop{&cup;}}
 \newcommand{\rfloor}{\mathop{&rfloor;}}
 \newcommand{\euro}{\mathchar{&euro;}}
-\newcommand{\int}{\mathop{&Integral;}}
+\newcommand{\int}{\mathop[movablelimits="true"]{&int;}}
 \newcommand{\cong}{\mathop{&cong;}}
 \newcommand{\ne}{\mathop{&ne;}}
 \newcommand{\le}{\mathop{&le;}}

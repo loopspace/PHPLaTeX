@@ -1,10 +1,10 @@
 // name: newcounter
-global $primitives;
+global $commands;
 global $counters;
-$name = nextgrp($latex);
+$name = stripgrp(nextgrp($latex));
 $counters[$name] = 0;
 $commands["the" . $name] = array(
-				 "args" => 1,
+				 "args" => 0,
 				 "opts" => array(),
 				 "defn" => '\usecounter{' . $name . '}'
 				 );
