@@ -1,13 +1,70 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
-  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">  
+  <head>
+    <title>PHPLaTeX Demo Page</title> 
+  </head>
+  <body>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100ex" height="19ex">
-<rect x="1ex" y="1ex" width="20ex" height="5ex" stroke="black" fill="none"/>
-<foreignObject x="1ex" y="1ex" width="20ex" height="5ex">
+<rect x="1ex" y="1ex" width="10ex" height="10ex" stroke="black" fill="none"/>
+<foreignObject x="1ex" y="1ex" width="10ex" height="10ex">
 <body xmlns="http://www.w3.org/1999/xhtml"><div align="center" style="position:relative"><div align="center" style="top:50%, height:3ex, margin-top:-1.5ex">hello</div></div></body>
 </foreignObject>
-<rect x="30ex" y="1ex" width="20ex" height="5ex" stroke="black" fill="none"/>
-<foreignObject x="30ex" y="1ex" width="20ex" height="5ex">
+<rect x="12ex" y="1ex" width="10ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="12ex" y="1ex" width="10ex" height="5ex">
 <body xmlns="http://www.w3.org/1999/xhtml"><div align="center">hello</div></body>
 </foreignObject>
+<rect x="23ex" y="1ex" width="10ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="23ex" y="1ex" width="10ex" height="5ex">
+<body xmlns="http://www.w3.org/1999/xhtml"><div align="center">aeiou</div></body>
+</foreignObject>
+<rect x="34ex" y="1ex" width="10ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="34ex" y="1ex" width="10ex" height="5ex">
+<body xmlns="http://www.w3.org/1999/xhtml"><div align="center"><math xmlns='http://www.w3.org/1998/Math/MathML' display="block">
+<mrow>
+<mover>
+<mrow>
+<mi >&sum;</mi>
+</mrow>
+<mrow>
+<mn >2</mn>
+</mrow>
+</mover>
+</mrow>
+<mrow>
+<msub>
+<mrow>
+<mi >x</mi>
+</mrow>
+<mrow>
+<mn >2</mn>
+</mrow>
+</msub>
+</mrow>
+</math>
+</div></body>
+</foreignObject>
+<rect x="45ex" y="1ex" width="10ex" height="5ex" stroke="black" fill="none"/>
+<foreignObject x="45ex" y="1ex" width="10ex" height="5ex">
+<body xmlns="http://www.w3.org/1999/xhtml"><div align="center"><math xmlns='http://www.w3.org/1998/Math/MathML' display="block">
+<mrow>
+<mspace height="3ex" linebreak="nobreak" />
+<mi >&sum;</mi>
+</mrow>
+<mrow>
+<msub>
+<mrow>
+<mi >x</mi>
+</mrow>
+<mrow>
+<mn >2</mn>
+</mrow>
+</msub>
+</mrow>
+</math>
+</div></body>
+</foreignObject>
 </svg>
+  </body>
+</html>
