@@ -1,3 +1,16 @@
+2009-06-10  Andrew Stacey  <andrew.stacey@math.ntnu.no>
+
+	* primitives/xymatrix.php: Shifted arrowheads into a separate
+	file.  Still have to load them, though.  Would prefer off-document
+	referencing but haven't figured that out.  Should load at the
+	start of the document, though.
+	(for): Added coordinates and direction of mid-point of curve,
+	useful for adding decorations to the middle.
+	Maybe label points should also know their directions?
+	(for): Added ability to have markers at the middle of the arrow;
+	syntax is stem{arrow}stem, where the outermost stems have to be
+	the same.
+
 2009-06-08  Andrew Stacey  <andrew.stacey@math.ntnu.no>
 
 	* primitives/documentclass.php: for now, just swallows the class name.

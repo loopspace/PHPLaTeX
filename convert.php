@@ -35,7 +35,7 @@ if ($source)
   }
 else
   {
-    header("Location: " . dirname($_SERVER["PHP_SELF"]) . "/form.html");
+    header("Location: " . dirname($_SERVER["PHP_SELF"]) . "/convert.html");
   }
 
 print processLaTeX ($source);

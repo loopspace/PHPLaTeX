@@ -4,6 +4,7 @@ $dim = array(
 	     "row" => "4",
 	     "col" => "6"
 	     );
+$arrowfile = "arrows.svg";
 // morally, \ifnextchar{@} ...
 $nexttok = nexttok($latex);
 while ($nexttok != "{")
@@ -271,148 +272,28 @@ $svg .= 'width="'
   . 'ex">'
   . "\n";
 
-$svg .= '<defs>
-    <marker id="filledArrow" viewBox="0 0 10 10" refX="10" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" />
-    </marker>
-    <marker id="basicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="doubleArrow" viewBox="0 0 15 10" refX="10" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="15" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="barArrow" viewBox="0 0 10 10" refX="10" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 10 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="bardoubleArrow" viewBox="0 0 15 10" refX="10" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="15" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 15 0 L 15 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="parenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="5" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 Q 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="reversebasicArrow" viewBox="0 0 10 10" refX="0" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="reversedoubleArrow" viewBox="0 0 15 10" refX="5" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="15" markerHeight="10"
-	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="reversebarArrow" viewBox="0 0 10 10" refX="0" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="reversebardoubleArrow" viewBox="0 0 15 10" refX="5" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="15" markerHeight="10"
-	    orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="reverseparenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="5" markerHeight="10"
-	    orient="auto">
-      <path d="M 5 0 Q -5 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="slashArrow" viewBox="0 0 5 10" refX="2.5" refY="5" 
-	    markerUnits="strokeWidth"
-	    markerWidth="5" markerHeight="10"
-	    orient="auto">
-      <path d="M 5 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="doubleslashArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 5 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="crossArrow" viewBox="0 0 10 10" refX="5" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 0 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 10 0 L 10 0" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="plusArrow" viewBox="0 0 10 10" refX="5" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 5 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 0 5 L 10 5" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="vbarArrow" viewBox="0 0 5 10" refX="2.5" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="5" markerHeight="10"
-	    orient="auto">
-      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="doublevbarArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
-      <path d="M 7.5 0 L 7.5 10" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-    <marker id="circleArrow" viewBox="0 0 10 10" refX="0" refY="5"
-	    markerUnits="strokeWidth"
-	    markerWidth="10" markerHeight="10"
-	    orient="auto">
-      <circle cs="5" cy="5" r="5" fill="none" stroke="black" stroke-width="1" />
-    </marker>
-</defs>' . "\n";
+$svg .= file_get_contents($arrowfile);
+
 
 $arrowheads = array(
-		    "filledArrow" => "filledArrow",
-		    ">" => "basicArrow",
-		    ">>" => "doubleArrow",
-		    ">|" => "barArrow",
-		    "|>>" => "bardoubleArrow",
-		    ")" => "parenthesisArrow",
-		    "<" => "reversebasicArrow",
-		    "<<" => "reversedoubleArrow",
-		    "|<" => "reversebarArrow",
-		    "|<<" => "reversebardoubleArrow",
-		    "(" => "reverseparenthesisArrow",
-		    "/" => "slashArrow",
-		    "//" => "doubleslashArrow",
-		    "x" => "crossArrow",
-		    "+" => "plusArrow",
-		    "|" => "vbarArrow",
-		    "||" => "doublevbarArrow",
-		    "o" => "circleArrow"
+		    "filledArrow" => "#filledArrow",
+		    ">" => "#basicArrow",
+		    ">>" => "#doubleArrow",
+		    ">|" => "#barArrow",
+		    "|>>" => "#bardoubleArrow",
+		    ")" => "#parenthesisArrow",
+		    "<" => "#reversebasicArrow",
+		    "<<" => "#reversedoubleArrow",
+		    "|<" => "#reversebarArrow",
+		    "|<<" => "#reversebardoubleArrow",
+		    "(" => "#reverseparenthesisArrow",
+		    "/" => "#slashArrow",
+		    "//" => "#doubleslashArrow",
+		    "x" => "#crossArrow",
+		    "+" => "#plusArrow",
+		    "|" => "#vbarArrow",
+		    "||" => "#doublevbarArrow",
+		    "o" => "#circleArrow"
 		    );
 
 for($m = 0;$m < count($entry);$m++)
@@ -475,6 +356,7 @@ for($i = 0; $i < count($arrows);$i++)
      * $ox,$oy orthogonal arrow vector
      * $nx,$ny normalised orthogonal arrow vector
      * $mx,$my x,y-coordinates of midpoint of arrow
+     * $dx,$dy tangent vector at midpoint
      * $lux,$luy x,y-coordinates of upper label
      * $llx,$lly x,y-coordinates of lower label
      * $lmx,$lmy x,y-coordinates of middle label
@@ -482,7 +364,7 @@ for($i = 0; $i < count($arrows);$i++)
      * $cex,$cey x,y-coordinates of end of arrow (bezier cubic)
      * $ccsx,$ccsx x,y-coordinates of first control pt (bezier cubic)
      * $ccex,$ccyx x,y-coordinates of second control pt (bezier cubic)
-
+     * $qmx,$qmy x,y-coordinates of control point (bezier quadratic)
      */
 
     // convert label displacements into distances
@@ -622,10 +504,6 @@ for($i = 0; $i < count($arrows);$i++)
     $ex += $nx * MakeEx($displacement);
     $ey += $ny * MakeEx($displacement);
 
-    // midpoints of lines
-    $mx = ($sx + $ex)/2;
-    $my = ($sy + $ey)/2;
-
     // draw arrow
     // This is a bit of a cludge to rescale the arrow so that '1px' becomes '1ex'.  This is needed because the 'path' element only takes bare units.
     $svg .= '<svg width="'
@@ -753,6 +631,12 @@ for($i = 0; $i < count($arrows);$i++)
 	    $lly = (1 - $ldisp)*(1 - $ldisp)*(1 - $ldisp)*$csy + 3*(1 - $ldisp)*(1 - $ldisp)*$ldisp*($csy + $ccsy*$cntl) + 3*(1 - $ldisp)*$ldisp*$ldisp*($cey + $ccey*$cntl) + $ldisp*$ldisp*$ldisp*$cey;
 	    $lmx = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csx + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csx + $ccsx*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cex + $ccex*$cntl) + $mdisp*$mdisp*$mdisp*$cex;
 	    $lmy = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csy + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csy + $ccsy*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cey + $ccey*$cntl) + $mdisp*$mdisp*$mdisp*$cey;
+
+	    // midpoint of line
+	    $mx = 0.125*$csx + 0.375*($csx + $ccsx*$cntl) + 0.375*($cex + $ccex*$cntl) + 0.125*$cex;
+	    $my = 0.125*$csy + 0.375*($csy + $ccsy*$cntl) + 0.375*($cey + $ccey*$cntl) + 0.125*$cey;
+	    $dx = -0.25*$csx - 0.25*($csx + $ccsx*$cntl) + 0.25*($cex + $ccex*$cntl) + 0.25*$cex;
+	    $dy = -0.25*$csy - 0.25*($csy + $ccsy*$cntl) + 0.25*($cey + $ccey*$cntl) + 0.25*$cey;
 	  }
 	else
 	  {
@@ -777,28 +661,37 @@ for($i = 0; $i < count($arrows);$i++)
 		$scale = 1;
 	      }
 
+
+	    // midpoints of lines
+	    $qmx = ($sx + $ex)/2;
+	    $qmy = ($sy + $ey)/2;
+
 	    // should we displace the start and finish slightly?
 	    $arrowpath .= 'M '
 	      . $sx
 	      . ' '
 	      . $sy
 	      . ' Q '
-	      . ($mx + $dir*$scale*$nx)
+	      . ($qmx + $dir*$scale*$nx)
 	      . ' '
-	      . ($my + $dir*$scale*$ny)
+	      . ($qmy + $dir*$scale*$ny)
 	      . ' '
 	      . $ex
 	      . ' '
 	      . $ey;
 
 	    // compute label positions
-	    $lux = (1 - $udisp)*(1 - $udisp)*$sx + 2*(1 - $udisp)*$udisp*($mx + $dir*$scale*$nx) + $udisp*$udisp*$ex;
-	    $luy = (1 - $udisp)*(1 - $udisp)*$sy + 2*(1 - $udisp)*$udisp*($my + $dir*$scale*$ny) + $udisp*$udisp*$ey;
-	    $llx = (1 - $ldisp)*(1 - $ldisp)*$sx + 2*(1 - $ldisp)*$ldisp*($mx + $dir*$scale*$nx) + $ldisp*$ldisp*$ex;
-	    $lly = (1 - $ldisp)*(1 - $ldisp)*$sy + 2*(1 - $ldisp)*$ldisp*($my + $dir*$scale*$ny) + $ldisp*$ldisp*$ey;
-	    $lmx = (1 - $mdisp)*(1 - $mdisp)*$sx + 2*(1 - $mdisp)*$mdisp*($mx + $dir*$scale*$nx) + $mdisp*$mdisp*$ex;
-	    $lmy = (1 - $mdisp)*(1 - $mdisp)*$sy + 2*(1 - $mdisp)*$mdisp*($my + $dir*$scale*$ny) + $mdisp*$mdisp*$ey;
+	    $lux = (1 - $udisp)*(1 - $udisp)*$sx + 2*(1 - $udisp)*$udisp*($qmx + $dir*$scale*$nx) + $udisp*$udisp*$ex;
+	    $luy = (1 - $udisp)*(1 - $udisp)*$sy + 2*(1 - $udisp)*$udisp*($qmy + $dir*$scale*$ny) + $udisp*$udisp*$ey;
+	    $llx = (1 - $ldisp)*(1 - $ldisp)*$sx + 2*(1 - $ldisp)*$ldisp*($qmx + $dir*$scale*$nx) + $ldisp*$ldisp*$ex;
+	    $lly = (1 - $ldisp)*(1 - $ldisp)*$sy + 2*(1 - $ldisp)*$ldisp*($qmy + $dir*$scale*$ny) + $ldisp*$ldisp*$ey;
+	    $lmx = (1 - $mdisp)*(1 - $mdisp)*$sx + 2*(1 - $mdisp)*$mdisp*($qmx + $dir*$scale*$nx) + $mdisp*$mdisp*$ex;
+	    $lmy = (1 - $mdisp)*(1 - $mdisp)*$sy + 2*(1 - $mdisp)*$mdisp*($qmy + $dir*$scale*$ny) + $mdisp*$mdisp*$ey;
 
+	    $mx = 0.25*$sx + 0.5*($qmx + $dir*$scale*$nx) + 0.25*$ex;
+	    $my = 0.25*$sy + 0.5*($qmy + $dir*$scale*$ny) + 0.25*$ey;
+	    $dx = -0.5*$sx + 0.5*$ex;
+	    $dy = -0.5*$sy + 0.5*$ey;
 	  }
       }
     else
@@ -818,6 +711,11 @@ for($i = 0; $i < count($arrows);$i++)
 	$lly = $sy + $ldisp*($ey - $sy);
 	$lmx = $sx + $mdisp*($ex - $sx);
 	$lmy = $sy + $mdisp*($ey - $sy);
+
+	$mx = ($sx + $ex)/2;
+	$my = ($sy + $ey)/2;
+	$dx = $ex - $sx;
+	$dy = $ey - $sy;
       }
 
     // assemble style
@@ -883,6 +781,18 @@ for($i = 0; $i < count($arrows);$i++)
 
     $arrowpath .= '" fill="none" ';
 
+    LaTeXdebug($stem,1);
+
+    if (preg_match('/^([^{]*){([^}]*)}\1$/',$stem,$matches))
+      {
+	$stem = $matches[1];
+	$mid = $matches[2];
+      }
+    else
+      {
+	$mid = "";
+      }
+
     if (($stem == '--') or ($stem == '=='))
       {
 	$arrowpath .= ' stroke-dasharray="1,1" ';
@@ -919,17 +829,35 @@ for($i = 0; $i < count($arrows);$i++)
 
     if ($markerstart)
       {
-	$arrowpath .= 'marker-start="url(#'
+	$arrowpath .= 'marker-start="url('
 	  . $markerstart
 	  . ')" ';
       }
     if ($markerend)
       {
-	$arrowpath .= 'marker-end="url(#'
+	$arrowpath .= 'marker-end="url('
 	  . $markerend
 	  . ')" ';
       }
     $arrowpath .= ' />';
+
+    LaTeXdebug("midpoints: $mx $mx $dx $dy",1);
+
+    if (array_key_exists($mid,$arrowheads))
+      {
+	LaTeXdebug("Got middle of arrow",1);
+	$arrowpath .= '<path d="M '
+	  . ($mx - $dx)
+	  . ' '
+	  . ($my - $dy)
+	  . ' L '
+	  . $mx
+	  . ' '
+	  . $my
+	  . '" stroke-width=".1" fill="none" marker-end="url('
+	  . $arrowheads[$mid]
+	  . ')" />';
+      }
 
     $svg .= $arrowpath
       . '</svg>'
