@@ -9,6 +9,11 @@
 
 
 /*
+ * This program, and its subsiduary parts, is made available under the GPL.
+ * It is copyright: Andrew Stacey, 2009.
+ */
+
+/*
  * Fundamental pieces of structure:
  *  definitions (defined by \def)
  *  commands (defined by \command)

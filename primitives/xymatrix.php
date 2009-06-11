@@ -261,8 +261,8 @@ $dim["col"] = ($dim["col"] + $maxheight + $maxdepth);
 $numrows = count($entry);
 $numcols += 1;
 
-$svgwidth = 2*($dim["row"]*$numrows);
-$svgheight =  2*($dim["col"]*$numcols);
+$svgwidth = $dim["row"]*($numrows + 1);
+$svgheight = $dim["col"]*($numcols - 1);
 
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
 $svg .= 'width="' 

@@ -14,6 +14,17 @@ The main consequence of the second is that it can handle macro expansion.
 Not everything is implemented yet, and things that are may not be implemented fully.
 A full list of the currently available commands, together with some notes on specific commands, is given at the end.
 
+This is not intended to ever be a PHP implementation of TeX.
+It would be nice if one could load in a reasonably straightforward TeX or LaTeX document and convert it to XHTML+MathML+SVG, however I do not intend it ever to be able to load in a style file and use it with no alterations.
+The reason being that TeX is a \emph{renderer} whereas this program is a \emph{converter}.
+The rendering is done by another program (i.e.\ your web browser).
+Therefore the aim of this program is to tranlate a document into something a web browser can understand.
+The reason that it has to be fairly complicated is that TeX is actually a programming language whereas HTML is merely a markup language.
+Therefore some of the programming commands in a normal TeX document have to be carried out before they can be converted to markup.
+Unfortunately, the division between pre-rendering and post-rendering processing is not clean and so cannot be fully automatic (or at least, I've no plans to attempt it).
+In essence, the closer one is to the actual TeX engine, the less likely one is going to be able to ``drag and drop'' it into this program.
+Fortunately, most LaTeX documents are a long, long way from that.
+
 \section{Mathematics}
 
 Mathematics implementation is a work in progress.
@@ -54,11 +65,35 @@ To save computation, the positions on the arrows are determined by the parameter
 
 \[
 \xymatrix{
-A \ar@{>{={|}=}>>}@/^3ex/[rd]^{f} & B \ar@2{|}@([d],[ur])[rd]^g & C \\  D & E & F
+A \ar@{>{-{|}-}>>}@/_3ex/[rd]^{f} & B \ar@2{|}@([d],[u])[rd]^g & C \\  D & E & F
 }
 \]
 
-Much work still needs to be done on finetuning the algorithms for label placement and text size.
+Much work still needs to be done on fine tuning the algorithms for label placement and text size.
+
+The way that this works is as follows.
+The argument to xymatrix is parsed and split up into a matrix of entries.
+Each entry is converted to MathML and measured.
+Currently only the width is measured, the height and depth are set to a standard (so high or deep entries may get cropped).
+Each node is then set in a box (using the foreignObject tag) and horizontally centred within that box.
+To get vertical alignment correct, a strut is placed at the begining of the label of the maximum height of the node entries.
+The boxes use the maximum width of all the nodes, meaning that hopefully no node entry will get cropped horizontally.
+Then the arrows are placed.
+Using the measured widths of each node, the arrows start and end at one of the eight compass points around the node.
+Which compass point depends on where the arrow is going to or from, but this can be overriden by using \emph{curving}: the second arrow in the above is curved by using @([d],[u]) to exit the upper node from ``d'' and enter the lower from ``u''.
+The arrow is either a straight line, quadratic bezier, or cubic bezier, depending on how complicated the curving specification (basically we use the simplest that we can get away with).
+Setting the style is the simplest, except that there is a fairly complicated dictionary to translate XY styles to SVG styles.
+The method of doubling and tripling arrow stems is that of TikZ: draw thick lines first and overlay with successive white and black lines.
+The positions of the labels are then computed and the labels are rendered.
+This is a little more complicated than the nodes in that we don't want the label boxes to be wider than they have to be since labels are more likely to be in the middle of diagrams where life is more cluttered.
+Also, positioning them precisely is problematic since we specify the top left corner of the box without knowing exactly where it's contents will be put.
+
+By placing the arrows after the nodes, we can get away with having our node boxes a little on the large side.
+However, this makes other things more awkward.
+In particular, passing arrows under nodes is not easy to do, also the arrows currently point to their compass point whereas what they ought to do is point to the centre of the node but stop short at the compass point.
+(This latter wouldn't actually be solved by putting the nodes on last as the arrowheads would be covered up.
+Actually solving this would just take a little more programming but is not unfeasible.)
+
 
 \section{Commands}
 
@@ -202,15 +237,46 @@ Via ``amsmath'' package:
 matrix, pmatrix, bmatrix, Bmatrix, vmatrix, Vmatrix, smallmatrix, cases, aligned, gathered, split
 
 
+\section{Notes on the Code}
+
+For the user, there are currently two interfaces to the code.
+The first is in index.php which gives a textarea and then converts the input to that, redisplaying the form and optionally displaying the source code.
+The second is a file conversion.
+At the moment, it only works on files in the ``doc'' directory below it (currently only this file).
+In fact, it is what is rendering this document.
+
+For the hacker, there are more things that one needs to know.
+The bulk of the program is in ``latex.php''.
+This contains the routines to read tokens, expand tokens, and various other useful things.
+Primitives are stored in the directory ``primitives''.
+A primitive is a function and the file is the body of that function.
+Packages are storied in the directory ``packages''.
 
 \section{ToDo}
 
 \begin{itemize}
 \item Fine tune ``getWidthOf'' algorthim.
+\item Sort out reseting of subcounters.
+\item Implement the variety of formatting styles of counters.
+\item Implement the rest of iTeX, and amsmath.
+\item Fully allow nesting of def/newcommands (i.e.\ parameter expansion).
+\item Hyperlinks!
+\item Primitives: &#92;if, &#92;ifx, &#92;loop, &#92;let
+\item Scoping: commands and styles only take effect for the current scope.
+\item Catcodes!
+\item A range of stylesheets.
+\item Validation and better error handling.
+\item Object-orient stuff to make it more transparent.
+\item Only load the SVG arrowheads once (could check for ability to cross-load?)
 \end{itemize}
 
 \subsection{Commands I Wish I'd Already Defined Before Writing This Documentation}
 
 &#92;backslash, &#92;verb, verbatim environment.
+
+\section{License, Source Code, etc}
+
+This program is made available under the GPL.
+It does not have an official release yet, being only in alpha stage, but you can get it via BZR by pointing your BZR program at the main PHPLaTeX directory.
 
 \end{document}

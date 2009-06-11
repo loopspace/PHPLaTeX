@@ -1,3 +1,9 @@
+2009-06-11  Andrew Stacey  <andrew.stacey@math.ntnu.no>
+
+	* latex.php: Added basic GPL notice.
+
+	* doc/PHPLaTeX.tex: Wrote basic documentation.
+
 2009-06-10  Andrew Stacey  <andrew.stacey@math.ntnu.no>
 
 	* primitives/xymatrix.php: Shifted arrowheads into a separate

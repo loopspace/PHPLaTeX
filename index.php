@@ -51,6 +51,8 @@ print '<?xml version="1.0"?>
 
 <a href="<?php print dirname($_SERVER['PHP_SELF'])?>/convert.php?file=PHPLaTeX.tex">Documentation</a>
 
+  (N.B. don't use &#92;begin{document} and &#92;end{document} here)
+
 <h3>Result:</h3>
 
 <p>
