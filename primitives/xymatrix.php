@@ -4,7 +4,7 @@ $dim = array(
 	     "row" => "4",
 	     "col" => "6"
 	     );
-$arrowfile = "arrows.svg";
+$arrowfile = "arrows.def";
 // morally, \ifnextchar{@} ...
 $nexttok = nexttok($latex);
 while ($nexttok != "{")

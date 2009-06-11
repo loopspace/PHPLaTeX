@@ -44,10 +44,12 @@ print '<?xml version="1.0"?>
 </p>
 <input type="hidden" name="testslashes" value="\test" />
   <div>View Source:
-<input type="checkbox" name="source" value="off" /></div>
+<input type="checkbox" name="source" value="1" <?php if ($_REQUEST['source'])   print 'checked="checked"' ?> /></div>
 <input type="submit" value="send" />
 <input type="reset" />
 </form>
+
+<a href="<?php print dirname($_SERVER['PHP_SELF'])?>/convert.php?file=PHPLaTeX.tex">Documentation</a>
 
 <h3>Result:</h3>
 

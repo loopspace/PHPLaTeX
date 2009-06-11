@@ -18,8 +18,8 @@
 \newcommand{\amporcol}{\ifarray </mtd><mtd>\else &amp;\fi}
 \newenvironment{array}[1][]{\ifmmode <mrow><mtable #1><mtr><mtd>\arraytrue\fi}{\arrayfalse</mtd></mtr></mtable></mrow>}
 
-\newenvironment{itemize}{\def\item{\def\item{</li><li>}}<ul><li>}{</li></ul>}
-\newenvironment{enumerate}{\def\item{\def\item{</li><li>}}<ol><li>}{</li></ol>}
+\newenvironment{itemize}{\def\item{\def\item{</p></li><li><p>}}</p><ul><li><p>}{</p></li></ul><p>}
+\newenvironment{enumerate}{\def\item{\def\item{</p></li><li><p>}}</p><ol><li><p>}{</p></li></ol><p>}
 
 \newcommand{\section}[1]{\refstepcounter{section}</p><h1>\thesection\ #1</h1><p>}
 \newcommand{\subsection}[1]{\refstepcounter{subsection}</p><h2>\thesubsection\   #1</h2><p>}

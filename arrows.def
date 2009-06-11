@@ -1,0 +1,122 @@
+  <defs>
+    <marker id="filledArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="basicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke-width="1" stroke="black"/>
+    </marker>
+    <marker id="doubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="barArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 10 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="bardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 15 5 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 15 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="parenthesisArrow" viewBox="0 0 5 10" refX="5" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 Q 10 5 0 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="reversebasicArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="reversedoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="reversebarArrow" viewBox="0 0 10 10" refX="10" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="reversebardoubleArrow" viewBox="0 0 15 10" refX="15" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="15" markerHeight="10"
+	    orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 15 0 L 5 5 L 15 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="reverseparenthesisArrow" viewBox="0 0 5 10" refX="0" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 5 0 Q -5 5 5 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="slashArrow" viewBox="0 0 5 10" refX="2.5" refY="5" 
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 5 0 L 0 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="doubleslashArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 5 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="crossArrow" viewBox="0 0 10 10" refX="5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 0 0 L 10 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 10 0 L 10 0" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="plusArrow" viewBox="0 0 10 10" refX="5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 5 0 L 5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 0 5 L 10 5" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="vbarArrow" viewBox="0 0 5 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="5" markerHeight="10"
+	    orient="auto">
+      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="doublevbarArrow" viewBox="0 0 10 10" refX="2.5" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <path d="M 2.5 0 L 2.5 10" fill="none" stroke="black" stroke-width="1" />
+      <path d="M 7.5 0 L 7.5 10" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+    <marker id="circleArrow" viewBox="0 0 10 10" refX="0" refY="5"
+	    markerUnits="strokeWidth"
+	    markerWidth="10" markerHeight="10"
+	    orient="auto">
+      <circle cx="5" cy="5" r="4.5" fill="none" stroke="black" stroke-width="1" />
+    </marker>
+  </defs>

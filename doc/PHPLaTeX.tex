@@ -14,6 +14,52 @@ The main consequence of the second is that it can handle macro expansion.
 Not everything is implemented yet, and things that are may not be implemented fully.
 A full list of the currently available commands, together with some notes on specific commands, is given at the end.
 
+\section{Mathematics}
+
+Mathematics implementation is a work in progress.
+Certain obvious features are not yet implemented, in particular not all of the iTeX suite is currently supported.
+The main thing to know is that this program currently only supports LaTeX-style mathematics delimiters: &#92;( and &#92;) for inline mathematics and &#92;[ and &#92;] for display style.
+
+\section{XY Pictures and SVG}
+
+The motiviation for this program to was to write something that could convert xymatrix-style pictures into SVG.
+A major issue with this is the integraction of MathML and SVG: basically, there is none.
+Each can be embedded in the other, but neither can know anything about the sub-object.
+Therefore alignment and size are particularly troublesome.
+So this program has a rudimentary ``getWidthOf'' function which converts the inset mathematics into MathML and then estimates its width.
+This is then fed back into the SVG-generation to help get the alignment sorted out.
+However, once one has gone to the trouble of converting the mathematics into MathML, one may as well go the whole distance and convert the entire document.
+
+Most features in an xymatrix command are supported, plus one or two little extras.
+What is not currently supported are: 
+
+\begin{enumerate}
+\item The arguments that can be given \emph{before} the main picture begins.
+\item Labels in the arrows.
+Most of the work is there, but I've yet to decide how to put a suitable gap in the arrow.
+(Labels above and below the arrows work.)
+\item Arrows passing by nodes other than their source and target.
+\end{enumerate}
+
+All of these can be specified but they are currently ignored.
+
+The main extra is that although labels cannot be put in the middle of arrows, arrowheads can.
+The syntax extends the ``style'' syntax of an xymatrix arrow.
+The standard ``style'' syntax is to put ``@&#123;\emph{tail} \emph{stem} \emph{head}&#125;'' in the arrow specification.
+If the stem consists of ``stem&#123;tip&#125;stem'' then the ``tip'' is put at the midpoint of the arrow.
+Note that the before and after parts of the stem have to be the same, and will collapse to just one copy (so ``-&#123;>&#125;-'' is an \emph{unbroken} line).
+
+To save computation, the positions on the arrows are determined by the parameter used in their formula rather than arc-length.
+
+
+\[
+\xymatrix{
+A \ar@{>{={|}=}>>}@/^3ex/[rd]^{f} & B \ar@2{|}@([d],[ur])[rd]^g & C \\  D & E & F
+}
+\]
+
+Much work still needs to be done on finetuning the algorithms for label placement and text size.
+
 \section{Commands}
 
 \subsection{Primitives}
@@ -21,5 +67,150 @@ A full list of the currently available commands, together with some notes on spe
 Primitives are PHP functions.
 They generally need to muck around with the internals of the system and so need access to the ``lower level'' of the program.
 
+The following are currently implemented as primitives:
+
+\begin{enumerate}
+\item addtocounter
+
+Counters are internal objects to adding to one requires access to the internals, hence a primitive.
+
+\item csname
+
+Merging two separate tokens (in this case the backslash and the command name) into a new token is not allowed for commands, so this needs to be a primitive.
+
+\item def
+
+Creates a new def, so needs to be a primitive.
+
+\item documentclass
+
+Currently doesn't do anything, more of a placeholder at the moment.
+
+\item endmath
+
+Commands swallow following spaces, except for the end-of-mathematics symbol.
+So this needs to be a primitive to avoid that (for the moment).
+
+\item entity
+
+This creates an entity from the given string.
+Entities are considered as tokens so this essentially merges tokens which can't be done by commands.
+
+\item expandafter
+
+As this involves expansion, it needs to be a primitive.
+
+\item false
+
+This alters the status of a conditional.
+This shouldn't be used by an author.
+
+\item if
+
+This checks the status of a conditional.
+It isn't the same as the TeX ``if'' command, rather it's used for conditionals created by ``newif''.
+This shouldn't be used by an author.
+
+\item newcommand
+
+This creates a new command.
+Although in LaTeX, ``newcommand'' is built on top of ``def'', here they are separate to optimise optional arguments.
+
+\item newcounter
+
+This creates a new counter.
+
+\item newenvironment
+
+This creates a new environment.
+It may be possible to reprogram this using just ``newcommand''s and ``expandafter''s since all it really does is create two commands.
+
+\item refstepcounter
+
+This isn't properly implemented yet.
+At the moment it just adds 1 to the counter, but it should then reset all subcounters.
+
+\item setcounter
+
+This sets a counter to a value, hence is a primitive.
+
+\item show
+
+This shows the corresponding primitive, def, or command.
+For primitives it doesn't give a lot of information, though.
+
+\item true
+
+See ``false''.
+
+\item usecounter
+
+This prints the value of the counter.
+
+\item usepackage
+
+This loads in optional extras.
+Currently available packages are: ``amsmath.sty'' and ``itex.sty''.
+It is also used to automatically load in ``default.sty''.
+As this accesses the file system, it has to be a primitive.
+However, it could be rewritten to use a more generic file inclusion.
+
+\item xymatrix
+
+This converts an xymatrix command into an SVG diagram.
+As there is some complicated calculation going on, this is a primitive.
+Nothing particularly requires that (though the compuation certainly couldn't yet be done as TeX commands), but one point of this was to use PHP where that made sense and here it certainly does.
+\end{enumerate}
+
+\subsection{Defs, Commands, and Environments}
+
+In PHPLaTeX, defs and commands are more alike than in ordinary LaTeX.
+This is mainly a question of implementation for optional arguments for commands.
+However, this is of little import for their use.
+There are two main differences from ordinary (La)TeX.
+Although defs and commands can be stacked, the nested defs and commands cannot currently take arguments (this will not be hard to fix, just haven't gotten round to it).
+The other difference is that any arguments to a command can be designated as optional.
+That is, the person who defines the command can choose which arguments should be optional, and what their default arguments should be.
+This feature is not available via the ``newcommand'' primitive, rather one has to write a new primitive that defines the command directly.
+Thus this feature is more for hackers than authors.
+
+Environments are as in LaTeX: they simply define commands that get invoked upon begining and ending.
+
+At the moment, none of the defining commands (def, newcommand, or newenvironment) checks to see if a command of that name already exists.
+Thus the last definition (usually) wins.
+
+Currently available commands and environments are:
+
+\subsubsection{Commands}
+
+&#92;title, &#92;begin, &#92;end, &#92;newif, &#92;(, &#92;[, &#92;], &#92;amporcol, &#92;section, &#92;subsection, &#92;subsubsection, &#92;thesubsection, &#92;thesubsubsection, &#92;newline, &#92;par, &#92;emph, &#92;textbf, &#92;", &#92;`, &#92;', &#92;^, &#92;~, &#92;c, &#92; , &#92;mathop, &#92;mathnum, &#92;mathchar, &#92;mathparen, &#92;left, &#92;right, &#92;frac, &#92;sqrt, &#92;root, &#92;rule, &#92;!, &#92;negspace, &#92;,, &#92;thinspace, &#92;:, &#92;medspace, &#92;;, &#92;thickspace, &#92;quad, &#92;qquad, &#92;ae, &#92;AE, &#92;oe, &#92;OE, &#92;aa, &#92;AA, &#92;o, &#92;O, &#92;ss, &#92;dag, &#92;ddag, &#92;S, &#92;P, &#92;copyright, &#92;pounds, &#92;aleph, &#92;wp, &#92;Re, &#92;Im, &#92;surd, &#92;angle, &#92;partial, &#92;infty, &#92;clubsuit, &#92;diamondsuit, &#92;heartsuit, &#92;spadesuit, &#92;cdot, &#92;vartheta, &#92;varpi, &#92;dots, &#92;in, &#92;to, &#92;approx, &#92;propto, &#92;neq, &#92;neg, &#92;wedge, &#92;vee, &#92;supset, &#92;subset, &#92;emptyset, &#92;pm, &#92;implies, &#92;prime, &#92;nabla, &#92;forall, &#92;times, &#92;notin, &#92;ni, &#92;prod, &#92;sum, &#92;ast, &#92;equiv, &#92;sim, &#92;oplus, &#92;cap, &#92;cup, &#92;rfloor, &#92;euro, &#92;int, &#92;cong, &#92;ne, &#92;le, &#92;ge, &#92;gt, &#92;lt, &#92;otimes, &#92;perp, &#92;alpha, &#92;beta, &#92;gamma, &#92;delta, &#92;epsilon, &#92;zeta, &#92;eta, &#92;theta, &#92;iota, &#92;kappa, &#92;lambda, &#92;mu, &#92;nu, &#92;xi, &#92;omicron, &#92;pi, &#92;rho, &#92;sigma, &#92;tau, &#92;upsilon, &#92;phi, &#92;chi, &#92;psi, &#92;omega
+
+Via ``amsmath'' package:
+
+&#92;mathbb, &#92;mathcal, &#92;mathfrak, &#92;big, &#92;Big, &#92;bigg, &#92;Bigg, &#92;text, &#92;lvert, &#92;rvert, &#92;lVert, &#92;rVert, &#92;lbrace, &#92;rbrace, &#92;lbracket, &#92;rbracket
+
+Via ``itex'' package:
+
+&#92;infty, &#92;infinity, &#92;lbrace, &#92;{, &#92;rbrace, &#92;, &#92;vert, &#92;Vert, &#92;|, &#92;setminus, &#92;backslash, &#92;smallsetminus, &#92;sslash, &#92;lfloor, &#92;lceil, &#92;lang, &#92;langle, &#92;rfloor, &#92;rceil, &#92;rang, &#92;rangle, &#92;uparrow, &#92;downarrow, &#92;updownarrow, &#92;#, &#92;prime, &#92;alpha, &#92;beta, &#92;gamma, &#92;delta, &#92;zeta, &#92;eta, &#92;theta, &#92;iota, &#92;kappa, &#92;lambda, &#92;mu, &#92;nu, &#92;xi, &#92;pi, &#92;rho, &#92;sigma, &#92;tau, &#92;upsilon, &#92;chi, &#92;psi, &#92;omega, &#92;backepsilon, &#92;varepsilon, &#92;varkappa, &#92;varpi, &#92;varrho, &#92;varsigma, &#92;vartheta, &#92;phi, &#92;varphi, &#92;arccos, &#92;arcsin, &#92;arctan, &#92;arg, &#92;cos, &#92;cosh, &#92;cot, &#92;coth, &#92;csc, &#92;deg, &#92;dim, &#92;exp, &#92;hom, &#92;ker, &#92;lg, &#92;ln, &#92;log, &#92;sec, &#92;sin, &#92;sinh, &#92;tan, &#92;tanh, &#92;det, &#92;gcd, &#92;inf, &#92;lim, &#92;liminf, &#92;limsup, &#92;max, &#92;min, &#92;Pr, &#92;sup, &#92;omicron, &#92;epsilon, &#92;cdot, &#92;Alpha, &#92;Beta, &#92;Delta, &#92;Gamma, &#92;digamma, &#92;Lambda, &#92;Pi, &#92;Phi, &#92;Psi, &#92;Sigma, &#92;Theta, &#92;Xi, &#92;Zeta, &#92;Eta, &#92;Iota, &#92;Kappa, &#92;Mu, &#92;Nu, &#92;Rho, &#92;Tau, &#92;mho, &#92;Omega, &#92;Upsilon, &#92;Upsi, &#92;iff, &#92;Longleftrightarrow, &#92;Leftrightarrow, &#92;impliedby, &#92;Leftarrow, &#92;implies, &#92;Rightarrow, &#92;hookleftarrow, &#92;embedsin, &#92;hookrightarrow, &#92;longleftarrow, &#92;longrightarrow, &#92;leftarrow, &#92;to, &#92;rightarrow, &#92;leftrightarrow, &#92;mapsto, &#92;map, &#92;nearrow, &#92;nearr, &#92;nwarrow, &#92;nwarr, &#92;searrow, &#92;searr, &#92;swarrow, &#92;swarr, &#92;neArrow, &#92;neArr, &#92;nwArrow, &#92;nwArr, &#92;seArrow, &#92;seArr, &#92;swArrow, &#92;swArr, &#92;darr, &#92;Downarrow, &#92;uparr, &#92;Uparrow, &#92;downuparrow, &#92;duparr, &#92;updarr, &#92;Updownarrow, &#92;leftsquigarrow, &#92;rightsquigarrow, &#92;leftrightsquigarrow, &#92;upuparrows, &#92;rightleftarrows, &#92;rightrightarrows, &#92;dashleftarrow, &#92;dashrightarrow, &#92;curvearrowleft, &#92;curvearrowbotright, &#92;downdownarrows, &#92;leftleftarrows, &#92;leftrightarrows, &#92;righttoleftarrow, &#92;lefttorightarrow, &#92;circlearrowleft, &#92;circlearrowright, &#92;dots, &#92;ldots, &#92;cdots, &#92;ddots, &#92;udots, &#92;vdots, &#92;cup, &#92;union, &#92;bigcup, &#92;Union, &#92;cap, &#92;intersection, &#92;bigcap, &#92;Intersection, &#92;in, &#92;gt, &#92;lt, &#92;approxeq, &#92;backsim, &#92;backsimeq, &#92;subset, &#92;subseteq, &#92;subseteqq, &#92;subsetneq, &#92;subsetneqq, &#92;varsubsetneq, &#92;varsubsetneqq, &#92;prec, &#92;parallel, &#92;nparallel, &#92;shortparallel, &#92;nshortparallel, &#92;perp, &#92;eqslantgtr, &#92;eqslantless, &#92;gg, &#92;ggg, &#92;geq, &#92;geqq, &#92;geqslant, &#92;gneq, &#92;gneqq, &#92;gnapprox, &#92;gnsim, &#92;gtrapprox, &#92;ge, &#92;le, &#92;leq, &#92;leqq, &#92;leqslant, &#92;lessapprox, &#92;lessdot, &#92;lesseqgtr, &#92;lesseqqgtr, &#92;lessgtr, &#92;lneq, &#92;lneqq, &#92;lnsim, &#92;lvertneqq, &#92;gtrsim, &#92;gtrdot, &#92;gtreqless, &#92;gtreqqless, &#92;gtrless, &#92;gvertneqq, &#92;lesssim, &#92;lnapprox, &#92;nsubset, &#92;nsubseteq, &#92;nsubseteqq, &#92;notin, &#92;ni, &#92;notni, &#92;nmid, &#92;nshortmid, &#92;preceq, &#92;npreceq, &#92;ll, &#92;ngeq, &#92;ngeqq, &#92;ngeqslant, &#92;nleq, &#92;nleqq, &#92;nleqslant, &#92;nless, &#92;supset, &#92;supseteq, &#92;supseteqq, &#92;supsetneq, &#92;supsetneqq, &#92;varsupsetneq, &#92;varsupsetneqq, &#92;approx, &#92;asymp, &#92;bowtie, &#92;dashv, &#92;Vdash, &#92;vDash, &#92;VDash, &#92;vdash, &#92;Vvdash, &#92;models, &#92;sim, &#92;simeq, &#92;nsim, &#92;smile, &#92;triangle, &#92;triangledown, &#92;triangleleft, &#92;cong, &#92;succ, &#92;nsucc, &#92;ngtr, &#92;nsupset, &#92;nsupseteq, &#92;propto, &#92;equiv, &#92;nequiv, &#92;frown, &#92;triangleright, &#92;ncong, &#92;succeq, &#92;succapprox, &#92;succnapprox, &#92;succcurlyeq, &#92;succsim, &#92;succnsim, &#92;nsucceq, &#92;nvDash, &#92;nvdash, &#92;nVDash, &#92;amalg, &#92;pm, &#92;mp, &#92;bigcirc, &#92;wr, &#92;odot, &#92;uplus, &#92;clubsuit, &#92;spadesuit, &#92;Diamond, &#92;diamond, &#92;sqcup, &#92;sqcap, &#92;sqsubset, &#92;sqsubseteq, &#92;sqsupset, &#92;sqsupseteq, &#92;Subset, &#92;Supset, &#92;ltimes, &#92;div, &#92;rtimes, &#92;bot, &#92;therefore, &#92;thickapprox, &#92;thicksim, &#92;varpropto, &#92;varnothing, &#92;flat, &#92;vee, &#92;because, &#92;between, &#92;Bumpeq, &#92;bumpeq, &#92;circeq, &#92;curlyeqprec, &#92;curlyeqsucc, &#92;doteq, &#92;doteqdot, &#92;eqcirc, &#92;fallingdotseq, &#92;multimap, &#92;pitchfork, &#92;precapprox, &#92;precnapprox, &#92;preccurlyeq, &#92;precsim, &#92;precnsim, &#92;risingdotseq, &#92;sharp, &#92;bullet, &#92;nexists, &#92;dagger, &#92;ddagger, &#92;not, &#92;top, &#92;natural, &#92;angle, &#92;measuredangle, &#92;backprime, &#92;bigstar, &#92;blacklozenge, &#92;lozenge, &#92;blacksquare, &#92;blacktriangle, &#92;blacktriangledown, &#92;forall, &#92;bigtriangleup, &#92;bigtriangledown, &#92;nprec, &#92;aleph, &#92;beth, &#92;eth, &#92;ell, &#92;hbar, &#92;Im, &#92;imath, &#92;jmath, &#92;wp, &#92;Re, &#92;Perp, &#92;Vbar, &#92;Box, &#92;square, &#92;emptyset, &#92;empty, &#92;exists, &#92;circ, &#92;rhd, &#92;lhd, &#92;lll, &#92;unrhd, &#92;unlhd, &#92;Del, &#92;nabla, &#92;sphericalangle, &#92;heartsuit, &#92;diamondsuit, &#92;partial, &#92;qed, &#92;mod, &#92;bottom, &#92;neg, &#92;neq, &#92;ne, &#92;shortmid, &#92;mid, &#92;int, &#92;integral, &#92;iint, &#92;doubleintegral, &#92;iiint, &#92;tripleintegral, &#92;iiiint, &#92;quadrupleintegral, &#92;oint, &#92;conint, &#92;contourintegral, &#92;times, &#92;star, &#92;circleddash, &#92;odash, &#92;boxminus, &#92;minusb, &#92;boxplus, &#92;plusb, &#92;boxtimes, &#92;timesb, &#92;sum, &#92;prod, &#92;product, &#92;coprod, &#92;coproduct, &#92;otimes, &#92;Otimes, &#92;bigotimes, &#92;oplus, &#92;Oplus, &#92;bigoplus, &#92;bigodot, &#92;bigsqcup, &#92;biguplus, &#92;wedge, &#92;Wedge, &#92;bigwedge, &#92;Vee, &#92;bigvee
+
+\subsubsection{Environments}
+
+document, array, itemize, enumerate
+
+Via ``amsmath'' package:
+
+matrix, pmatrix, bmatrix, Bmatrix, vmatrix, Vmatrix, smallmatrix, cases, aligned, gathered, split
+
+
+
+\section{ToDo}
+
+\begin{itemize}
+\item Fine tune ``getWidthOf'' algorthim.
+\end{itemize}
+
+\subsection{Commands I Wish I'd Already Defined Before Writing This Documentation}
+
+&#92;backslash, &#92;verb, verbatim environment.
 
 \end{document}
