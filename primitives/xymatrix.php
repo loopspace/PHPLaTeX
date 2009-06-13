@@ -60,8 +60,8 @@ while ($matrix)
 
 	    while ($inarrow)
 	      {
-		// ignore spaces
-		$matrix = ltrim($matrix," ");
+		// ignore spaces and nulls
+		$matrix = ltrim($matrix," \0");
 		$nexttok = nexttok($matrix);
 		//		LaTeXdebug($nexttok,1);
 		if ($nexttok == '^')
@@ -262,7 +262,7 @@ $numrows = count($entry);
 $numcols += 1;
 
 $svgwidth = $dim["row"]*($numrows + 1);
-$svgheight = $dim["col"]*($numcols - 1);
+$svgheight = $dim["col"]*($numcols);
 
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
 $svg .= 'width="' 

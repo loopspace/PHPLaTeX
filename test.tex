@@ -1,18 +1,43 @@
 \documentclass{article}
 
-\usepackage[arrow,matrix]{xy}
-
 \begin{document}
 
-hello
+\newcounter{hello}
+\setcounter{hello}{1}
+\def\hello{hello}
+\def\world{world}
+\hello\ 
+\world\
+\thehello
 
-world
+\bgroup
+\newcounter{world}
+\stepcounter{hello}
+\def\hello{greetings}
+\def\world{earthlings}
+\hello\ 
+\world\
+\thehello
 
-hello
+{
+\stepcounter{hello}
+\let\oldhello=\hello
+\def\hello{welcome}
+\gdef\world{people}
+\hello\ 
+\world\ 
+\oldhello\
+\thehello
 
-\relax
+}
+\hello\ 
+\world\ 
+\thehello
 
-world
-
+}
+\hello\ 
+\world\ 
+\thehello\ 
+\theworld
 
 \end{document}
