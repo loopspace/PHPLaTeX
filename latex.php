@@ -583,7 +583,11 @@ function expandtok ($token,&$latex)
 }
 
 /*
- * Expand a string and estimate its width
+ * Expand a string and estimate its width, height, and depth
+ */
+
+/*
+ * WIDTH
  */
 
 /*
@@ -609,7 +613,14 @@ function charWidth ($char)
 	    }
 	  else
 	    {
-	      $length += 1;
+	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
+		{
+		  $length += 1.5;
+		}
+	      else
+		{
+		  $length += 1;
+		}
 	    }
 	}
       else
@@ -661,7 +672,20 @@ $widthRule = array(
 		"mfrac" => create_function(
 					   '$contents',
 					   'return max(explode(" ",$contents));'
-					   )
+					   ),
+		"msup" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
+		"msub" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return array_shift($conts);'),
+		"msubsup" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
+		"mtext" => create_function(
+					   '$contents',
+					   'return array_sum(explode(" ",$contents));'
+					   ),
 		);
 
 
@@ -727,6 +751,324 @@ return $matches[2];
 
   LaTeXdebug($a,1);
   return trim(min($textwidth,$a));
+}
+
+
+/*
+ * HEIGHT
+ */
+
+/*
+ * Array to override automatic height calculation
+ */
+
+$charHeights = array();
+
+function charHeight ($char)
+{
+  global $charHeights;
+  // gets a string of characters or entities and returns their (approximate) length
+  $height = 0;
+  while ($char)
+    {
+      if (preg_match('/^(&(?:[A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);)(.*)/',$char,$matches))
+	{
+	  // entity
+	  $char = $matches[2];
+	  if (array_key_exists($matches[1],$charWidths))
+	    {
+	      $height = max($height, $charHeights[$matches[1]]);
+	    }
+	  else
+	    {
+	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
+		{
+		  $height = max($height, 1.5);
+		}
+	      else
+		{
+		  $height = max($height,1);
+		}
+	    }
+	}
+      else
+	{
+	  $firstchar = substr($char,0,1);
+	  $char = substr($char,1);
+	  if (array_key_exists($firstchar,$charHeights))
+	    {
+	      $height = max($height,$charHeights[$char]);
+	    }
+	  else
+	    {
+	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
+		{
+		  $height = max($height,1.5);
+		}
+	      else
+		{
+		  $height = max($height,1);
+		}
+	    }
+	}
+    }
+  return $height;
+}
+
+/*
+ * Need these to be global so that we can refer to them in a
+ * function-within-a-function (limited scoping rules of PHP)
+ */
+
+$heightRule = array(
+		"mi" => create_function(
+					'$contents',
+					'return charHeight($contents);'
+					),
+		"mo" => create_function(
+					'$contents',
+					'return (charHeight($contents) + 1);'
+					),
+		"mn" => create_function(
+					'$contents',
+					'return charHeight($contents);'
+					),
+		"mrow" => create_function(
+					  '$contents',
+					  'return max(explode(" ",$contents));'
+					  ),
+		"mfrac" => create_function(
+					   '$contents',
+					   'return array_sum(explode(" ",$contents));'
+					   ),
+		"mtext" => create_function(
+					   '$contents',
+					   'return max(explode(" ",$contents));'
+					   ),
+		);
+
+
+function getHeightOf ($string)
+{
+  $expanded = processLaTeX($string);
+  $textheight = 80; // maximum width, global variable?
+  $height = 0;
+  
+  // Need to go through and compute lengths
+
+  $a = trim($expanded);  
+  $b = "";
+
+  // first replace single tags
+  while ($a != $b)
+    {
+  LaTeXdebug($a,1);
+
+      $b = $a;
+      $a = preg_replace_callback(
+				 '/<([a-z]+)([^>]*)\/>/',
+				 create_function(
+						 '$matches',
+						 '
+global $heightRule;
+if (array_key_exists($matches[1], $heightRule))
+{
+return " " . $heightRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return " 0 ";
+}
+'),
+			$b);
+    }
+
+  $b = "";
+
+  while ($a != $b)
+    {
+  LaTeXdebug($a,1);
+
+      $b = $a;
+      $a = preg_replace_callback(
+			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
+			create_function(
+					'$matches',
+					'
+global $heightRule;
+if (array_key_exists($matches[1], $heightRule))
+{
+return " " . $heightRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return $matches[2];
+}
+'),
+			$b);
+    }
+
+  LaTeXdebug($a,1);
+  return trim(min($textheight,$a));
+}
+
+
+/*
+ * DEPTH
+ */
+
+/*
+ * Array to override automatic depth calculation
+ */
+
+$charDepths = array();
+
+function charDepth ($char)
+{
+  global $charDepths;
+  // gets a string of characters or entities and returns their (approximate) length
+  $depth = 0;
+  while ($char)
+    {
+      if (preg_match('/^(&(?:[A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);)(.*)/',$char,$matches))
+	{
+	  // entity
+	  $char = $matches[2];
+	  if (array_key_exists($matches[1],$charDepths))
+	    {
+	      $depth = max($depth, $charDepths[$matches[1]]);
+	    }
+	  else
+	    {
+	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
+		{
+		  $depth = max($depth,0);
+		}
+	      else
+		{
+		  $depth = max($depth,0);
+		}
+	    }
+	}
+      else
+	{
+	  $firstchar = substr($char,0,1);
+	  $char = substr($char,1);
+	  if (array_key_exists($firstchar,$charDepths))
+	    {
+	      $depth = max($depth,$charDepths[$char]);
+	    }
+	  else
+	    {
+	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
+		{
+		  $depth = max($depth,1.5);
+		}
+	      else
+		{
+		  $depth = max($depth,1);
+		}
+	    }
+	}
+    }
+  return $depth;
+}
+
+/*
+ * Need these to be global so that we can refer to them in a
+ * function-within-a-function (limited scoping rules of PHP)
+ */
+
+$depthRule = array(
+		"mi" => create_function(
+					'$contents',
+					'return charDepth($contents);'
+					),
+		"mo" => create_function(
+					'$contents',
+					'return (charDepth($contents) + 1);'
+					),
+		"mn" => create_function(
+					'$contents',
+					'return charDepth($contents);'
+					),
+		"mrow" => create_function(
+					  '$contents',
+					  'return max(explode(" ",$contents));'
+					  ),
+		"mfrac" => create_function(
+					   '$contents',
+					   'return array_sum(explode(" ",$contents));'
+					   ),
+		"mtext" => create_function(
+					   '$contents',
+					   'return max(explode(" ",$contents));'
+					   ),
+		);
+
+
+function getDepthOf ($string)
+{
+  $expanded = processLaTeX($string);
+  $textdepth = 80; // maximum width, global variable?
+  $depth = 0;
+  
+  // Need to go through and compute lengths
+
+  $a = trim($expanded);  
+  $b = "";
+
+  // first replace single tags
+  while ($a != $b)
+    {
+  LaTeXdebug($a,1);
+
+      $b = $a;
+      $a = preg_replace_callback(
+				 '/<([a-z]+)([^>]*)\/>/',
+				 create_function(
+						 '$matches',
+						 '
+global $depthRule;
+if (array_key_exists($matches[1], $depthRule))
+{
+return " " . $depthRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return " 0 ";
+}
+'),
+			$b);
+    }
+
+  $b = "";
+
+  while ($a != $b)
+    {
+  LaTeXdebug($a,1);
+
+      $b = $a;
+      $a = preg_replace_callback(
+			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
+			create_function(
+					'$matches',
+					'
+global $depthRule;
+if (array_key_exists($matches[1], $depthRule))
+{
+return " " . $depthRule[$matches[1]]($matches[2]) . " ";
+}
+else
+{
+return $matches[2];
+}
+'),
+			$b);
+    }
+
+  LaTeXdebug($a,1);
+  return trim(min($textdepth,$a));
 }
 
 
