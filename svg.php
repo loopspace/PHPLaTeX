@@ -197,11 +197,11 @@ function charHeight ($char)
 	    {
 	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
 		{
-		  $height = max($height, 2);
+		  $height = max($height, 1.8);
 		}
 	      else
 		{
-		  $height = max($height,2);
+		  $height = max($height,1.8);
 		}
 	    }
 	}
@@ -215,13 +215,13 @@ function charHeight ($char)
 	    }
 	  else
 	    {
-	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
+	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZbdfhijklt",$firstchar) !== FALSE)
 		{
-		  $height = max($height,2);
+		  $height = max($height,1.8);
 		}
 	      else
 		{
-		  $height = max($height,2);
+		  $height = max($height,1.2);
 		}
 	    }
 	}
@@ -510,6 +510,9 @@ function MakeEx($length)
   return $dist;
 }
 
+// The following all use "vectors": arrays with "x" and "y".
+// Should probably make this OO for use with TikZ coordinate systems.
+
 function cubicBezier($t,$s,$a,$b,$e)
 {
   foreach (array("x","y") as $c)
@@ -586,13 +589,50 @@ function vecOrth($a)
   return $r;
 }
 
-function vecNorm($a)
+function vecSqNorm($a)
 {
   LaTeXdebug("vecNorm got x: " . $a["x"] . " and y: " .  $a["y"],1);
-  $n["x"] = $a["x"]/sqrt($a["x"]*$a["x"] + $a["y"]*$a["y"]);
-  $n["y"] = $a["y"]/sqrt($a["x"]*$a["x"] + $a["y"]*$a["y"]);
-  return $n;
+  return sqrt($a["x"]*$a["x"] + $a["y"]*$a["y"]);
 }
+
+function vecReSqNorm($a)
+{
+  if (($a["x"] == 0) and ($a["y"] == 0))
+    {
+      return 0;
+    }
+  else
+    {
+      return vecScale(1/vecSqNorm($a),$a);
+    }
+}
+
+// Sup norm with $ur and $dl as upper-right and lower-left corners of box
+function vecSupNorm($a,$ur,$dl)
+{
+  if (($ur["x"] > 0) and ($ur["y"] > 0) and ($dl["x"] <0) and ($dl["y"] < 0))
+    {
+      return max($a["x"]/$ur["x"], $a["x"]/$dl["x"], $a["y"]/$ur["y"], $a["y"]/$dl["y"]);
+    }
+  else
+    {
+      return 0;
+    }
+}
+
+function vecReSupNorm($a,$ur,$dl)
+{
+  $n = vecSupNorm($a,$ur,$dl);
+  if ($n == 0)
+    {
+      return 0;
+    }
+  else
+    {
+      return vecScale(1/$n,$a);
+    }
+}
+
 
 function vecSign($a)
 {

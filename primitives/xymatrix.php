@@ -1,8 +1,8 @@
 // name: xymatrix
 $args = "";
 $dim = array(
-	     "x" => "4", // row
-	     "y" => "6"  // col
+	     "x" => "8", // row
+	     "y" => "8"  // col
 	     );
 $arrowfile = "arrows.def";
 $accuracy = 20; // rounding for computations
@@ -27,8 +27,8 @@ $matrix = stripgrp(nextgrp($latex));
 $m = 0;
 $n = 0;
 $maxwidth = 1;
-$maxheight = 2.5;
-$maxdepth = 2;
+$maxheight = 2;
+$maxdepth = 0;
 $numcols = 0;
 
 // due to not vertically centering our entries, need a vertical fudge
@@ -238,13 +238,17 @@ while ($matrix)
 	$nexttok = nexttok($matrix);
       }
     $entry[$m][$n] = trim($entry[$m][$n]);
-    $width[$m][$n] = (getWidthOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
-    $height[$m][$n] =  (getHeightOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
-    $depth[$m][$n] =  (getDepthOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
+    $width[$m][$n] = getWidthOf('\(' . $entry[$m][$n] . '\)');
+    $height[$m][$n] = getHeightOf('\(' . $entry[$m][$n] . '\)');
+    $depth[$m][$n] = getDepthOf('\(' . $entry[$m][$n] . '\)');
 
     if ($width[$m][$n] > $maxwidth)
       $maxwidth = $width[$m][$n];
-    // should do same for height
+    if ($height[$m][$n] > $maxheigh)
+      $maxheigh = $height[$m][$n];
+    if ($depth[$m][$n] > $maxdepth)
+      $maxdepth = $depth[$m][$n];
+
     if ($nexttok == '&')
       {
 	$n++;
@@ -457,10 +461,8 @@ for($i = 0; $i < count($arrows);$i++)
     $e = vecSum($s,udrlVect($target));
 
     // centres of entries
-    $sc["x"] = ($s["x"] * $dim["x"]) + $maxwidth/2;
-    $sc["y"] = ($s["y"] * $dim["y"]) + $maxheight -1; // don't vertically centre?
-    $ec["x"] = ($e["x"] * $dim["x"]) + $maxwidth/2;
-    $ec["y"] = ($e["y"] * $dim["y"]) + $maxheight -1;
+    $sc = vecSum(vecScale($dim,$s),vecMake($maxwidth/2,$maxheight-1));
+    $ec = vecSum(vecScale($dim,$e),vecMake($maxwidth/2,$maxheight-1));
 
     // direction of arrows
 
@@ -504,7 +506,7 @@ for($i = 0; $i < count($arrows);$i++)
 	    // mid point of a quadratic bezier is on the tangents at both extremal points
 	    // so tangents are in the directions of the line between these points
 	    $o = vecOrth(vecMinus($ec,$sc));
-	    $n = vecNorm($o);
+	    $n = vecReSqNorm($o);
 	    $ds = vecSum(vecScale(.5,vecMinus($ec,$sc)),vecScale($dir*$scale,$n));
 	    $de = vecSum(vecScale(.5,vecMinus($sc,$ec)),vecScale($dir*$scale,$n));
 	  }
@@ -517,33 +519,14 @@ for($i = 0; $i < count($arrows);$i++)
       }
 
     // Now compute anchors as place where vector out of centre leaves box
-    if ($ds["x"] == 0)
-      {
-	$ts = abs($height[$s["y"]][$s["x"]]/(2*$ds["y"]));
-      }
-    elseif ($ds["y"] == 0)
-      {
-	$ts = abs($width[$s["y"]][$s["x"]]/(2*$ds["x"]));
-      }
-    else
-      {
-	$ts = min(abs($height[$s["y"]][$s["x"]]/(2*$ds["y"])),abs($width[$s["y"]][$s["x"]]/(2*$ds["x"])));
-      }
-    $s = vecSum($sc,vecScale($ts,$ds));
 
-    if ($de["x"] == 0)
-      {
-	$te = abs($height[$e["y"]][$e["x"]]/(2*$de["y"]));
-      }
-    elseif ($de["y"] == 0)
-      {
-	$te = abs($width[$e["y"]][$e["x"]]/(2*$de["x"]));
-      }
-    else
-      {
-	$te = min(abs($height[$e["y"]][$e["x"]]/(2*$de["y"])),abs($width[$e["y"]][$e["x"]]/(2*$de["x"])));
-      }
-    $e = vecSum($ec,vecScale($te,$de));
+    $sBoxur = vecMake($width[$s["y"]][$s["x"]]/2,$depth[$s["y"]][$s["x"]]);
+    $sBoxdl = vecMake(-$width[$s["y"]][$s["x"]]/2,1-$height[$s["y"]][$s["x"]]);
+    $s = vecSum($sc,vecReSupNorm($ds,$sBoxur,$sBoxdl));
+
+    $eBoxur = vecMake($width[$e["y"]][$e["x"]]/2,$depth[$e["y"]][$e["x"]]);
+    $eBoxdl = vecMake(-$width[$e["y"]][$e["x"]]/2,1-$height[$e["y"]][$e["x"]]);
+    $e = vecSum($ec,vecReSupNorm($de,$eBoxur,$eBoxdl));
 
 //    $narrowpath = '<circle cx="' . $s["x"] . 'ex" cy="' . $s["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
 //    $narrowpath .= '<circle cx="' . $e["x"] . 'ex" cy="' . $e["y"] . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
@@ -739,7 +722,7 @@ for($i = 0; $i < count($arrows);$i++)
 
     if ($upperlabel)
       {
-	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)');
+	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)') + 1;
 	$upperlabelheight = getHeightOf('\(' . $upperlabel . '\)') + getDepthOf('\(' . $upperlabel . '\)');
 
 	if ($arrowtype == "C")
@@ -758,16 +741,16 @@ for($i = 0; $i < count($arrows);$i++)
 	LaTeXdebug("tangent is: " . vecXY($lud),1);
 	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
 
-	$lu = vecSum($lu,vecScale(vecMake(.5*$upperlabelwidth,.5*$upperlabelheigh),vecSum(vecOrth(vecSign($lud)),vecMake(1,1))));
+	$lu = vecSum($lu,vecSum(vecScale(vecMake(.5*$upperlabelwidth,.5*$upperlabelheight),vecOrth(vecSign($lud))),vecMake(-1,-1)));
 
-	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="green" stroke-width="1" />' . "\n";
 //	$lu["x"] += - $upperlabelwidth/2 + $n["x"]*$swap;
 //	$lu["y"] += - $upperlabelheight/2 - $fudgeheight + ($n["y"] - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject '
 	  . vecXY($lu,1)
 	  . ' width="'
-	  . ($upperlabelwidth + 2)
+	  . $upperlabelwidth
 	  . 'ex" height="'
 	  . $upperlabelheight
 	  . 'ex">'
