@@ -567,6 +567,11 @@ function expandtok ($token,&$latex)
 		{
 		  $return = '\mathparen{' . $token . '}';
 		}
+	      elseif (preg_match('/^&([A-Za-z]+|[0-9]+|#[0-9A-Fa-f]+);/',$token))
+		{
+		  // entity
+		  $return = '\mathchar{' . $token . '}';
+		}
 	      else
 		{
 		  $return = $token;
@@ -703,8 +708,6 @@ function getWidthOf ($string)
   // first replace single tags
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
-
       $b = $a;
       $a = preg_replace_callback(
 				 '/<([a-z]+)([^>]*)\/>/',
@@ -728,8 +731,6 @@ return " 0 ";
 
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
-
       $b = $a;
       $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
@@ -749,7 +750,6 @@ return $matches[2];
 			$b);
     }
 
-  LaTeXdebug($a,1);
   return trim(min($textwidth,$a));
 }
 
@@ -775,7 +775,7 @@ function charHeight ($char)
 	{
 	  // entity
 	  $char = $matches[2];
-	  if (array_key_exists($matches[1],$charWidths))
+	  if (array_key_exists($matches[1],$charHeights))
 	    {
 	      $height = max($height, $charHeights[$matches[1]]);
 	    }
@@ -783,11 +783,11 @@ function charHeight ($char)
 	    {
 	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
 		{
-		  $height = max($height, 1.5);
+		  $height = max($height, 2);
 		}
 	      else
 		{
-		  $height = max($height,1);
+		  $height = max($height,2);
 		}
 	    }
 	}
@@ -803,11 +803,11 @@ function charHeight ($char)
 	    {
 	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
 		{
-		  $height = max($height,1.5);
+		  $height = max($height,2);
 		}
 	      else
 		{
-		  $height = max($height,1);
+		  $height = max($height,2);
 		}
 	    }
 	}
@@ -862,8 +862,6 @@ function getHeightOf ($string)
   // first replace single tags
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
-
       $b = $a;
       $a = preg_replace_callback(
 				 '/<([a-z]+)([^>]*)\/>/',
@@ -887,8 +885,6 @@ return " 0 ";
 
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
-
       $b = $a;
       $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
@@ -908,7 +904,6 @@ return $matches[2];
 			$b);
     }
 
-  LaTeXdebug($a,1);
   return trim(min($textheight,$a));
 }
 
@@ -962,11 +957,11 @@ function charDepth ($char)
 	    {
 	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
 		{
-		  $depth = max($depth,1.5);
+		  $depth = max($depth,0);
 		}
 	      else
 		{
-		  $depth = max($depth,1);
+		  $depth = max($depth,0);
 		}
 	    }
 	}
@@ -1021,7 +1016,6 @@ function getDepthOf ($string)
   // first replace single tags
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
 
       $b = $a;
       $a = preg_replace_callback(
@@ -1046,7 +1040,6 @@ return " 0 ";
 
   while ($a != $b)
     {
-  LaTeXdebug($a,1);
 
       $b = $a;
       $a = preg_replace_callback(
@@ -1067,7 +1060,6 @@ return $matches[2];
 			$b);
     }
 
-  LaTeXdebug($a,1);
   return trim(min($textdepth,$a));
 }
 

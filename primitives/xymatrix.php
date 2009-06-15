@@ -5,6 +5,7 @@ $dim = array(
 	     "col" => "6"
 	     );
 $arrowfile = "arrows.def";
+$accuracy = 20; // rounding for computations
 // morally, \ifnextchar{@} ...
 $nexttok = nexttok($latex);
 while ($nexttok != "{")
@@ -31,7 +32,7 @@ $maxdepth = 2;
 $numcols = 0;
 
 // due to not vertically centering our entries, need a vertical fudge
-$fudgeheight = 1/2;
+$fudgeheight = 0;
 
 while ($matrix)
   {
@@ -238,8 +239,8 @@ while ($matrix)
       }
     $entry[$m][$n] = trim($entry[$m][$n]);
     $width[$m][$n] = (getWidthOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
-    $height[$m][$n] = $maxheight; // need getHeightOf here, and depth
-    $depth[$m][$n] = $maxdepth;
+    $height[$m][$n] =  (getHeightOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
+    $depth[$m][$n] =  (getDepthOf('\(' . $entry[$m][$n] . '\)') + 2); // margin of error
 
     if ($width[$m][$n] > $maxwidth)
       $maxwidth = $width[$m][$n];
@@ -309,7 +310,8 @@ for($m = 0;$m < count($entry);$m++)
 	  . 'ex" height="'
 	  . ($maxheight + $maxdepth)
 	  . 'ex">'
-	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div align="center">'
+	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
+	  . '<div align="center">'
 	  . '\('
 	  . '\rule{0ex}{'
 	  . $maxheight
@@ -365,6 +367,11 @@ for($i = 0; $i < count($arrows);$i++)
      * $ccsx,$ccsx x,y-coordinates of first control pt (bezier cubic)
      * $ccex,$ccyx x,y-coordinates of second control pt (bezier cubic)
      * $qmx,$qmy x,y-coordinates of control point (bezier quadratic)
+     *
+     * $scx,$scy x,y-coordinates of centres of entries
+     * $ecx,$ecy -"-
+     * $dsx,$dsy direction of arrow as it leaves start
+     * $dex,$dxy direction of arrow as it arrives at target
      */
 
     // convert label displacements into distances
@@ -444,6 +451,210 @@ for($i = 0; $i < count($arrows);$i++)
     // final entry
     $en = $sn + substr_count(strtolower($target),"r") - substr_count(strtolower($target),"l");
     $em = $sm + substr_count(strtolower($target),"d") - substr_count(strtolower($target),"u");
+
+    // centres of entries
+    $scx = ($sn * $dim["row"]) + $maxwidth/2;
+    $scy = ($sm * $dim["col"]) + $maxheight -1; // don't vertically centre?
+    $ecx = ($en * $dim["row"]) + $maxwidth/2;
+    $ecy = ($em * $dim["col"]) + $maxheight -1;
+
+    // direction of arrows
+
+    if ($curving)
+      {
+	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
+	  {
+	    $arrowtype="C";
+	    // cubic bezier curve
+	    LaTeXdebug("$dirs[1] $dirs[2]",1);
+	    // Need to recompute the anchors
+	    // horizontally
+	    if (stripos($dirs[1],"r") !== FALSE)
+	      {
+		// arrow should leave source to the right
+		$dsx = 1;
+	      }
+	    elseif (stripos($dirs[1],"l") !== FALSE)
+	      {
+		// arrow should leave source to the left
+		$dsx = -1;
+	      }
+	    else
+	      {
+		// arrow leaves in the middle
+		$dsx = 0;
+	      }
+	    if (stripos($dirs[2],"r") !== FALSE)
+	      {
+		// arrow should enter target from the right
+		$dex = 1;
+	      }
+	    elseif (stripos($dirs[2],"l") !== FALSE)
+	      {
+		// arrow should enter target from the left
+		$dex = -1;
+	      }
+	    else
+	      {
+		// arrow arrives in the middle
+		$dex = 0;
+	      }
+	    // vertically
+	    if (stripos($dirs[1],"d") !== FALSE)
+	      {
+		// arrow should leave source downwards
+		$dsy = 1;
+	      }
+	    elseif (stripos($dirs[1],"u") !== FALSE)
+	      {
+		// arrow should leave source upwards
+		$dsy = -1;
+	      }
+	    else
+	      {
+		// arrow should leave source in the middle
+		$dsy = 0;
+	      }
+	    if (stripos($dirs[2],"d") !== FALSE)
+	      {
+		// arrow should enter target from below
+		$dey = 1;
+	      }
+	    elseif (stripos($dirs[2],"u") !== FALSE)
+	      {
+		// arrow should enter target from above
+		$dey = -1;
+	      }
+	    else
+	      {
+		// arrow should enter target in the middle
+		$dey = 0;
+	      }
+	  }
+	else
+	  {
+	    $arrowtype="Q";
+	    // symmetric quadratic bezier curve
+	    $type = substr($curving,0,1);
+	    if ($type == "_")
+	      {
+	    $dir = -1;
+	      }
+	    else
+	      {
+		$dir = 1;
+	      }
+	    $length = substr($curving,1);
+	    $length = trim($length);
+	    if ($length)
+	      {
+		$scale = MakeEx($length);
+	      }
+	    else
+	      {
+		$scale = 1;
+	      }
+
+	    // mid point of a quadratic bezier is on the tangents at both extremal points
+	    // so tangents are in the directions of the line between these points
+	    $ox = $ecy - $scy;
+	    $oy = $scx - $ecx;
+	    $nx = round($ox/sqrt($ox*$ox + $oy*$oy)*20)/20;
+	    $ny = round($oy/sqrt($ox*$ox + $oy*$oy)*20)/20;
+
+
+	    $dsx = ($scx + $ecx)/2 + $dir*$scale*$nx - $sx;
+	    $dsy = ($scy + $ecy)/2 + $dir*$scale*$ny - $sy;
+	    $dex = $ex - (($scx + $ecx)/2 + $dir*$scale*$nx);
+	    $dey = $ey - (($scy + $ecy)/2 + $dir*$scale*$ny);
+	  }
+      }
+    else
+      {
+	$arrowtype="";
+	$dsx = $ecx - $scx;
+	$dsy = $ecy - $scy;
+	$dex = $dsx;
+	$dey = $dsy;
+      }
+
+    // Now compute anchors as place where vector out of centre leaves box
+    if ($dsx == 0)
+      {
+	$ts = $height[$sm][$sn]/(2*$dsy);
+      }
+    elseif ($dsy == 0)
+      {
+	$ts = $width[$sm][$sn]/(2*$dsx);
+      }
+    else
+      {
+	$ts = min($height[$sm][$sn]/(2*$dsy),$width[$sm][$sn]/(2*$dsx));
+      }
+    $sx = $scx + $ts*$dsx;
+    $sy = $scy + $ts*$dsy;
+
+    if ($dex == 0)
+      {
+	$ts = $height[$em][$en]/(2*$dey);
+      }
+    elseif ($dey == 0)
+      {
+	$ts = $width[$em][$en]/(2*$dex);
+      }
+    else
+      {
+	$ts = min($height[$em][$en]/(2*$dey),$width[$em][$en]/(2*$dex));
+      }
+    $ex = $ecx + $ts*$dex;
+    $ey = $ecy + $ts*$dey;
+
+    $narrowpath = '<circle cx="' . $sx . 'ex" cy="' . $sy . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+    $narrowpath .= '<circle cx="' . $ex . 'ex" cy="' . $ey . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
+
+    $narrowpath .= '<svg width="'
+      . $svgwidth
+      . 'ex" height="'
+      . $svgheight
+      . 'ex" viewBox="0 0 '
+      . $svgwidth
+      . ' '
+      . $svgheight
+      . '">'
+      . "\n";
+
+    $narrowpath .= '<path d="'
+      . 'M '
+      . $sx
+      . ' '
+      . $sy
+      . ' ';
+
+    if ($arrowtype)
+      {
+	$narrowpath .= $arrowtype
+	  . ' '
+	  . ($sx + $dsx)
+	  . ' '
+	  . ($sy + $dsy)
+	  . ' ';
+      }
+    if ($arrowtype == "C")
+      {
+	$narrowpath .= ($ecx - $dex)
+	  . ' '
+	  . ($ecy - $dey)
+	  . ' ';
+      }
+
+    $narrowpath .= $ex
+      . ' '
+      . $ey
+      . '" ';
+
+    $narrowpath .= 'stroke="red" stroke-width=".1" fill="none" /></svg>';
+    //    $svg .= $narrowpath;
+
     // need to compute "anchors" for source and target
     // horizontally
     if ($en > $sn)
@@ -866,7 +1077,7 @@ for($i = 0; $i < count($arrows);$i++)
     if ($upperlabel)
       {
 	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)');
-	$upperlabelheight = "3.5";
+	$upperlabelheight = getHeightOf('\(' . $upperlabel . '\)') + getDepthOf('\(' . $upperlabel . '\)');
 
 //	$svg .= '<circle cx="' . $lux . 'ex" cy="' . $luy . 'ex" r="1" stroke="black" stroke-width="1" />' . "\n";
 	$lux += - $upperlabelwidth/2 + $nx*$swap;
@@ -881,7 +1092,8 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex" height="'
 	  . $upperlabelheight
 	  . 'ex">'
-	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
+	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
+	  . '<div style="width:'
 	  . $upperlabelwidth
 	  . 'ex,height:'
 	  . ($upperlabelheight -1)
@@ -896,7 +1108,7 @@ for($i = 0; $i < count($arrows);$i++)
     if ($lowerlabel)
       {
 	$lowerlabelwidth = getWidthOf('\(' . $lowerlabel . '\)');
-	$lowerlabelheight = "3";
+	$lowerlabelheight = getHeightOf('\(' . $lowerlabel . '\)') + getDepthOf('\(' . $lowerlabel . '\)');
 	$llx += - $lowerlabelwidth/2 - $nx*$swap;
 	$lly += - ($ny - $fudgeheight)*$swap;
 
@@ -909,7 +1121,8 @@ for($i = 0; $i < count($arrows);$i++)
 	  . 'ex" height="'
 	  . $lowerlabelheight
 	  . 'ex">'
-	  . '<body xmlns="http://www.w3.org/1999/xhtml"><div style="width:'
+	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
+	  . '<div style="width:'
 	  . $lowerlabelwidth
 	  . 'ex,height:'
 	  . ($lowerlabelheight -1)
