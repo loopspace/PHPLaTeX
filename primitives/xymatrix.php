@@ -1,8 +1,8 @@
 // name: xymatrix
 $args = "";
 $dim = array(
-	     "row" => "4",
-	     "col" => "6"
+	     "x" => "4", // row
+	     "y" => "6"  // col
 	     );
 $arrowfile = "arrows.def";
 $accuracy = 20; // rounding for computations
@@ -195,8 +195,8 @@ while ($matrix)
 
 	    $matrix = $nexttok . "\0" . $matrix;
 	    $arrows[] = array(
-			      "row" => $m,
-			      "col" => $n,
+			      "y" => $m,
+			      "x" => $n,
 			      "upperdisplacement" => $upperdisplacement,
 			      "upperlabel" => $upperlabel,
 			      "lowerdisplacement" => $lowerdisplacement,
@@ -257,13 +257,18 @@ while ($matrix)
 	$n = 0;
       }
   }
-$dim["row"] = ($dim["row"] + $maxwidth);
-$dim["col"] = ($dim["col"] + $maxheight + $maxdepth);
+$maxNodeSize = array(
+		     "x" => $maxwidth,
+		     "y" => $maxheight + $maxdepth
+		     );
+
+$dim = vecSum($dim,$maxNodeSize);
+
 $numrows = count($entry);
 $numcols += 1;
 
-$svgwidth = $dim["row"]*($numrows + 1);
-$svgheight = $dim["col"]*($numcols);
+$svgwidth = $dim["x"]*($numrows + 1);
+$svgheight = $dim["y"]*($numcols);
 
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
 $svg .= 'width="' 
@@ -302,9 +307,9 @@ for($m = 0;$m < count($entry);$m++)
     for($n = 0;$n < count($entry[$m]); $n++)
       {
 	$svg .= '<foreignObject x="'
-	  . ($n * $dim["row"])
+	  . ($n * $dim["x"])
 	  . 'ex" y="'
-	  . ($m * $dim["col"])
+	  . ($m * $dim["y"])
 	  . 'ex" width="'
 	  . $maxwidth
 	  . 'ex" height="'
@@ -328,8 +333,8 @@ for($i = 0; $i < count($arrows);$i++)
   {
     // extract significant parts from arrow
     // starting entry
-    $sm = $arrows[$i]["row"];
-    $sn = $arrows[$i]["col"];
+    $s["y"] = $arrows[$i]["y"];
+    $s["x"] = $arrows[$i]["x"];
     $upperdisplacement = $arrows[$i]["upperdisplacement"];
     $upperlabel = $arrows[$i]["upperlabel"];
     $lowerdisplacement = $arrows[$i]["lowerdisplacement"];
@@ -371,7 +376,7 @@ for($i = 0; $i < count($arrows);$i++)
      * $scx,$scy x,y-coordinates of centres of entries
      * $ecx,$ecy -"-
      * $dsx,$dsy direction of arrow as it leaves start
-     * $dex,$dxy direction of arrow as it arrives at target
+     * $dex,$dxy reverse of direction of arrow as it arrives at target
      */
 
     // convert label displacements into distances
@@ -449,14 +454,13 @@ for($i = 0; $i < count($arrows);$i++)
       }
 
     // final entry
-    $en = $sn + substr_count(strtolower($target),"r") - substr_count(strtolower($target),"l");
-    $em = $sm + substr_count(strtolower($target),"d") - substr_count(strtolower($target),"u");
+    $e = vecSum($s,udrlVect($target));
 
     // centres of entries
-    $scx = ($sn * $dim["row"]) + $maxwidth/2;
-    $scy = ($sm * $dim["col"]) + $maxheight -1; // don't vertically centre?
-    $ecx = ($en * $dim["row"]) + $maxwidth/2;
-    $ecy = ($em * $dim["col"]) + $maxheight -1;
+    $sc["x"] = ($s["x"] * $dim["x"]) + $maxwidth/2;
+    $sc["y"] = ($s["y"] * $dim["y"]) + $maxheight -1; // don't vertically centre?
+    $ec["x"] = ($e["x"] * $dim["x"]) + $maxwidth/2;
+    $ec["y"] = ($e["y"] * $dim["y"]) + $maxheight -1;
 
     // direction of arrows
 
@@ -464,72 +468,14 @@ for($i = 0; $i < count($arrows);$i++)
       {
 	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
 	  {
+	    $cntl = 4;
 	    $arrowtype="C";
 	    // cubic bezier curve
 	    LaTeXdebug("$dirs[1] $dirs[2]",1);
 	    // Need to recompute the anchors
 	    // horizontally
-	    if (stripos($dirs[1],"r") !== FALSE)
-	      {
-		// arrow should leave source to the right
-		$dsx = 1;
-	      }
-	    elseif (stripos($dirs[1],"l") !== FALSE)
-	      {
-		// arrow should leave source to the left
-		$dsx = -1;
-	      }
-	    else
-	      {
-		// arrow leaves in the middle
-		$dsx = 0;
-	      }
-	    if (stripos($dirs[2],"r") !== FALSE)
-	      {
-		// arrow should enter target from the right
-		$dex = 1;
-	      }
-	    elseif (stripos($dirs[2],"l") !== FALSE)
-	      {
-		// arrow should enter target from the left
-		$dex = -1;
-	      }
-	    else
-	      {
-		// arrow arrives in the middle
-		$dex = 0;
-	      }
-	    // vertically
-	    if (stripos($dirs[1],"d") !== FALSE)
-	      {
-		// arrow should leave source downwards
-		$dsy = 1;
-	      }
-	    elseif (stripos($dirs[1],"u") !== FALSE)
-	      {
-		// arrow should leave source upwards
-		$dsy = -1;
-	      }
-	    else
-	      {
-		// arrow should leave source in the middle
-		$dsy = 0;
-	      }
-	    if (stripos($dirs[2],"d") !== FALSE)
-	      {
-		// arrow should enter target from below
-		$dey = 1;
-	      }
-	    elseif (stripos($dirs[2],"u") !== FALSE)
-	      {
-		// arrow should enter target from above
-		$dey = -1;
-	      }
-	    else
-	      {
-		// arrow should enter target in the middle
-		$dey = 0;
-	      }
+	    $ds = vecScale($cntl,vecSign(udrlVect($dirs[1])));
+	    $de = vecScale($cntl,vecSign(udrlVect($dirs[2])));
 	  }
 	else
 	  {
@@ -557,62 +503,52 @@ for($i = 0; $i < count($arrows);$i++)
 
 	    // mid point of a quadratic bezier is on the tangents at both extremal points
 	    // so tangents are in the directions of the line between these points
-	    $ox = $ecy - $scy;
-	    $oy = $scx - $ecx;
-	    $nx = round($ox/sqrt($ox*$ox + $oy*$oy)*20)/20;
-	    $ny = round($oy/sqrt($ox*$ox + $oy*$oy)*20)/20;
-
-
-	    $dsx = ($scx + $ecx)/2 + $dir*$scale*$nx - $sx;
-	    $dsy = ($scy + $ecy)/2 + $dir*$scale*$ny - $sy;
-	    $dex = $ex - (($scx + $ecx)/2 + $dir*$scale*$nx);
-	    $dey = $ey - (($scy + $ecy)/2 + $dir*$scale*$ny);
+	    $o = vecOrth(vecMinus($ec,$sc));
+	    $n = vecNorm($o);
+	    $ds = vecSum(vecScale(.5,vecMinus($ec,$sc)),vecScale($dir*$scale,$n));
+	    $de = vecSum(vecScale(.5,vecMinus($sc,$ec)),vecScale($dir*$scale,$n));
 	  }
       }
     else
       {
 	$arrowtype="";
-	$dsx = $ecx - $scx;
-	$dsy = $ecy - $scy;
-	$dex = $dsx;
-	$dey = $dsy;
+	$ds = vecMinus($ec,$sc);
+	$de = vecScale(-1,$ds);
       }
 
     // Now compute anchors as place where vector out of centre leaves box
-    if ($dsx == 0)
+    if ($ds["x"] == 0)
       {
-	$ts = $height[$sm][$sn]/(2*$dsy);
+	$ts = abs($height[$s["y"]][$s["x"]]/(2*$ds["y"]));
       }
-    elseif ($dsy == 0)
+    elseif ($ds["y"] == 0)
       {
-	$ts = $width[$sm][$sn]/(2*$dsx);
-      }
-    else
-      {
-	$ts = min($height[$sm][$sn]/(2*$dsy),$width[$sm][$sn]/(2*$dsx));
-      }
-    $sx = $scx + $ts*$dsx;
-    $sy = $scy + $ts*$dsy;
-
-    if ($dex == 0)
-      {
-	$ts = $height[$em][$en]/(2*$dey);
-      }
-    elseif ($dey == 0)
-      {
-	$ts = $width[$em][$en]/(2*$dex);
+	$ts = abs($width[$s["y"]][$s["x"]]/(2*$ds["x"]));
       }
     else
       {
-	$ts = min($height[$em][$en]/(2*$dey),$width[$em][$en]/(2*$dex));
+	$ts = min(abs($height[$s["y"]][$s["x"]]/(2*$ds["y"])),abs($width[$s["y"]][$s["x"]]/(2*$ds["x"])));
       }
-    $ex = $ecx + $ts*$dex;
-    $ey = $ecy + $ts*$dey;
+    $s = vecSum($sc,vecScale($ts,$ds));
 
-    $narrowpath = '<circle cx="' . $sx . 'ex" cy="' . $sy . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
-    $narrowpath .= '<circle cx="' . $ex . 'ex" cy="' . $ey . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
+    if ($de["x"] == 0)
+      {
+	$te = abs($height[$e["y"]][$e["x"]]/(2*$de["y"]));
+      }
+    elseif ($de["y"] == 0)
+      {
+	$te = abs($width[$e["y"]][$e["x"]]/(2*$de["x"]));
+      }
+    else
+      {
+	$te = min(abs($height[$e["y"]][$e["x"]]/(2*$de["y"])),abs($width[$e["y"]][$e["x"]]/(2*$de["x"])));
+      }
+    $e = vecSum($ec,vecScale($te,$de));
 
-    $narrowpath .= '<svg width="'
+//    $narrowpath = '<circle cx="' . $s["x"] . 'ex" cy="' . $s["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+//    $narrowpath .= '<circle cx="' . $e["x"] . 'ex" cy="' . $e["y"] . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
+
+    $arrowpath = '<svg width="'
       . $svgwidth
       . 'ex" height="'
       . $svgheight
@@ -623,311 +559,29 @@ for($i = 0; $i < count($arrows);$i++)
       . '">'
       . "\n";
 
-    $narrowpath .= '<path d="'
+    $arrowpath .= '<path d="'
       . 'M '
-      . $sx
-      . ' '
-      . $sy
+      . vecXY($s)
       . ' ';
 
-    if ($arrowtype)
+    if ($arrowtype == "Q")
       {
-	$narrowpath .= $arrowtype
-	  . ' '
-	  . ($sx + $dsx)
-	  . ' '
-	  . ($sy + $dsy)
+	$arrowpath .= 'Q '
+	  . vecXY(vecSum($sc,$ds))
 	  . ' ';
       }
-    if ($arrowtype == "C")
+    elseif ($arrowtype == "C")
       {
-	$narrowpath .= ($ecx - $dex)
+	$arrowpath .= 'C '
+	  . vecXY(vecSum($s,$ds))
 	  . ' '
-	  . ($ecy - $dey)
+	  . vecXY(vecSum($e,$de))
 	  . ' ';
       }
 
-    $narrowpath .= $ex
-      . ' '
-      . $ey
+    $arrowpath .= vecXY($e)
       . '" ';
 
-    $narrowpath .= 'stroke="red" stroke-width=".1" fill="none" /></svg>';
-    //    $svg .= $narrowpath;
-
-    // need to compute "anchors" for source and target
-    // horizontally
-    if ($en > $sn)
-      {
-	// target is to right of source
-	$sx = ($sn * $dim["row"]) + $maxwidth - ($maxwidth - $width[$sm][$sn])/2;
-	$ex = ($en * $dim["row"]) + ($maxwidth - $width[$em][$en])/2;
-      }
-    elseif ($en < $sn)
-      {
-	// target is to left of source
-	$sx = ($sn * $dim["row"]) + ($maxwidth - $width[$sm][$sn])/2;
-	$ex = ($en * $dim["row"]) + $maxwidth - ($maxwidth - $width[$em][$en])/2;
-      }
-    else
-      {
-	// target is in same column as source
-	$sx = ($sn * $dim["row"]) + $maxwidth/2;
-	$ex = ($sn * $dim["row"]) + $maxwidth/2;
-      }
-    // vertically
-    if ($em > $sm)
-      {
-	// target is below source
-	$sy = ($sm * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
-	$ey = ($em * $dim["col"]) + ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
-      }
-    elseif ($em < $sm)
-      {
-	// target is above source
-	$sy = ($sm * $dim["col"]) + ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
-	$ey = ($em * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
-      }
-    else
-      {
-	// target is in same row as source
-	$sy = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
-	$ey = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
-      }
-
-    $sy += $fudgeheight;
-    $ey += $fudgeheight;
-
-    // direction of arrow
-    $bx = $ex - $sx;
-    $by = $ey - $sy;
-    $ax = round($bx/sqrt($bx*$bx + $by*$by)*20)/20;
-    $ay = round($by/sqrt($bx*$bx + $by*$by)*20)/20;
-
-    // orthogonal direction
-    $ox = $ey - $sy;
-    $oy = $sx - $ex;
-    $nx = round($ox/sqrt($ox*$ox + $oy*$oy)*20)/20;
-    $ny = round($oy/sqrt($ox*$ox + $oy*$oy)*20)/20;
-
-    $sx += $nx * MakeEx($displacement);
-    $sy += $ny * MakeEx($displacement);
-    $ex += $nx * MakeEx($displacement);
-    $ey += $ny * MakeEx($displacement);
-
-    // draw arrow
-    // This is a bit of a cludge to rescale the arrow so that '1px' becomes '1ex'.  This is needed because the 'path' element only takes bare units.
-    $svg .= '<svg width="'
-      . $svgwidth
-      . 'ex" height="'
-      . $svgheight
-      . 'ex" viewBox="0 0 '
-      . $svgwidth
-      . ' '
-      . $svgheight
-      . '">'
-      . "\n";
-
-    $arrowpath = '<path d="';
-
-    // If curving, define a bezier 
-    // we also need to define the (x,y) coordinates of the labels so need to know the displacements
-    if ($curving)
-      {
-	if (preg_match('/\[([udlr ]+)\] *, *\[([udlr ]+)\]/',$curving,$dirs))
-	  {
-	    // cubic bezier curve
-	    LaTeXdebug("$dirs[1] $dirs[2]",1);
-	    // Need to recompute the anchors
-	    // horizontally
-	    if (stripos($dirs[1],"r") !== FALSE)
-	      {
-		// arrow should leave source to the right
-		$csx = ($sn * $dim["row"]) + $maxwidth - ($maxwidth - $width[$sm][$sn])/2;
-		$ccsx = 1;
-	      }
-	    elseif (stripos($dirs[1],"l") !== FALSE)
-	      {
-		// arrow should leave source to the left
-		$csx = ($sn * $dim["row"]) + ($maxwidth - $width[$sm][$sn])/2;
-		$ccsx = -1;
-	      }
-	    else
-	      {
-		// arrow leaves in the middle
-		$csx = ($sn * $dim["row"]) + $maxwidth/2;
-		$ccsx = 0;
-	      }
-	    if (stripos($dirs[2],"r") !== FALSE)
-	      {
-		// arrow should enter target from the right
-		$cex = ($en * $dim["row"]) + $maxwidth - ($maxwidth - $width[$em][$en])/2;
-		$ccex = -1;
-	      }
-	    elseif (stripos($dirs[2],"l") !== FALSE)
-	      {
-		// arrow should enter target from the left
-		$cex = ($en * $dim["row"]) + ($maxwidth - $width[$em][$en])/2;
-		$ccex = 1;
-	      }
-	    else
-	      {
-		// arrow arrives in the middle
-		$cex = ($en * $dim["row"]) + $maxwidth/2;
-		$ccex = 0;
-	      }
-	    // vertically
-	    if (stripos($dirs[1],"d") !== FALSE)
-	      {
-		// arrow should leave source downwards
-		$csy = ($sm * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
-		$ccsy = 1;
-	      }
-	    elseif (stripos($dirs[1],"u") !== FALSE)
-	      {
-		// arrow should leave source upwards
-		$csy = ($sm * $dim["col"]) + ($maxheight + $maxdepth - $height[$sm][$sn] - $depth[$sm][$sn])/2;
-		$ccsy = -1;
-	      }
-	    else
-	      {
-		// arrow should leave source in the middle
-		$csy = ($sm * $dim["col"]) + ($maxheight + $maxdepth)/2;
-		$ccsy = 0;
-	      }
-	    if (stripos($dirs[2],"d") !== FALSE)
-	      {
-		// arrow should enter target from below
-		$cey = ($em * $dim["col"]) + $maxheight + $maxdepth - ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
-		$ccey = 1;
-	      }
-	    elseif (stripos($dirs[2],"u") !== FALSE)
-	      {
-		// arrow should enter target from above
-		$cey = ($em * $dim["col"]) + ($maxheight + $maxdepth - $height[$em][$en] - $depth[$em][$en])/2;
-		$ccey = -1;
-	      }
-	    else
-	      {
-		// arrow should enter target in the middle
-		$cey = ($em * $dim["col"]) + ($maxheight + $maxdepth)/2;
-		$ccey = 0;
-	      }
-
-	    $csy += $fudgeheight;
-	    $cey += $fudgeheight;
-	    $cntl = 4;
-
-	    $arrowpath .= 'M '
-	      . $csx
-	      . ' '
-	      . $csy
-	      . ' C '
-	      . ($csx + $ccsx*$cntl)
-	      . ' '
-	      . ($csy + $ccsy*$cntl)
-	      . ' '
-	      . ($cex + $ccex*$cntl)
-	      . ' '
-	      . ($cey + $ccey*$cntl)
-	      . ' '
-	      . $cex
-	      . ' '
-	      . $cey;
-	    
-	    // compute the positions of the labels (along the curves, shifting them off the curve is done later)
-	    $lux = (1 - $udisp)*(1 - $udisp)*(1 - $udisp)*$csx + 3*(1 - $udisp)*(1 - $udisp)*$udisp*($csx + $ccsx*$cntl) + 3*(1 - $udisp)*$udisp*$udisp*($cex + $ccex*$cntl) + $udisp*$udisp*$udisp*$cex;
-	    $luy = (1 - $udisp)*(1 - $udisp)*(1 - $udisp)*$csy + 3*(1 - $udisp)*(1 - $udisp)*$udisp*($csy + $ccsy*$cntl) + 3*(1 - $udisp)*$udisp*$udisp*($cey + $ccey*$cntl) + $udisp*$udisp*$udisp*$cey;
-	    $llx = (1 - $ldisp)*(1 - $ldisp)*(1 - $ldisp)*$csx + 3*(1 - $ldisp)*(1 - $ldisp)*$ldisp*($csx + $ccsx*$cntl) + 3*(1 - $ldisp)*$ldisp*$ldisp*($cex + $ccex*$cntl) + $ldisp*$ldisp*$ldisp*$cex;
-	    $lly = (1 - $ldisp)*(1 - $ldisp)*(1 - $ldisp)*$csy + 3*(1 - $ldisp)*(1 - $ldisp)*$ldisp*($csy + $ccsy*$cntl) + 3*(1 - $ldisp)*$ldisp*$ldisp*($cey + $ccey*$cntl) + $ldisp*$ldisp*$ldisp*$cey;
-	    $lmx = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csx + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csx + $ccsx*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cex + $ccex*$cntl) + $mdisp*$mdisp*$mdisp*$cex;
-	    $lmy = (1 - $mdisp)*(1 - $mdisp)*(1 - $mdisp)*$csy + 3*(1 - $mdisp)*(1 - $mdisp)*$mdisp*($csy + $ccsy*$cntl) + 3*(1 - $mdisp)*$mdisp*$mdisp*($cey + $ccey*$cntl) + $mdisp*$mdisp*$mdisp*$cey;
-
-	    // midpoint of line
-	    $mx = 0.125*$csx + 0.375*($csx + $ccsx*$cntl) + 0.375*($cex + $ccex*$cntl) + 0.125*$cex;
-	    $my = 0.125*$csy + 0.375*($csy + $ccsy*$cntl) + 0.375*($cey + $ccey*$cntl) + 0.125*$cey;
-	    $dx = -0.25*$csx - 0.25*($csx + $ccsx*$cntl) + 0.25*($cex + $ccex*$cntl) + 0.25*$cex;
-	    $dy = -0.25*$csy - 0.25*($csy + $ccsy*$cntl) + 0.25*($cey + $ccey*$cntl) + 0.25*$cey;
-	  }
-	else
-	  {
-	    // symmetric quadratic bezier curve
-	    $type = substr($curving,0,1);
-	    if ($type == "_")
-	      {
-	    $dir = -1;
-	      }
-	    else
-	      {
-		$dir = 1;
-	      }
-	    $length = substr($curving,1);
-	    $length = trim($length);
-	    if ($length)
-	      {
-		$scale = MakeEx($length);
-	      }
-	    else
-	      {
-		$scale = 1;
-	      }
-
-
-	    // midpoints of lines
-	    $qmx = ($sx + $ex)/2;
-	    $qmy = ($sy + $ey)/2;
-
-	    // should we displace the start and finish slightly?
-	    $arrowpath .= 'M '
-	      . $sx
-	      . ' '
-	      . $sy
-	      . ' Q '
-	      . ($qmx + $dir*$scale*$nx)
-	      . ' '
-	      . ($qmy + $dir*$scale*$ny)
-	      . ' '
-	      . $ex
-	      . ' '
-	      . $ey;
-
-	    // compute label positions
-	    $lux = (1 - $udisp)*(1 - $udisp)*$sx + 2*(1 - $udisp)*$udisp*($qmx + $dir*$scale*$nx) + $udisp*$udisp*$ex;
-	    $luy = (1 - $udisp)*(1 - $udisp)*$sy + 2*(1 - $udisp)*$udisp*($qmy + $dir*$scale*$ny) + $udisp*$udisp*$ey;
-	    $llx = (1 - $ldisp)*(1 - $ldisp)*$sx + 2*(1 - $ldisp)*$ldisp*($qmx + $dir*$scale*$nx) + $ldisp*$ldisp*$ex;
-	    $lly = (1 - $ldisp)*(1 - $ldisp)*$sy + 2*(1 - $ldisp)*$ldisp*($qmy + $dir*$scale*$ny) + $ldisp*$ldisp*$ey;
-	    $lmx = (1 - $mdisp)*(1 - $mdisp)*$sx + 2*(1 - $mdisp)*$mdisp*($qmx + $dir*$scale*$nx) + $mdisp*$mdisp*$ex;
-	    $lmy = (1 - $mdisp)*(1 - $mdisp)*$sy + 2*(1 - $mdisp)*$mdisp*($qmy + $dir*$scale*$ny) + $mdisp*$mdisp*$ey;
-
-	    $mx = 0.25*$sx + 0.5*($qmx + $dir*$scale*$nx) + 0.25*$ex;
-	    $my = 0.25*$sy + 0.5*($qmy + $dir*$scale*$ny) + 0.25*$ey;
-	    $dx = -0.5*$sx + 0.5*$ex;
-	    $dy = -0.5*$sy + 0.5*$ey;
-	  }
-      }
-    else
-      {
-	$arrowpath .= 'M '
-	  . $sx
-	  . ' '
-	  . $sy
-	  . ' L '
-	  . $ex
-	  . ' '
-	  . $ey;
-	// compute label positions
-	$lux = $sx + $udisp*($ex - $sx);
-	$luy = $sy + $udisp*($ey - $sy);
-	$llx = $sx + $ldisp*($ex - $sx);
-	$lly = $sy + $ldisp*($ey - $sy);
-	$lmx = $sx + $mdisp*($ex - $sx);
-	$lmy = $sy + $mdisp*($ey - $sy);
-
-	$mx = ($sx + $ex)/2;
-	$my = ($sy + $ey)/2;
-	$dx = $ex - $sx;
-	$dy = $ey - $sy;
-      }
 
     // assemble style
     if ($style)
@@ -990,7 +644,7 @@ for($i = 0; $i < count($arrows);$i++)
 	$markerstart = "";
       }
 
-    $arrowpath .= '" fill="none" ';
+    $arrowpath .= ' fill="none" ';
 
     LaTeXdebug($stem,1);
 
@@ -1052,19 +706,28 @@ for($i = 0; $i < count($arrows);$i++)
       }
     $arrowpath .= ' />';
 
-    LaTeXdebug("midpoints: $mx $mx $dx $dy",1);
+    //    LaTeXdebug("midpoints: $m['x'] $m['y'] $d['x'] $d['y']",1);
 
     if (array_key_exists($mid,$arrowheads))
       {
 	LaTeXdebug("Got middle of arrow",1);
+	if ($arrowtype == "C")
+	  {
+	    list($m,$d) = cubicBezier(.5,$s,vecSum($s,$ds),vecSum($e,$de),$e);
+	  }
+	elseif ($arrowtype == "Q")
+	  {
+	    list($m,$d) = quadraticBezier(.5,$s,vecSum($sc,$ds),$e);
+	  }
+	else
+	  {
+	    list($m,$d) = linear(.5,$s,$e);
+	  }
+
 	$arrowpath .= '<path d="M '
-	  . ($mx - $dx)
-	  . ' '
-	  . ($my - $dy)
+	  . vecXY(vecMinus($m,$d))
 	  . ' L '
-	  . $mx
-	  . ' '
-	  . $my
+	  . vecXY($m)
 	  . '" stroke-width=".1" fill="none" marker-end="url('
 	  . $arrowheads[$mid]
 	  . ')" />';
@@ -1079,25 +742,37 @@ for($i = 0; $i < count($arrows);$i++)
 	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)');
 	$upperlabelheight = getHeightOf('\(' . $upperlabel . '\)') + getDepthOf('\(' . $upperlabel . '\)');
 
-//	$svg .= '<circle cx="' . $lux . 'ex" cy="' . $luy . 'ex" r="1" stroke="black" stroke-width="1" />' . "\n";
-	$lux += - $upperlabelwidth/2 + $nx*$swap;
-	$luy += - $upperlabelheight/2 - $fudgeheight + ($ny - $fudgeheight)*$swap;
+	if ($arrowtype == "C")
+	  {
+	    list($lu,$lud) = cubicBezier($udisp,$s,vecSum($s,$ds),vecSum($e,$de),$e);
+	  }
+	elseif ($arrowtype == "Q")
+	  {
+	    list($lu,$lud) = quadraticBezier($udisp,$s,vecSum($sc,$ds),$e);
+	  }
+	else
+	  {
+	    list($lu,$lud) = linear($udisp,$s,$e);
+	  }
 
-	$svg .= '<foreignObject x="'
-	  . $lux
-	  . 'ex" y="'
-	  . $luy
-	  . 'ex" width="'
+	LaTeXdebug("tangent is: " . vecXY($lud),1);
+	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+
+	$lu = vecSum($lu,vecScale(vecMake(.5*$upperlabelwidth,.5*$upperlabelheigh),vecSum(vecOrth(vecSign($lud)),vecMake(1,1))));
+
+	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+//	$lu["x"] += - $upperlabelwidth/2 + $n["x"]*$swap;
+//	$lu["y"] += - $upperlabelheight/2 - $fudgeheight + ($n["y"] - $fudgeheight)*$swap;
+
+	$svg .= '<foreignObject '
+	  . vecXY($lu,1)
+	  . ' width="'
 	  . ($upperlabelwidth + 2)
 	  . 'ex" height="'
 	  . $upperlabelheight
 	  . 'ex">'
 	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
-	  . '<div style="width:'
-	  . $upperlabelwidth
-	  . 'ex,height:'
-	  . ($upperlabelheight -1)
-	  . 'ex" align="center">'
+	  . '<div align="center">'
 	  . '\('
 	  . $upperlabel
 	  . '\)'
@@ -1109,13 +784,13 @@ for($i = 0; $i < count($arrows);$i++)
       {
 	$lowerlabelwidth = getWidthOf('\(' . $lowerlabel . '\)');
 	$lowerlabelheight = getHeightOf('\(' . $lowerlabel . '\)') + getDepthOf('\(' . $lowerlabel . '\)');
-	$llx += - $lowerlabelwidth/2 - $nx*$swap;
-	$lly += - ($ny - $fudgeheight)*$swap;
+	$ll["x"] += - $lowerlabelwidth/2 - $n["x"]*$swap;
+	$ll["y"] += - ($n["y"] - $fudgeheight)*$swap;
 
 	$svg .= '<foreignObject x="'
-	  . $llx
+	  . $ll["x"]
 	  . 'ex" y="'
-	  . $lly
+	  . $ll["y"]
 	  . 'ex" width="'
 	  . ($lowerlabelwidth + 1)
 	  . 'ex" height="'
