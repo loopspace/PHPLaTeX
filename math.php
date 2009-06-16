@@ -660,11 +660,15 @@ function udrlVect($str)
 }
 
 // return the vector in string form, rounded as usually this is before insertion into SVG
-function vecXY($a,$b = 0)
+function vecXY($a,$b = "")
 {
-  if ($b)
+  if ($b == "x")
     {
       return 'x="' . (round($a["x"]*20)/20) . 'ex" y="' . (round($a["y"]*20)/20) . 'ex"';
+    }
+  elseif ($b == "w")
+    {
+      return 'width="' . abs(round($a["x"]*20)/20) . 'ex" height="' . abs(round($a["y"]*20)/20) . 'ex"';
     }
   else
     {

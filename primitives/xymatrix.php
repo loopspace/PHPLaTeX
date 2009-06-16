@@ -1,12 +1,13 @@
 // name: xymatrix
 $args = "";
-$dim = array(
-	     "x" => "8", // row
-	     "y" => "8"  // col
-	     );
+$sep = vecMake(8,8); // separation of entries
+$margin = vecMake(4,4); // margin around diagram
+$padding = vecMake(1,1); // padding around nodes
+
 $arrowfile = "arrows.def";
 $accuracy = 20; // rounding for computations
 // morally, \ifnextchar{@} ...
+
 $nexttok = nexttok($latex);
 while ($nexttok != "{")
   {
@@ -27,7 +28,7 @@ $matrix = stripgrp(nextgrp($latex));
 $m = 0;
 $n = 0;
 $maxwidth = 1;
-$maxheight = 2;
+$maxheight = 1;
 $maxdepth = 0;
 $numcols = 0;
 
@@ -44,12 +45,7 @@ while ($matrix)
 	  {
 	    // got an arrow
 	    $inarrow = 1;
-	    $upperdisplacement = "";
-	    $upperlabel = "";
-	    $lowerdisplacement = "";
-	    $lowerlabel = "";
-	    $middledisplacement = "";
-	    $middlelabel = "";
+	    $labels = array();
 	    $curving = "";
 	    $stylevariant = "";
 	    $style = "";
@@ -65,47 +61,37 @@ while ($matrix)
 		$matrix = ltrim($matrix," \0");
 		$nexttok = nexttok($matrix);
 		//		LaTeXdebug($nexttok,1);
-		if ($nexttok == '^')
+		if (($nexttok == '^') or ($nexttok == '_') or ($nexttok == '|'))
 		  {
-		    LaTeXdebug("label above",1);
-		    // label above
+		    LaTeXdebug("label",1);
+		    // label 
+		    if ($nexttok == '^')
+		      {
+			$position = 1;
+		      }
+		    elseif ($nexttok == '_')
+		      {
+			$position = -1;
+		      }
+		    else
+		      {
+			$position = 0;
+		      }
 		    // displacement syntax: (< *){0,2}|(> *){0,2}
+		    $labeldisplacement = .5;
 		    $matrix = ltrim($matrix," ");
 		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
 		      {
-			$upperdisplacement = $matches[0];
-			$matrix = substr($matrix,strlen($upperdisplacement));
+			$labeldisplacement = $matches[0];
+			$matrix = substr($matrix,strlen($labeldisplacement));
 		      }
 		    $matrix = ltrim($matrix," ");
-		    $upperlabel = nextgrp($matrix);
-		  }
-		elseif ($nexttok == '_')
-		  {
-		    LaTeXdebug("label below",1);
-		    // label below
-		    // displacement syntax: (< *){0,2}|(> *){0,2}
-		    $matrix = ltrim($matrix," ");
-		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
-		      {
-			$lowerdisplacement = $matches[0];
-			$matrix = substr($matrix,strlen($lowerdisplacement));
-		      }
-		    $matrix = ltrim($matrix," ");
-		    $lowerlabel = nextgrp($matrix);
-		  }
-		elseif ($nexttok == '|')
-		  {
-		    LaTeXdebug("label middle",1);
-		    // label in middle
-		    // displacement syntax: (< *){0,2}|(> *){0,2}
-		    ltrim($matrix," ");
-		    if (preg_match('/!{[^;]+;[^}]+}|(?:(?:[<>])[<> ]*)?(?:\([\.0-9]+\))?|/',$matrix,$matches))
-		      {
-			$middledisplacement = $matches[0];
-			$matrix = substr($matrix,strlen($middledisplacement));
-		      }
-		    ltrim($matrix," ");
-		    $middlelabel = nextgrp($matrix);
+		    $text = nextgrp($matrix);
+		    $labels[] = array(
+				      "position" => $position,
+				      "displacement" => $labeldisplacement,
+				      "text" => $text
+				      );
 		  }
 		elseif ($nexttok == '@')
 		  {
@@ -126,10 +112,10 @@ while ($matrix)
 		    elseif ($nexttok == '(')
 		      {
 			// also curving
+			LaTeXdebug("curving",1);
 			$nexttok = nexttok($matrix);
 			while ($nexttok != ')')
 			  {
-			    LaTeXdebug("curving",1);
 			    $curving .= $nexttok;
 			    $nexttok = nexttok($matrix);
 			  }
@@ -197,12 +183,7 @@ while ($matrix)
 	    $arrows[] = array(
 			      "y" => $m,
 			      "x" => $n,
-			      "upperdisplacement" => $upperdisplacement,
-			      "upperlabel" => $upperlabel,
-			      "lowerdisplacement" => $lowerdisplacement,
-			      "lowerlabel" => $lowerlabel,
-			      "middledisplacement" => $middledisplacement,
-			      "middlelabel" => $middlelabel,
+			      "labels" => $labels,
 			      "curving" => $curving,
 			      "stylevariant" => $stylevariant,
 			      "style" => $style,
@@ -212,23 +193,6 @@ while ($matrix)
 			      "dash" => $dash,
 			      "target" => $target
 			      );
-	    LaTeXdebug("source: $m $n",1);
-	    LaTeXdebug("upperdisplacement: " . $upperdisplacement,1);
-	    LaTeXdebug("upperlabel: " . $upperlabel,1);
-	    LaTeXdebug("lowerdisplacement: " . $lowerdisplacement,1);
-	    LaTeXdebug("lowerlabel: " . $lowerlabel,1);
-	    LaTeXdebug("middledisplacement: " . $middledisplacement,1);
-	    LaTeXdebug("middlelabel: " . $middlelabel,1);
-	    LaTeXdebug("curving: " . $curving,1);
-	    LaTeXdebug("stylevariant: " . $stylevariant,1);
-	    LaTeXdebug("style: " . $style,1);
-	    LaTeXdebug("displacement: " . $displacement,1);
-	    LaTeXdebug("control: " . $control,1);
-	    LaTeXdebug("swap: " . $swap,1);
-	    LaTeXdebug("dash: " . $dash,1);
-	    LaTeXdebug("target: " . $target,1);
-
-
 	  }
 	else
 	  {
@@ -245,7 +209,7 @@ while ($matrix)
     if ($width[$m][$n] > $maxwidth)
       $maxwidth = $width[$m][$n];
     if ($height[$m][$n] > $maxheigh)
-      $maxheigh = $height[$m][$n];
+      $maxheight = $height[$m][$n];
     if ($depth[$m][$n] > $maxdepth)
       $maxdepth = $depth[$m][$n];
 
@@ -261,29 +225,22 @@ while ($matrix)
 	$n = 0;
       }
   }
-$maxNodeSize = array(
-		     "x" => $maxwidth,
-		     "y" => $maxheight + $maxdepth
-		     );
 
-$dim = vecSum($dim,$maxNodeSize);
-
-$numrows = count($entry);
-$numcols += 1;
-
-$svgwidth = $dim["x"]*($numrows + 1);
-$svgheight = $dim["y"]*($numcols);
+// maximum node size as seen from outside (i.e. plus padding)
+$maxNodeSize = vecSum($padding,vecMake($maxwidth, $maxheight + $maxdepth));
+// node separation vector
+$nodeCoords = vecSum($sep,$maxNodeSize);
+// size of matrix of entries
+$matrixSize = vecMake($numcols,count($entry) - 1); // start counting at 0,0
+// total size of diagram
+$svgSize = vecSum(vecSum(vecScale(2,$margin),vecScale($matrixSize,$nodeCoords)),$maxNodeSize);
 
 $svg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" ';
-$svg .= 'width="' 
-  . $svgwidth
-  . 'ex" height="' 
-  . $svgheight
-  . 'ex">'
-  . "\n";
+$svg .= vecXY($svgSize,"w");
+$svg .= '>';
 
+// should only do this once per page, maybe now it's not necessary ...
 $svg .= file_get_contents($arrowfile);
-
 
 $arrowheads = array(
 		    "filledArrow" => "#filledArrow",
@@ -310,15 +267,11 @@ for($m = 0;$m < count($entry);$m++)
   {
     for($n = 0;$n < count($entry[$m]); $n++)
       {
-	$svg .= '<foreignObject x="'
-	  . ($n * $dim["x"])
-	  . 'ex" y="'
-	  . ($m * $dim["y"])
-	  . 'ex" width="'
-	  . $maxwidth
-	  . 'ex" height="'
-	  . ($maxheight + $maxdepth)
-	  . 'ex">'
+	$svg .= '<foreignObject '
+	  . vecXY(vecSum($margin,vecScale(vecMake($n,$m),$nodeCoords)),"x")
+	  . ' '
+	  . vecXY($maxNodeSize,"w")
+	  . '>'
 	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
 	  . '<div align="center">'
 	  . '\('
@@ -337,14 +290,8 @@ for($i = 0; $i < count($arrows);$i++)
   {
     // extract significant parts from arrow
     // starting entry
-    $s["y"] = $arrows[$i]["y"];
-    $s["x"] = $arrows[$i]["x"];
-    $upperdisplacement = $arrows[$i]["upperdisplacement"];
-    $upperlabel = $arrows[$i]["upperlabel"];
-    $lowerdisplacement = $arrows[$i]["lowerdisplacement"];
-    $lowerlabel = $arrows[$i]["lowerlabel"];
-    $middledisplacement = $arrows[$i]["middledisplacement"];
-    $middlelabel = $arrows[$i]["middlelabel"];
+    $s = vecMake($arrows[$i]["x"],$arrows[$i]["y"]);
+    $labels = $arrows[$i]["labels"];
     $curving = $arrows[$i]["curving"];
     $stylevariant = $arrows[$i]["stylevariant"];
     $style = $arrows[$i]["style"];
@@ -357,6 +304,15 @@ for($i = 0; $i < count($arrows);$i++)
 
     /*
      * Coordinate summary:
+     *
+     * $s coordinates of starting entry (matrix co-ords)
+     * $e coordinates of final entry (matrix co-ords)
+     * $sc coordinates of centre of starting entry
+     * $ec coordinates of centre of final entry
+     * $ds vector of direction of arrow as it leaves start
+     * $de vector of direction back along arrow as it enters target
+     * $sa coordinates of start of arrow
+     * $ea coordinates of end of arrow
      *
      * $sn,$sm matrix coordinates of starting entry
      * $en,$em matrix coordinates of final entry
@@ -389,80 +345,13 @@ for($i = 0; $i < count($arrows);$i++)
     //    midpoints of the entries
     // 2. the offsets (> and <) are relative to the length of the
     //    curve, not absolute distances.
-    $jot = .1;
-    if ($upperdisplacement)
-      {
-	// The first > or < is to anchor it at the relevant end
-	$uin = (substr_count($upperdisplacement,"<") - 1)*$jot;
-	$uout = 1 - (substr_count($upperdisplacement,">") - 1)*$jot;
-	if (preg_match('/\((\.[0-9]+)\)/',$upperdisplacement,$matches))
-	  {
-	    $udisp = $uin + ($uout - $uin)*$matches[1];
-	  }
-	elseif (substr($upperdisplacement,0,1) == "<")
-	  {
-	    $udisp = $uin;
-	  }
-	else
-	  {
-	    $udisp = $uout;
-	  }
-      }
-    else
-      {
-	$udisp = .5;
-      }
-    if ($lowerdisplacement)
-      {
-	// The first > or < is to anchor it at the relevant end
-	$lin = (substr_count($lowerdisplacement,"<") - 1)*$jot;
-	$lout = 1 - (substr_count($lowerdisplacement,">") - 1)*$jot;
-	if (preg_match('/\((\.[0-9]+)\)/',$lowerdisplacement,$matches))
-	  {
-	    $ldisp = $lin + ($lout - $lin)*$matches[1];
-	  }
-	elseif (substr($lowerdisplacement,0,1) == "<")
-	  {
-	    $ldisp = $lin;
-	  }
-	else
-	  {
-	    $ldisp = $lout;
-	  }
-      }
-    else
-      {
-	$ldisp = .5;
-      }
-    if ($middledisplacement)
-      {
-	// The first > or < is to anchor it at the relevant end
-	$min = (substr_count($middledisplacement,"<") - 1)*$jot;
-	$mout = 1 - (substr_count($middledisplacement,">") - 1)*$jot;
-	if (preg_match('/\((\.[0-9]+)\)/',$middledisplacement,$matches))
-	  {
-	    $mdisp = $min + ($mout - $min)*$matches[1];
-	  }
-	elseif (substr($middledisplacement,0,1) == "<")
-	  {
-	    $mdisp = $min;
-	  }
-	else
-	  {
-	    $mdisp = $mout;
-	  }
-      }
-    else
-      {
-	$mdisp = .5;
-      }
 
     // final entry
     $e = vecSum($s,udrlVect($target));
 
     // centres of entries
-    $sc = vecSum(vecScale($dim,$s),vecMake($maxwidth/2,$maxheight-1));
-    $ec = vecSum(vecScale($dim,$e),vecMake($maxwidth/2,$maxheight-1));
+    $sc = vecSum(vecSum($margin,vecScale($s,$nodeCoords)),vecScale(.5,$maxNodeSize));
+    $ec = vecSum(vecSum($margin,vecScale($e,$nodeCoords)),vecScale(.5,$maxNodeSize));
 
     // direction of arrows
 
@@ -520,31 +409,30 @@ for($i = 0; $i < count($arrows);$i++)
 
     // Now compute anchors as place where vector out of centre leaves box
 
-    $sBoxur = vecMake($width[$s["y"]][$s["x"]]/2,$depth[$s["y"]][$s["x"]]);
-    $sBoxdl = vecMake(-$width[$s["y"]][$s["x"]]/2,1-$height[$s["y"]][$s["x"]]);
-    $s = vecSum($sc,vecReSupNorm($ds,$sBoxur,$sBoxdl));
+    $sBoxur = vecSum($padding,vecMake($width[$s["y"]][$s["x"]]/2,($height[$s["y"]][$s["x"]]+$depth[$s["y"]][$s["x"]])/2));
+    $sBoxdl = vecScale(-1,$sBoxur);
+    $sa = vecSum($sc,vecReSupNorm($ds,$sBoxur,$sBoxdl));
 
-    $eBoxur = vecMake($width[$e["y"]][$e["x"]]/2,$depth[$e["y"]][$e["x"]]);
-    $eBoxdl = vecMake(-$width[$e["y"]][$e["x"]]/2,1-$height[$e["y"]][$e["x"]]);
-    $e = vecSum($ec,vecReSupNorm($de,$eBoxur,$eBoxdl));
+    LaTeXdebug("Renormalising: " . vecXY($sBoxur) . ' ' . vecXY($sBoxdl),1);
 
-//    $narrowpath = '<circle cx="' . $s["x"] . 'ex" cy="' . $s["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
-//    $narrowpath .= '<circle cx="' . $e["x"] . 'ex" cy="' . $e["y"] . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
+    $eBoxur = vecSum($padding,vecMake($width[$e["y"]][$e["x"]]/2,($height[$s["y"]][$s["x"]]+$depth[$e["y"]][$e["x"]])/2));
+    $eBoxdl = vecScale(-1,$eBoxur);
+    $ea = vecSum($ec,vecReSupNorm($de,$eBoxur,$eBoxdl));
 
-    $arrowpath = '<svg width="'
-      . $svgwidth
-      . 'ex" height="'
-      . $svgheight
-      . 'ex" viewBox="0 0 '
-      . $svgwidth
-      . ' '
-      . $svgheight
+//    $svg .= '<circle cx="' . $sc["x"] . 'ex" cy="' . $sc["y"] . 'ex" r="1" stroke="green" stroke-width="1" />' . "\n";
+//    $svg .= '<circle cx="' . $sa["x"] . 'ex" cy="' . $sa["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+//    $svg .= '<circle cx="' . $ea["x"] . 'ex" cy="' . $ea["y"] . 'ex" r="1" stroke="blue" stroke-width="1" />' . "\n";
+
+    $arrowpath = '<svg '
+      . vecXY($svgSize,"w")
+      . ' viewBox="0 0 '
+      . vecXY($svgSize)
       . '">'
       . "\n";
 
     $arrowpath .= '<path d="'
       . 'M '
-      . vecXY($s)
+      . vecXY($sa)
       . ' ';
 
     if ($arrowtype == "Q")
@@ -556,13 +444,13 @@ for($i = 0; $i < count($arrows);$i++)
     elseif ($arrowtype == "C")
       {
 	$arrowpath .= 'C '
-	  . vecXY(vecSum($s,$ds))
+	  . vecXY(vecSum($sa,$ds))
 	  . ' '
-	  . vecXY(vecSum($e,$de))
+	  . vecXY(vecSum($ea,$de))
 	  . ' ';
       }
 
-    $arrowpath .= vecXY($e)
+    $arrowpath .= vecXY($ea)
       . '" ';
 
 
@@ -696,15 +584,15 @@ for($i = 0; $i < count($arrows);$i++)
 	LaTeXdebug("Got middle of arrow",1);
 	if ($arrowtype == "C")
 	  {
-	    list($m,$d) = cubicBezier(.5,$s,vecSum($s,$ds),vecSum($e,$de),$e);
+	    list($m,$d) = cubicBezier(.5,$sa,vecSum($sa,$ds),vecSum($ea,$de),$ea);
 	  }
 	elseif ($arrowtype == "Q")
 	  {
-	    list($m,$d) = quadraticBezier(.5,$s,vecSum($sc,$ds),$e);
+	    list($m,$d) = quadraticBezier(.5,$sa,vecSum($sc,$ds),$ea);
 	  }
 	else
 	  {
-	    list($m,$d) = linear(.5,$s,$e);
+	    list($m,$d) = linear(.5,$sa,$ea);
 	  }
 
 	$arrowpath .= '<path d="M '
@@ -720,73 +608,77 @@ for($i = 0; $i < count($arrows);$i++)
       . '</svg>'
       . "\n";
 
-    if ($upperlabel)
+    while ($labels)
       {
-	$upperlabelwidth = getWidthOf('\(' . $upperlabel . '\)') + 1;
-	$upperlabelheight = getHeightOf('\(' . $upperlabel . '\)') + getDepthOf('\(' . $upperlabel . '\)');
+	$label = array_shift($labels);
+	$text = $label["text"];
+	$labeldisplacement = $label["displacement"];
+	$pos = $label["position"];
 
-	if ($arrowtype == "C")
+    $jot = .1;
+    if ($labeldisplacement)
+      {
+	// The first > or < is to anchor it at the relevant end
+	$in = (substr_count($labeldisplacement,"<") - 1)*$jot;
+	$out = 1 - (substr_count($labeldisplacement,">") - 1)*$jot;
+	if (preg_match('/\((\.[0-9]+)\)/',$labeldisplacement,$matches))
 	  {
-	    list($lu,$lud) = cubicBezier($udisp,$s,vecSum($s,$ds),vecSum($e,$de),$e);
+	    $disp = $in + ($out - $in)*$matches[1];
 	  }
-	elseif ($arrowtype == "Q")
+	elseif (substr($labeldisplacement,0,1) == "<")
 	  {
-	    list($lu,$lud) = quadraticBezier($udisp,$s,vecSum($sc,$ds),$e);
+	    $disp = $in;
 	  }
 	else
 	  {
-	    list($lu,$lud) = linear($udisp,$s,$e);
+	    $disp = $out;
+	  }
+      }
+    else
+      {
+	$disp = .5;
+      }
+
+	$labelSize = vecMake(getWidthOf('\(' . $text . '\)'), getHeightOf('\(' . $text . '\)') + getDepthOf('\(' . $text . '\)'));
+
+	if ($arrowtype == "C")
+	  {
+	    list($lu,$lud) = cubicBezier($disp,$sa,vecSum($sa,$ds),vecSum($ea,$de),$ea);
+	  }
+	elseif ($arrowtype == "Q")
+	  {
+	    list($lu,$lud) = quadraticBezier($disp,$sa,vecSum($sc,$ds),$ea);
+	  }
+	else
+	  {
+	    list($lu,$lud) = linear($disp,$sa,$ea);
 	  }
 
-	LaTeXdebug("tangent is: " . vecXY($lud),1);
-	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
+	//	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="red" stroke-width="1" />' . "\n";
 
-	$lu = vecSum($lu,vecSum(vecScale(vecMake(.5*$upperlabelwidth,.5*$upperlabelheight),vecOrth(vecSign($lud))),vecMake(-1,-1)));
+	$lu = vecSum($lu,vecSum(vecScale($labelSize,vecOrth(vecSign(vecScale($pos,$lud)))),vecMake(-1,-1)));
 
-	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="green" stroke-width="1" />' . "\n";
+	//	$svg .= '<circle cx="' . $lu["x"] . 'ex" cy="' . $lu["y"] . 'ex" r="1" stroke="green" stroke-width="1" />' . "\n";
 //	$lu["x"] += - $upperlabelwidth/2 + $n["x"]*$swap;
 //	$lu["y"] += - $upperlabelheight/2 - $fudgeheight + ($n["y"] - $fudgeheight)*$swap;
 
+	if (!$pos)
+	  $svg .= '<rect '
+	    . vecXY($lu,"x")
+	    . ' '
+	    . vecXY(vecSum($padding,$labelSize),"w")
+	    . ' fill="white" />';
+
+
 	$svg .= '<foreignObject '
-	  . vecXY($lu,1)
-	  . ' width="'
-	  . $upperlabelwidth
-	  . 'ex" height="'
-	  . $upperlabelheight
-	  . 'ex">'
+	  . vecXY($lu,"x")
+	  . ' '
+	  . vecXY(vecSum($padding,$labelSize),"w")
+	  . '>'
 	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
 	  . '<div align="center">'
 	  . '\('
-	  . $upperlabel
-	  . '\)'
-	  . '</div></body>'
-	  . '</foreignObject>'
-	  . "\n";
-      }
-    if ($lowerlabel)
-      {
-	$lowerlabelwidth = getWidthOf('\(' . $lowerlabel . '\)');
-	$lowerlabelheight = getHeightOf('\(' . $lowerlabel . '\)') + getDepthOf('\(' . $lowerlabel . '\)');
-	$ll["x"] += - $lowerlabelwidth/2 - $n["x"]*$swap;
-	$ll["y"] += - ($n["y"] - $fudgeheight)*$swap;
-
-	$svg .= '<foreignObject x="'
-	  . $ll["x"]
-	  . 'ex" y="'
-	  . $ll["y"]
-	  . 'ex" width="'
-	  . ($lowerlabelwidth + 1)
-	  . 'ex" height="'
-	  . $lowerlabelheight
-	  . 'ex">'
-	  . '<body xmlns="http://www.w3.org/1999/xhtml" style="border-width: 0pt; margin: 0pt; padding: 0pt;">'
-	  . '<div style="width:'
-	  . $lowerlabelwidth
-	  . 'ex,height:'
-	  . ($lowerlabelheight -1)
-	  . 'ex" align="center">'
-	  . '\('
-	  . $lowerlabel
+	  . $text
 	  . '\)'
 	  . '</div></body>'
 	  . '</foreignObject>'

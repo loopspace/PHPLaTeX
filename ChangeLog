@@ -1,3 +1,13 @@
+2009-06-16  Andrew Edgell Stacey  <andrew.stacey@math.ntnu.no>
+
+	* math.php: Renamed svg.php to math.php.  Added more posibilities
+	for converting a vector to a string.
+
+	* primitives/xymatrix.php: Label positioning seems much better,
+	added a margin around diagram and padding on foreignObjects.
+	Completed transition to vector arithmetic.  Technically possible
+	to have lots of labels on an arrow, not just three!
+
 2009-06-15  Andrew Stacey  <andrew.stacey@math.ntnu.no>
 
 	* primitives/xymatrix.php: Modified to use vector mathematics,

@@ -1,7 +1,7 @@
 <?php
 
 include("latex.php");
-include("svg.php");
+include("math.php");
 initialise();
 
 // Main program starts here
