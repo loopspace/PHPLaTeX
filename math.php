@@ -5,6 +5,180 @@
  * Expand a string and estimate its width, height, and depth
  */
 
+$sizeFunctions = array(
+		       "horizSum", create_function('$a,$b','$c["width"] = $a["width"] + $b["width"];$c["height"] = max($a["height"], $b["height"]);$c["depth"] = max($a["depth"], $b["depth"]); return $c;'),
+		       "vertSum", create_function('$a,$b','$c["width"] = max($a["width"],$b["width"]);$c["height"] = $a["height"] + $b["height"]; $c["depth"] = $a["depth"] + $b["depth"]; return $c;')
+		       );
+
+$charSizes = array(
+		   "A" => array(
+				"width" => 1.5,
+				"height" => 1.8,
+				"depth" => 0
+				),
+		   "a" => array(
+				"width" => 1,
+				"height" => 1.1,
+				"depth" => 0
+				)
+		   );
+
+function charSize ($char)
+{
+  global $charSizes;
+  // gets a string of characters or entities and returns their (approximate) size
+  // morally, $size = new charSize();
+  $size = array(
+		"width" => 0,
+		"height" => 0,
+		"depth" => 0
+		);
+
+  while ($char)
+    {
+      if (preg_match('/^(&(?:[A-Za-z]+|#[0-9]+|#x[A-Fa-f0-9]+);)(.*)/',$char,$matches))
+	{
+	  // entity
+	  $char = $matches[2];
+	  if (array_key_exists($matches[1],$charSizes))
+	    {
+	      $size = $sizeFunctions["horizSum"]($size, $charSizes[$matches[1]]);
+	    }
+	  else
+	    {
+	      if (preg_match('/^(&[A-Z](opf|scr|frk);)/',$matches[1]))
+		{
+		  $size = $sizeFunctions["horizSum"]($size, $charSizes["A"]);
+		}
+	      else
+		{
+		  $size = $sizeFunctions["horizSum"]($size, $charSizes["a"]);
+		}
+	    }
+	}
+      else
+	{
+	  $firstchar = substr($char,0,1);
+	  $char = substr($char,1);
+	  if (array_key_exists($firstchar,$charWidths))
+	    {
+	      $size = $sizeFunctions["horizSum"]($size, $charSizes[$firstchar]);
+	    }
+	  else
+	    {
+	      if (strpos("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$firstchar) !== FALSE)
+		{
+		  $size = $sizeFunctions["horizSum"]($size, $charSizes["A"]);
+		}
+	      else
+		{
+		  $size = $sizeFunctions["horizSum"]($size, $charSizes["a"]);
+		}
+	    }
+	}
+    }
+  return $size;
+}
+
+
+/*
+ * Need these to be global so that we can refer to them in a
+ * function-within-a-function (limited scoping rules of PHP)
+ */
+
+$sizeRule = array(
+		"mi" => create_function(
+					'$contents',
+					'return charSize($contents);'
+					),
+		"mo" => create_function(
+					'$contents',
+					'return $sizeFunctions["horizSum"](charSize($contents),$charSizes["a"]);'
+					),
+		"mn" => create_function(
+					'$contents',
+					'return charSize($contents);'
+					),
+		"mrow" => create_function(
+					  '$contents',
+					  'return array_sum(explode(" ",$contents));'
+					  ),
+		"mfrac" => create_function(
+					   '$contents',
+					   'return max(explode(" ",$contents));'
+					   ),
+		"msup" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
+		"msub" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return array_shift($conts);'),
+		"msubsup" => create_function(
+					  '$contents',
+					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
+		"mtext" => create_function(
+					   '$contents',
+					   'return array_sum(explode(" ",$contents));'
+					   ),
+		);
+
+
+function getSizeOf ($string)
+{
+  $expanded = processLaTeX($string);
+  return _getSizeOf($expanded);
+}
+
+function _getEnclosure($tag,$string)
+{
+  
+}
+
+function _getSizeOf($string)
+{
+  
+  // Need to go through and compute lengths
+
+  $string = trim($string);
+
+  if (preg_match('#^<([a-z]+)([^>]*)(/?)>(.*)#s',$string,$matches))
+    {
+      // tag
+      if ($matches[3])
+	{
+	  // non-enclosure tag
+	  if (array_key_exists($matches[1],$sizeRule))
+	    {
+	      return $sizeFunctions["horizSum"]($sizeRule[$matches[1]]($matches[2]),_getSizeOf($matches[4]));
+	    }
+	  else
+	    {
+	      return _getSizeOf($matches[4]);
+	    }
+	}
+      else
+	{
+	  // enclosure tag, find enclosure
+	  $tag = $matches[1];
+	  
+	  $enclosure = "";
+	  if (array_key_exists($matches[1],$sizeRule))
+	    {
+	    }
+	  else
+	    {
+	    }
+	}
+    }
+  else
+    {
+      // not a tag
+      preg_match('/([^<]*)(.*)/',$string,$matches);
+      return $sizeFunctions["horizSum"]($charSize($matches[1]),_getSizeOf($matches[2]));
+    }
+}
+
+
 /*
  * WIDTH
  */
