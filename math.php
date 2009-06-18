@@ -859,21 +859,7 @@ function vecMake($x,$y)
 
 function vecAngle($a)
 {
-  if ($a["y"] == 0)
-    {
-      if ($a["x"] < 0)
-	{
-	  return 180;
-	}
-      else
-	{
-	  return 0;
-	}
-    }
-  else
-    {
-      return arctan($a["x"]/$a["y"]);
-    }
+  return rad2deg(atan2($a["y"],$a["x"]));
 }
 
 ?>

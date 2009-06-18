@@ -310,129 +310,183 @@ $arrowheads = array(
 		    "filledArrow" => array(
 					   "size" => vecMake(10,10),
 					   "startRef" => vecMake(10,5),
+					   "midRef" => vecMake(5,5),
 					   "endRef" => vecMake(10,5),
 					   "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" />",
 					   "endMask" => "<path d=\"M 0 0 L 10 5 L 0 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />",
-					   "startMask" => ""),
+					   "midMask" => "",
+					   "startMask" => ""
+					   ),
 		    ">" => array(
 				 "size" => vecMake(10,10),
-				 "startRef" => vecMake(10,5),
+				 "startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
 				 "endRef" => vecMake(10,5),
 				 "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke-width=\"1\" stroke=\"black\" />",
 				 "endMask" => "<path d=\"M 0 0 L 10 5 L 0 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />",
-				 "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
+					   "midMask" => "",
+				 "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				 ),
 		    ">>" => array(
 				  "size" => vecMake(15,10),
 				  "startRef" => vecMake(10,5),
+				  "midRef" => vecMake(12.5,5),
 				  "endRef" => vecMake(15,5),
 				  "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 15 5 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
 				  "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
-				 "endMask" => "<path d=\"M 5 0 L 15 5 L 5 10 L 15 10 L 15 0 z\" fill=\"black\" stroke-width=\"1\" />"),
-		    "|>" => array(
+					   "midMask" => "",
+				 "endMask" => "<path d=\"M 5 0 L 15 5 L 5 10 L 15 10 L 15 0 z\" fill=\"black\" stroke-width=\"1\" />"
+				  ),
+		    ">|" => array(
 				  "size" => vecMake(10,10),
-				  "startRef" => vecMake(10,5),
+				  "startRef" => vecMake(0,5),
+				  "midRef" => vecMake(5,5),
 				  "endRef" => vecMake(10,5),
 				  "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 10 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				 "endMask" => "<path d=\"M 0 0 L 10 0 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
-				 "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
-		    "|>>" => array(
+				 "endMask" => "<path d=\"M 0 0 L 10 5 L 0 10 L 10 10 L 10 0 z \" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "startMask" => "<path d=\"M 0 0 L 0 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />"
+				  ),
+		    ">>|" => array(
 				   "size" => vecMake(15,10),
-				   "startRef" => vecMake(15,5),
-				   "endRef" => vecMake(10,5),
+				   "startRef" => vecMake(0,5),
+				   "midRef" => vecMake(7.5,5),
+				   "endRef" => vecMake(15,5),
 				   "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 15 5 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 15 0 L 15 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				   "endMask" =>  "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
-				   "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
+				   "endMask" =>  "<path d=\"M 5 0 L 15 5 L 0 15 L 15 10 L 15 0 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "startMask" => "<path d=\"M 0 0 L 0 10 L 15 10 L 15 0 z\" fill=\"black\" stroke-width=\"1\" />"
+				   ),
 		     ')' => array(
 				  "size" => vecMake(5,10),
-				  "startRef" => vecMake(5,5),
+				  "startRef" => vecMake(0,5),
+				  "midRef" => vecMake(2.5,5),
 				  "endRef" => vecMake(5,5),
 				  "arrow" => "<path d=\"M 0 0 Q 10 5 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				 "startMask" => "",
-				 "endMask" => ""),
+				 "startMask" => "<path d=\"M 0 0 Q 10 5 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "endMask" => "<path d=\"M 0 0 Q 10 5 0 10 L 5 10 L 5 0 z\" fill=\"black\"  stroke-width=\"1\" />",
+				  ),
 		    "<" => array(
 				 "size" => vecMake(10,10),
-				 "startRef" => vecMake(10,5),
-				 "endRef" => vecMake(5,10),
+				 "startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
+				 "endRef" => vecMake(10,5),
 				 "arrow" => "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				 "startMask" => "",
-				 "endMask" => ""),
+				 "startMask" => "<path d=\"M 10 0 L 0 5 L 10 10 L 0 10 L 0 0 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "endMask" => "<path d=\"M 10 0 L 0 5 L 10 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				 ),
 		    "<<" => array(
 				  "size" => vecMake(15,10),
-				  "startRef" => vecMake(15,5),
-				  "endRef" => vecMake(10,5),
-				  "arrow" => "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/><path d=\"M 15 0 L 5 5 L 15 10\"fill=\"none\"stroke=\"black\"stroke-width=\"1\"/>",
-				  "startMask" => "",
-				  "endMask" => ""),
+				  "startRef" => vecMake(0,5),
+				  "midRef" => vecMake(7.5,5),
+				  "endRef" => vecMake(15,5),
+				  "arrow" => "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/><path d=\"M 15 0 L 5 5 L 15 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/>",
+				  "startMask" => "<path d=\"M 0 0 L 10 0 L 0 5 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				  "endMask" =>  "<path d=\"M 15 0 L 5 5 L 15 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				  ),
 		    "|<"=> array(
 				 "size" => vecMake(10,10),
-				 "startRef" => vecMake(10,5),
+				 "startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
 				 "endRef" => vecMake(10,5),
 				 "arrow"=> "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				 "startMask" => "",
-				 "endMask" => ""),
+				 "startMask" => "<path d=\"M 0 0 L 10 0 L 0 5 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "endMask" => "<path d=\"M 0 0 L 10 0 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				 ),
 		    "|<<"=> array(
 				  "size" => vecMake(15,10),
-				  "startRef" => vecMake(15,5),
-				  "endRef" => vecMake(10,5),
+				  "startRef" => vecMake(0,5),
+				  "midRef" => vecMake(7.5,5),
+				  "endRef" => vecMake(15,5),
 				  "arrow"=> "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 15 0 L 5 5 L 15 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				 "startMask" => "<path d=\"M 0 0 L 10 0 L 0 5 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				 "endMask" => "<path d=\"M 0 0 L 15 0 L 15 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				  ),
 		    "("=> array(
 				"size" => vecMake(5,10),
 				"startRef" => vecMake(0,5),
-				"endRef" => vecMake(0,5),
+				 "midRef" => vecMake(2.5,5),
+				"endRef" => vecMake(5,5),
 				"arrow"=> "<path d=\"M 5 0 Q -5 5 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				"startMask" => "<path d=\"M 5 0 Q -5 5 5 10 L 0 10 L 0 0 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				"endMask" => "<path d=\"M 5 0 Q -5 5 5 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				),
 		    "/"=> array(
 				"size" => vecMake(5,10),
-				"startRef" => vecMake(2,5),
-				"endRef" => vecMake(2,5),
+				"startRef" => vecMake(0,5),
+				 "midRef" => vecMake(2.5,5),
+				"endRef" => vecMake(5,5),
 				"arrow"=> "<path d=\"M 5 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				"startMask" => "<path d=\"M 5 0 L 0 10 L 0 0 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				"endMask" => "<path d=\"M 5 0 L 0 10 L 5 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				),
 		    "//"=> array(
 				 "size" => vecMake(10,10),
-				 "startRef" => vecMake(2,5),
-				 "endRef" => vecMake(2,5),
-				 "arrow"=> "<path d=\"M 0 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				 "startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
+				 "endRef" => vecMake(10,5),
+				 "arrow"=> "<path d=\"M 5 0 L 0 10 M 10 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				"startMask" => "<path d=\"M 10 0 L 5 10 L 0 10 L 0 0 z\" fill=\"black\" stroke-width=\"1\" />",
+				 "midMask" => "<path d=\"M 5 0 L 0 10 L 5 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />",
+				"endMask" => "<path d=\"M 5 0 L 0 10 L 5 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />"
+				 ),
 		    "x"=> array(
 				"size" => vecMake(10,10),
-				"startRef" => vecMake(5,5),
-				"endRef" => vecMake(5,5),
-				"arrow"=> "<path d=\"M 0 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 10 0 L 10 0\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				"startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
+				"endRef" => vecMake(10,5),
+				"arrow"=> "<path d=\"M 0 0 L 10 10 M 10 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "<path d=\"M 0 0 L 10 0 L 5 5 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				  "endMask" => "<path d=\"M 0 0 L 10 0 L 10 10 L 0 10 L 5 5 z\" fill=\"black\" stroke-width=\"1\" />",
+				),
 		    "+"=> array(
 				"size" => vecMake(10,10),
-				"startRef" => vecMake(5,5),
-				"endRef" => vecMake(5,5),
+				"startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
+				"endRef" => vecMake(10,5),
 				"arrow"=> "<path d=\"M 5 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 5 L 10 5\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				"startMask" => "<path d=\"M 0 0 L 5 0 L 5 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "midMask" => "",
+				"endMask" => "<path d=\"M 5 0 L 10 0 L 10 10 L 5 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				),
 		    "|"=> array(
-				"size" => vecMake(5,10),
-				"startRef" => vecMake(2,5),
-				"endRef" => vecMake(2,5),
-				"arrow"=> "<path d=\"M 2.5 0 L 2.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				"size" => vecMake(1,10),
+				"startRef" => vecMake(0,5),
+				 "midRef" => vecMake(0,5),
+				"endRef" => vecMake(1,5),
+				"arrow"=> "<path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
 				  "startMask" => "",
-				  "endMask" => ""),
+					   "midMask" => "",
+				  "endMask" => ""
+				),
 		    "||"=> array(
-				 "size" => vecMake(10,10),
-				 "startRef" => vecMake(2.5,5),
-				 "endRef" => vecMake(2.5,5),
-				 "arrow"=> "<path d=\"M 2.5 0 L 2.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 7.5 0 L 7.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				 "size" => vecMake(5,10),
+				 "startRef" => vecMake(0,5),
+				 "midRef" => vecMake(2.5,5),
+				 "endRef" => vecMake(5,5),
+				 "arrow"=> "<path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "<path d=\"M 0 0 L 5 0 L 5 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				 "midMask" => "<path d=\"M 0 0 L 5 0 L 5 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				  "endMask" => "<path d=\"M 0 0 L 5 0 L 5 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				 ),
 		    "o"=> array(
 				"size" => vecMake(10,10),
 				"startRef" => vecMake(0,5),
+				 "midRef" => vecMake(5,5),
 				"endRef" => vecMake(10,5),
 				"arrow"=> "<circle cx=\"5\" cy=\"5\" r=\"4.5\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
-				  "startMask" => "",
-				  "endMask" => ""),
+				"startMask" => "<circle cx=\"5\" cy=\"5\" r=\"4.5\" fill=\"black\" stroke-width=\"1\" /><path d=\"M 0 0 L 5 0 L 5 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				"midMask" => "<circle cx=\"5\" cy=\"5\" r=\"4.5\" fill=\"black\" stroke-width=\"1\" />",
+				"endMask" => "<circle cx=\"5\" cy=\"5\" r=\"4.5\" fill=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 10 0 L 10 10 L 5 10 z\" fill=\"black\" stroke-width=\"1\" />"
+				)
 		    );
 
 
@@ -712,6 +766,7 @@ if ($arrows)
 	$arrowpath .= vecXY($ea)
 	  . '" ';
 
+	$arrowpath .= ' fill="none" ';
 
 	// assemble style
 	if ($style)
@@ -756,73 +811,6 @@ if ($arrows)
 	    $stem = "-";
 	    $head = ">";
 	  }
-    
-	if (array_key_exists($head,$arrowheads))
-	  {
-	    $markerend = $arrowheads[$head];
-	  }
-	else
-	  {
-	    $markerend = array();
-	  }
-	if (array_key_exists($tail,$arrowheads))
-	  {
-	    $markerstart = $arrowheads[$tail];
-	  }
-	else
-	  {
-	    $markerstart = array();
-	  }
-
-	$arrowpath .= ' fill="none" ';
-
-	if (($markerstart) or ($markerend))
-	  {
-	    if ($markerstart)
-	      {
-		// move to $s, rotate to $ds, scale and draw mask
-		$svgArrowMask .= '<g transform="translate('
-		  . vecXY($sa)
-		  . ') scale(0.1) rotate('
-		  . vecAngle($ds)
-		  . ') translate('
-		  . vecXY(vecScale(-1,$markerstart["startRef"]))
-		  . ')">'
-		  . $markerstart["startMask"]
-		  . '</g>';
-		$svgArrow .= '<g transform="translate('
-		  . vecXY($sa)
-		  . ') scale(0.1) rotate('
-		  . vecAngle($ds)
-		  . ') translate('
-		  . vecXY(vecScale(-1,$markerstart["startRef"]))
-		  . ')">'
-		  . $markerstart["arrow"]
-		  . '</g>';
-
-	      }
-	    if ($markerend)
-	      {
-		$svgArrowMask .= '<g transform="translate('
-		  . vecXY($ea)
-		  . ') scale(0.1) rotate('
-		  . vecAngle($de)
-		  . ') translate('
-		  . vecXY(vecScale(-1,$markerend["endRef"]))
-		  . ')">'
-		  . $markerend["endMask"]
-		  . '</g>';
-		$svgArrow .= '<g transform="translate('
-		  . vecXY($ea)
-		  . ') scale(0.1) rotate('
-		  . vecAngle($de)
-		  . ') translate('
-		  . vecXY(vecScale(-1,$markerend["endRef"]))
-		  . ')">'
-		  . $markerend["arrow"]
-		  . '</g>';
-	      }
-	  }
 
 	if (preg_match('/^([^{]*){([^}]*)}\1$/',$stem,$matches))
 	  {
@@ -832,6 +820,88 @@ if ($arrows)
 	else
 	  {
 	    $mid = "";
+	  }
+
+
+	if (array_key_exists($head,$arrowheads))
+	  {
+	    $svgArrowMask .= '<g transform="translate('
+	      . vecXY($ea)
+	      . ') scale(0.1) rotate('
+	      . vecAngle(vecScale(-1,$de))
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$head]["endRef"]))
+	      . ')">'
+	      . $arrowheads[$head]["endMask"]
+	      . '</g>';
+	    $svgArrow .= '<g transform="translate('
+	      . vecXY($ea)
+	      . ') scale(0.1) rotate('
+	      . vecAngle(vecScale(-1,$de))
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$head]["endRef"]))
+	      . ')">'
+	      . $arrowheads[$head]["arrow"]
+	      . '</g>';
+	  }
+
+	if (array_key_exists($tail,$arrowheads))
+	  {
+	    // move to $s, rotate to $ds, scale and draw mask
+	    $svgArrowMask .= '<g transform="translate('
+	      . vecXY($sa)
+	      . ') scale(0.1) rotate('
+	      . vecAngle($ds)
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$tail]["startRef"]))
+	      . ')">'
+	      . $arrowheads[$tail]["startMask"]
+	      . '</g>';
+	    $svgArrow .= '<g transform="translate('
+	      . vecXY($sa)
+	      . ') scale(0.1) rotate('
+	      . vecAngle($ds)
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$tail]["startRef"]))
+	      . ')">'
+	      . $arrowheads[$tail]["arrow"]
+	      . '</g>';
+	  }
+
+	if (array_key_exists($mid,$arrowheads))
+	  {
+	    if ($arrowtype == "C")
+	      {
+		list($m,$d) = cubicBezier(.5,$sa,vecSum($sa,$ds),vecSum($ea,$de),$ea);
+	      }
+	    elseif ($arrowtype == "Q")
+	      {
+		list($m,$d) = quadraticBezier(.5,$sa,vecSum($sc,$ds),$ea);
+	      }
+	    else
+	      {
+		list($m,$d) = linear(.5,$sa,$ea);
+	      }
+
+	    $svgArrowMask .= '<g transform="translate('
+	      . vecXY($m)
+	      . ') scale(0.1) rotate('
+	      . vecAngle($d)
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$mid]["midRef"]))
+	      . ')">'
+	      . $arrowheads[$mid]["midMask"]
+	      . '</g>';
+	    $svgArrow .= '<g transform="translate('
+	      . vecXY($m)
+	      . ') scale(0.1) rotate('
+	      . vecAngle($d)
+	      . ') translate('
+	      . vecXY(vecScale(-1,$arrowheads[$mid]["midRef"]))
+	      . ')">'
+	      . $arrowheads[$mid]["arrow"]
+	      . '</g>';
+
 	  }
 
 	if (($stem == '--') or ($stem == '=='))
@@ -864,7 +934,7 @@ if ($arrows)
 	      . $svgArrowMask
 	      . '</mask>';
 
-	    $svgArrow = $arrowpath
+	    $svgArrow .= $arrowpath
 	      . ' '
 	      . $arrowstyle
 	      . ' '
@@ -891,7 +961,7 @@ if ($arrows)
 	      .  ' stroke="black" stroke-width=".5" />'
 	      . '</mask>';
 
-	    $svgArrow = $arrowpath
+	    $svgArrow .= $arrowpath
 	      . ' '
 	      . $arrowstyle
 	      . ' stroke="black" stroke-width=".7" mask="url(#Clip'
@@ -937,33 +1007,6 @@ if ($arrows)
 
 
 	$svgArrow .= ' />';
-
-	//    LaTeXdebug("midpoints: $m['x'] $m['y'] $d['x'] $d['y']",1);
-
-	if (array_key_exists($mid,$arrowheads))
-	  {
-	    LaTeXdebug("Got middle of arrow",1);
-	    if ($arrowtype == "C")
-	      {
-		list($m,$d) = cubicBezier(.5,$sa,vecSum($sa,$ds),vecSum($ea,$de),$ea);
-	      }
-	    elseif ($arrowtype == "Q")
-	      {
-		list($m,$d) = quadraticBezier(.5,$sa,vecSum($sc,$ds),$ea);
-	      }
-	    else
-	      {
-		list($m,$d) = linear(.5,$sa,$ea);
-	      }
-
-	    $svgArrow .= '<path d="M '
-	      . vecXY(vecMinus($m,$d))
-	      . ' L '
-	      . vecXY($m)
-	      . '" stroke-width=".1" fill="none" marker-end="url('
-	      . $arrowheads[$mid]
-	      . ')" />';
-	  }
 
 	$svgArrows .= $arrowmask . $svgArrow;
       }

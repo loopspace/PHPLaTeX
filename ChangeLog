@@ -1,3 +1,11 @@
+2009-06-18  Andrew Stacey  <andrew.stacey@math.ntnu.no>
+
+	* math.php (vecAngle): Added angle function.
+
+	* primitives/xymatrix.php: Changed arrowheads from markers to
+	actual SVG elements to enable use as masks.  This fixes the issue
+	of lines overrunning the arrowheads.
+
 2009-06-17  Andrew Edgell Stacey  <andrew.stacey@math.ntnu.no>
 
 	* math.php (vecXY): Added units specification.
