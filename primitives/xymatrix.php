@@ -303,28 +303,138 @@ $svg .= vecXY($svgSize,"w","ex");
 $svg .= '>';
 
 // should only do this once per page, maybe now it's not necessary ...
-$svg .= file_get_contents($arrowfile);
+//$svg .= file_get_contents($arrowfile);
+
 
 $arrowheads = array(
-		    "filledArrow" => "#filledArrow",
-		    ">" => "#basicArrow",
-		    ">>" => "#doubleArrow",
-		    ">|" => "#barArrow",
-		    "|>>" => "#bardoubleArrow",
-		    ")" => "#parenthesisArrow",
-		    "<" => "#reversebasicArrow",
-		    "<<" => "#reversedoubleArrow",
-		    "|<" => "#reversebarArrow",
-		    "|<<" => "#reversebardoubleArrow",
-		    "(" => "#reverseparenthesisArrow",
-		    "/" => "#slashArrow",
-		    "//" => "#doubleslashArrow",
-		    "x" => "#crossArrow",
-		    "+" => "#plusArrow",
-		    "|" => "#vbarArrow",
-		    "||" => "#doublevbarArrow",
-		    "o" => "#circleArrow"
+		    "filledArrow" => array(
+					   "size" => vecMake(10,10),
+					   "startRef" => vecMake(10,5),
+					   "endRef" => vecMake(10,5),
+					   "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" />",
+					   "endMask" => "<path d=\"M 0 0 L 10 5 L 0 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />",
+					   "startMask" => ""),
+		    ">" => array(
+				 "size" => vecMake(10,10),
+				 "startRef" => vecMake(10,5),
+				 "endRef" => vecMake(10,5),
+				 "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke-width=\"1\" stroke=\"black\" />",
+				 "endMask" => "<path d=\"M 0 0 L 10 5 L 0 10 L 10 10 L 10 0 z\" fill=\"black\" stroke-width=\"1\" />",
+				 "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
+		    ">>" => array(
+				  "size" => vecMake(15,10),
+				  "startRef" => vecMake(10,5),
+				  "endRef" => vecMake(15,5),
+				  "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 15 5 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				 "endMask" => "<path d=\"M 5 0 L 15 5 L 5 10 L 15 10 L 15 0 z\" fill=\"black\" stroke-width=\"1\" />"),
+		    "|>" => array(
+				  "size" => vecMake(10,10),
+				  "startRef" => vecMake(10,5),
+				  "endRef" => vecMake(10,5),
+				  "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 10 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				 "endMask" => "<path d=\"M 0 0 L 10 0 L 10 10 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				 "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
+		    "|>>" => array(
+				   "size" => vecMake(15,10),
+				   "startRef" => vecMake(15,5),
+				   "endRef" => vecMake(10,5),
+				   "arrow" => "<path d=\"M 0 0 L 10 5 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 15 5 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 15 0 L 15 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				   "endMask" =>  "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />",
+				   "startMask" => "<path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"black\" stroke-width=\"1\" />"),
+		     ')' => array(
+				  "size" => vecMake(5,10),
+				  "startRef" => vecMake(5,5),
+				  "endRef" => vecMake(5,5),
+				  "arrow" => "<path d=\"M 0 0 Q 10 5 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				 "startMask" => "",
+				 "endMask" => ""),
+		    "<" => array(
+				 "size" => vecMake(10,10),
+				 "startRef" => vecMake(10,5),
+				 "endRef" => vecMake(5,10),
+				 "arrow" => "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				 "startMask" => "",
+				 "endMask" => ""),
+		    "<<" => array(
+				  "size" => vecMake(15,10),
+				  "startRef" => vecMake(15,5),
+				  "endRef" => vecMake(10,5),
+				  "arrow" => "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/><path d=\"M 15 0 L 5 5 L 15 10\"fill=\"none\"stroke=\"black\"stroke-width=\"1\"/>",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "|<"=> array(
+				 "size" => vecMake(10,10),
+				 "startRef" => vecMake(10,5),
+				 "endRef" => vecMake(10,5),
+				 "arrow"=> "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				 "startMask" => "",
+				 "endMask" => ""),
+		    "|<<"=> array(
+				  "size" => vecMake(15,10),
+				  "startRef" => vecMake(15,5),
+				  "endRef" => vecMake(10,5),
+				  "arrow"=> "<path d=\"M 10 0 L 0 5 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 15 0 L 5 5 L 15 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "("=> array(
+				"size" => vecMake(5,10),
+				"startRef" => vecMake(0,5),
+				"endRef" => vecMake(0,5),
+				"arrow"=> "<path d=\"M 5 0 Q -5 5 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "/"=> array(
+				"size" => vecMake(5,10),
+				"startRef" => vecMake(2,5),
+				"endRef" => vecMake(2,5),
+				"arrow"=> "<path d=\"M 5 0 L 0 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "//"=> array(
+				 "size" => vecMake(10,10),
+				 "startRef" => vecMake(2,5),
+				 "endRef" => vecMake(2,5),
+				 "arrow"=> "<path d=\"M 0 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 5 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "x"=> array(
+				"size" => vecMake(10,10),
+				"startRef" => vecMake(5,5),
+				"endRef" => vecMake(5,5),
+				"arrow"=> "<path d=\"M 0 0 L 10 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 10 0 L 10 0\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "+"=> array(
+				"size" => vecMake(10,10),
+				"startRef" => vecMake(5,5),
+				"endRef" => vecMake(5,5),
+				"arrow"=> "<path d=\"M 5 0 L 5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 0 5 L 10 5\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "|"=> array(
+				"size" => vecMake(5,10),
+				"startRef" => vecMake(2,5),
+				"endRef" => vecMake(2,5),
+				"arrow"=> "<path d=\"M 2.5 0 L 2.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "||"=> array(
+				 "size" => vecMake(10,10),
+				 "startRef" => vecMake(2.5,5),
+				 "endRef" => vecMake(2.5,5),
+				 "arrow"=> "<path d=\"M 2.5 0 L 2.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" /><path d=\"M 7.5 0 L 7.5 10\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
+		    "o"=> array(
+				"size" => vecMake(10,10),
+				"startRef" => vecMake(0,5),
+				"endRef" => vecMake(10,5),
+				"arrow"=> "<circle cx=\"5\" cy=\"5\" r=\"4.5\" fill=\"none\" stroke=\"black\" stroke-width=\"1\" />",
+				  "startMask" => "",
+				  "endMask" => ""),
 		    );
+
 
 for($m = 0;$m < count($entry);$m++)
   {
@@ -653,7 +763,7 @@ if ($arrows)
 	  }
 	else
 	  {
-	    $markerend = "";
+	    $markerend = array();
 	  }
 	if (array_key_exists($tail,$arrowheads))
 	  {
@@ -661,29 +771,57 @@ if ($arrows)
 	  }
 	else
 	  {
-	    $markerstart = "";
+	    $markerstart = array();
 	  }
 
 	$arrowpath .= ' fill="none" ';
 
 	if (($markerstart) or ($markerend))
 	  {
-	    $svgArrowMask .= $arrowpath
-	      . ' stroke-width=".1" ';
-
 	    if ($markerstart)
 	      {
-		$svgArrowMask .= 'marker-start="url('
-		  . $markerstart
-		  . 'Mask)" ';
+		// move to $s, rotate to $ds, scale and draw mask
+		$svgArrowMask .= '<g transform="translate('
+		  . vecXY($sa)
+		  . ') scale(0.1) rotate('
+		  . vecAngle($ds)
+		  . ') translate('
+		  . vecXY(vecScale(-1,$markerstart["startRef"]))
+		  . ')">'
+		  . $markerstart["startMask"]
+		  . '</g>';
+		$svgArrow .= '<g transform="translate('
+		  . vecXY($sa)
+		  . ') scale(0.1) rotate('
+		  . vecAngle($ds)
+		  . ') translate('
+		  . vecXY(vecScale(-1,$markerstart["startRef"]))
+		  . ')">'
+		  . $markerstart["arrow"]
+		  . '</g>';
+
 	      }
 	    if ($markerend)
 	      {
-		$svgArrowMask .= 'marker-end="url('
-		  . $markerend
-		  . 'Mask)" ';
+		$svgArrowMask .= '<g transform="translate('
+		  . vecXY($ea)
+		  . ') scale(0.1) rotate('
+		  . vecAngle($de)
+		  . ') translate('
+		  . vecXY(vecScale(-1,$markerend["endRef"]))
+		  . ')">'
+		  . $markerend["endMask"]
+		  . '</g>';
+		$svgArrow .= '<g transform="translate('
+		  . vecXY($ea)
+		  . ') scale(0.1) rotate('
+		  . vecAngle($de)
+		  . ') translate('
+		  . vecXY(vecScale(-1,$markerend["endRef"]))
+		  . ')">'
+		  . $markerend["arrow"]
+		  . '</g>';
 	      }
-	    $svgArrowMask .= '/>';
 	  }
 
 	if (preg_match('/^([^{]*){([^}]*)}\1$/',$stem,$matches))
@@ -774,20 +912,6 @@ if ($arrows)
 	  }
 
 	$svgArrow .= ' stroke-width=".1" ';
-
-	if ($markerstart)
-	  {
-	    $svgArrow .= 'marker-start="url('
-	      . $markerstart
-	      . ')" ';
-	  }
-	if ($markerend)
-	  {
-	    $svgArrow .= 'marker-end="url('
-	      . $markerend
-	      . ')" ';
-	  }
-
 
 	if ($svgArrowMask)
 	  {
