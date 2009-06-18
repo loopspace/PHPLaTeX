@@ -371,8 +371,12 @@ if ($arrows)
 	$target = $arrow["target"];
 
 	$clipLabels = array();
-
-
+	$arrowpath = "";
+	$arrowstyle = "";
+	$arrowmask = "";
+	$svgArrow = "";
+	$svgArrowMask = "";
+	
 	/*
 	 * Coordinate summary:
 	 *
@@ -552,26 +556,11 @@ if ($arrows)
 
 	    if (!$pos)
 	      {
-		$clipLabels[] = "Clip" . ++$clip;
-
-		$svgArrowLabels .= '<mask id="Clip'
-		  . $clip
-		  . '" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" '
-		  . vecXY(vecMake(0,0),"x")
-		  . ' '
-		  . vecXY($svgSize,"w")
-		  . '>'
-		  . '<rect '
-		  . vecXY(vecMake(0,0),"x")
-		  . ' '
-		  . vecXY($svgSize,"w")
-		  . ' fill="white"/>'
-		  . '<rect '
+		$svgArrowMask .= '<rect '
 		  . vecXY($lu,"x")
 		  . ' '
 		  . vecXY(vecSum($padding,$labelSize),"w")
-		  . ' fill="black"/>'
-		  . '</mask>';
+		  . ' fill="black"/>';
 	      }
 
 	    $svgArrowLabels .= '<foreignObject '
@@ -677,7 +666,25 @@ if ($arrows)
 
 	$arrowpath .= ' fill="none" ';
 
-	LaTeXdebug($stem,1);
+	if (($markerstart) or ($markerend))
+	  {
+	    $svgArrowMask .= $arrowpath
+	      . ' stroke-width=".1" ';
+
+	    if ($markerstart)
+	      {
+		$svgArrowMask .= 'marker-start="url('
+		  . $markerstart
+		  . 'Mask)" ';
+	      }
+	    if ($markerend)
+	      {
+		$svgArrowMask .= 'marker-end="url('
+		  . $markerend
+		  . 'Mask)" ';
+	      }
+	    $svgArrowMask .= '/>';
+	  }
 
 	if (preg_match('/^([^{]*){([^}]*)}\1$/',$stem,$matches))
 	  {
@@ -691,61 +698,121 @@ if ($arrows)
 
 	if (($stem == '--') or ($stem == '=='))
 	  {
-	    $arrowpath .= ' stroke-dasharray="1,1" ';
+	    $arrowstyle = 'stroke-dasharray="1,1" ';
 	  }
 	elseif (($stem == '.') or ($stem == ':'))
 	  {
-	    $arrowpath .= ' stroke-dasharray=".5,1.5" ';
+	    $arrowstyle = 'stroke-dasharray=".5,1.5" ';
 	  }
+	$arrowmask = '';
 
-	if ($clipLabels)
-	  {
-	    foreach ($clipLabels as $clipLabel)
-	      {
-		$arrowpath .= ' mask="url(#'
-		  . $clipLabel
-		  . ')" ';
-	      }
-	  }
-
+	// If we have a doubled or tripled stem, draw these first
 	if (($stem == '=') or ($stem == '==') or ($stem == ':') or ($stylevariant == 2))
 	  {
-	    $basicarrow = $arrowpath;
-	    $arrowpath .= ' stroke="black" stroke-width=".5" />' . "\n";
-	    $arrowpath .= $basicarrow;
-	    $arrowpath .= ' stroke="white" stroke-width=".3" />' . "\n";
-	    $arrowpath .= $basicarrow;
+	    $arrowmask = '<mask id="Clip'
+	      . ++$clip
+	      . '" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" '
+	      . vecXY(vecMake(0,0),"x")
+	      . ' '
+	      . vecXY($svgSize,"w")
+	      . '>'
+	      . '<rect '
+	      . vecXY(vecMake(0,0),"x")
+	      . ' '
+	      . vecXY($svgSize,"w")
+	      . ' fill="white"/>'
+	      . $arrowpath
+	      .  ' stroke="black" stroke-width=".3" />'
+	      . $svgArrowMask
+	      . '</mask>';
+
+	    $svgArrow = $arrowpath
+	      . ' '
+	      . $arrowstyle
+	      . ' '
+	      . ' stroke="black" stroke-width=".5" mask="url(#Clip'
+	      . $clip
+	      . ')" />';
 	  }
 	elseif ($stylevariant == 3)
 	  {
-	    $basicarrow = $arrowpath;
-	    $arrowpath .= ' stroke="black" stroke-width=".7" />' . "\n";
-	    $arrowpath .= $basicarrow;
-	    $arrowpath .= ' stroke="white" stroke-width=".5" />' . "\n";
-	    $arrowpath .= $basicarrow;
-	    $arrowpath .= ' stroke="black" stroke-width=".1" />' . "\n";
-	    $arrowpath .= $basicarrow;
-	  }
-	elseif (($stem == '-') or ($stem == '--') or ($stem == '.'))
-	  {
-	    $arrowpath .= ' stroke="black" ';
+	    $arrowmask = '<mask id="Clip'
+	      . ++$clip
+	      . '" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" '
+	      . vecXY(vecMake(0,0),"x")
+	      . ' '
+	      . vecXY($svgSize,"w")
+	      . '>'
+	      . '<rect '
+	      . vecXY(vecMake(0,0),"x")
+	      . ' '
+	      . vecXY($svgSize,"w")
+	      . ' fill="white"/>'
+	      . $svgArrowMask
+	      . $arrowpath
+	      .  ' stroke="black" stroke-width=".5" />'
+	      . '</mask>';
+
+	    $svgArrow = $arrowpath
+	      . ' '
+	      . $arrowstyle
+	      . ' stroke="black" stroke-width=".7" mask="url(#Clip'
+	      . $clip
+	      . ')" />';
 	  }
 
-	$arrowpath .= ' stroke-width=".1" ';
+	// Now we draw the main arrow.  Even with a double stem we need to "draw" this for the arrowheads.
+
+	$svgArrow .= $arrowpath
+	  . ' '
+	  . $arrowstyle;
+
+	// this is when we draw the actual arrow
+	if ((($stem == '-') or ($stem == '--') or ($stem == '.')) and ($stylevariant != 2))
+	  {
+	    $svgArrow .= ' stroke="black" ';
+	  }
+
+	$svgArrow .= ' stroke-width=".1" ';
 
 	if ($markerstart)
 	  {
-	    $arrowpath .= 'marker-start="url('
+	    $svgArrow .= 'marker-start="url('
 	      . $markerstart
 	      . ')" ';
 	  }
 	if ($markerend)
 	  {
-	    $arrowpath .= 'marker-end="url('
+	    $svgArrow .= 'marker-end="url('
 	      . $markerend
 	      . ')" ';
 	  }
-	$arrowpath .= ' />';
+
+
+	if ($svgArrowMask)
+	  {
+	    $arrowmask .= '<mask id="Clip'
+		  . ++$clip
+		  . '" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" '
+		  . vecXY(vecMake(0,0),"x")
+		  . ' '
+		  . vecXY($svgSize,"w")
+		  . '>'
+		  . '<rect '
+		  . vecXY(vecMake(0,0),"x")
+		  . ' '
+		  . vecXY($svgSize,"w")
+		  . ' fill="white"/>'
+	      . $svgArrowMask
+	      . '</mask>';
+	    
+	    $svgArrow .= 'mask="url(#Clip'
+	      . $clip
+	      . ')" ';
+	  }
+
+
+	$svgArrow .= ' />';
 
 	//    LaTeXdebug("midpoints: $m['x'] $m['y'] $d['x'] $d['y']",1);
 
@@ -765,7 +832,7 @@ if ($arrows)
 		list($m,$d) = linear(.5,$sa,$ea);
 	      }
 
-	    $arrowpath .= '<path d="M '
+	    $svgArrow .= '<path d="M '
 	      . vecXY(vecMinus($m,$d))
 	      . ' L '
 	      . vecXY($m)
@@ -774,7 +841,7 @@ if ($arrows)
 	      . ')" />';
 	  }
 
-	$svgArrows .= $arrowpath;
+	$svgArrows .= $arrowmask . $svgArrow;
       }
 
     $svg .= $svgArrowLabels

@@ -622,7 +622,7 @@ function processLaTeX (&$latex)
     }
   $processed = trim($processed);
 // somehow want to add in some newlines to make the code look prettier, but do so without actually changing any content.
-  $tags = array("p","mrow","br","svg","math","body","path","marker","defs","foreignObject");
+  $tags = array("p","mrow","br","svg","math","body","path","marker","defs","foreignObject","mask");
   foreach ($tags as $tag)
     {
       $processed = preg_replace("/(<$tag\b[^>]*>)/","\n$1\n",$processed);
