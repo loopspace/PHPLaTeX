@@ -29,7 +29,7 @@ header("Content-type: application/xhtml+xml");
 
 // Must be a better way of generating these lines ...
 print '<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="http://www.w3.org/Math/XSL/mathml.xsl"?>'
+<?xml-stylesheet type="text/xsl" href="mathml.xsl"?>'
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
