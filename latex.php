@@ -2,7 +2,7 @@
 /*
  * PHPLaTeX parser
  *
- * Converts something approximating LaTeX code into XHTML+MathML
+ * Converts something approximating LaTeX code into HTML5+MathML
  * Works by parsing a string in the same manner as TeX:
  *  examining and expanding tokens
  */
@@ -10,7 +10,7 @@
 
 /*
  * This program, and its subsiduary parts, is made available under the GPL.
- * It is copyright: Andrew Stacey, 2009.
+ * It is copyright: Andrew Stacey, 2009-2022.
  */
 
 /*
@@ -25,7 +25,10 @@ $defs = array();
 $commands = array();
 $primitives = array();
 $counters = array();
-$conditionals = array();
+$conditionals = array(
+    "mmode" => false,
+    "output" => false
+);
 $lineno = 1;
 $maxops = 100000;
 $ops = 0;
@@ -293,7 +296,7 @@ function expandtok ($token,&$latex)
 	  // command is a generic def, need to slurp in tokens to match its pattern
 	  $pattern = $defs[$command]["pattern"];
 	  $defn = $defs[$command]["defn"];
-	  // in an ideal world we'd use a regular expression here but . only mathes characters not tokens
+	  // in an ideal world we'd use a regular expression here but . only matches characters not tokens
 	  if ($pattern != "")
 	    {
 	      // explode along hashes (check no more than 9?)
@@ -432,7 +435,7 @@ function expandtok ($token,&$latex)
   elseif ($firstchar == "{")
     {
       // grouping, if in math mode need to look for super or subscripts
-      if ($conditionals{"mmode"})
+      if ($conditionals["mmode"])
 	{
 	  // replace the first character, maybe this test ought to be on the whole token, though we ought to only get firstchar being { if the whole token is {
 	  $latex = $firstchar . $latex;
@@ -495,7 +498,7 @@ function expandtok ($token,&$latex)
     }
   else
     {
-      if ($conditionals{"mmode"})
+      if ($conditionals["mmode"])
 	{
 	  $mod = 1;
 	  $nexttok = nexttok($latex);
@@ -622,7 +625,9 @@ function processLaTeX (&$latex)
     }
   $processed = trim($processed);
 // somehow want to add in some newlines to make the code look prettier, but do so without actually changing any content.
-  $tags = array("p","mrow","br","svg","math","body","path","marker","defs","foreignObject","mask");
+  $tags = array("p","mrow","br","svg",
+                #"math",
+                "body","path","marker","defs","foreignObject","mask");
   foreach ($tags as $tag)
     {
       $processed = preg_replace("/(<$tag\b[^>]*>)/","\n$1\n",$processed);
@@ -655,7 +660,7 @@ function initialise ()
 	      // actual name is last non-whitespace part of first line
 	      // perhaps should have something better than this ...
 	      $name = preg_replace('/^.*\s+(\S+)\s*$/','\1',$name);
-	      $primitives[$name] = create_function('&$latex',$function);
+	      $primitives[$name] = eval('return function(&$latex) {' .$function. '};');
 	    }
 	}
     }

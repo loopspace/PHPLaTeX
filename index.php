@@ -7,37 +7,39 @@ initialise();
 // Main program starts here
 
 // This is to figure out whether or not stripslashes is needed
-if (array_key_exists('testslashes',$_REQUEST))
-  {
-    if ($_REQUEST['testslashes'] == '\test')
-      {
-	$source = $_REQUEST["latex"];
-      }
-    else
-      {
-	$source = stripslashes($_REQUEST["latex"]);
-      }
-  }
+if (array_key_exists('latex',$_REQUEST))
+    {
+	if (array_key_exists('testslashes',$_REQUEST))
+	{
+	    if ($_REQUEST['testslashes'] == '\test')
+	    {
+		$source = $_REQUEST["latex"];
+	    }
+	    else
+	    {
+		$source = stripslashes($_REQUEST["latex"]);
+	    }
+	}
+	else
+	{
+	    $source = $_REQUEST["latex"];
+	}
+    }
 else
-  {
-    $source = $_REQUEST["latex"];
-  }
-
+{
+    $source = "";
+}
 $source = trim($source);
 
-header("Content-type: application/xhtml+xml");
-
-// Must be a better way of generating these lines ...
-print '<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="mathml.xsl"?>'
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">  
-  <head>
-    <title>PHPLaTeX Demo Page</title> 
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lab="en" >
+    <head>
+	<meta charset="utf-8">
+	<title>PHPLaTeX Demo Page</title> 
+    </head>
+    <body>
 
 <form action="<?php print $_SERVER['PHP_SELF'] ?>" method="post">
 <p>
@@ -45,7 +47,7 @@ print '<?xml version="1.0"?>
 </p>
 <input type="hidden" name="testslashes" value="\test" />
   <div>View Source:
-<input type="checkbox" name="source" value="1" <?php if ($_REQUEST['source'])   print 'checked="checked"' ?> /></div>
+<input type="checkbox" name="source" value="1" <?php if (array_key_exists('source',$_REQUEST) && $_REQUEST['source'])   print 'checked="checked"' ?> /></div>
 <input type="submit" value="send" />
 <input type="reset" />
 </form>
@@ -64,7 +66,7 @@ print '<?xml version="1.0"?>
 
   print $result;
 
-  if ($_REQUEST["source"])
+  if (array_key_exists('source',$_REQUEST) && $_REQUEST["source"])
     {
       print '<pre>';
       print htmlspecialchars($result);

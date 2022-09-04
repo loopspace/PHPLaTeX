@@ -1,7 +1,7 @@
-\newenvironment{document}{<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="mathml.xsl"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml"><head>\doctitle</head><body><p>\outputtrue}{\outputfalse</p></body></html>}
+\newenvironment{document}{
+  <!DOCTYPE html>
+  <html lang="en">
+  <head><meta charset="utf-8">\doctitle</head><body><p>\outputtrue}{\outputfalse</p></body></html>}
 
 \newcommand{\title}[1]{\def\doctitle{<title>#1</title>}}
 \def\doctitle{}

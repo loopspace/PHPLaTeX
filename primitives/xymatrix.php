@@ -270,7 +270,7 @@ while ($matrix)
 
     if ($width[$m][$n] > $maxwidth)
       $maxwidth = $width[$m][$n];
-    if ($height[$m][$n] > $maxheigh)
+    if ($height[$m][$n] > $maxheight)
       $maxheight = $height[$m][$n];
     if ($depth[$m][$n] > $maxdepth)
       $maxdepth = $depth[$m][$n];

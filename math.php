@@ -6,8 +6,8 @@
  */
 
 $sizeFunctions = array(
-		       "horizSum", create_function('$a,$b','$c["width"] = $a["width"] + $b["width"];$c["height"] = max($a["height"], $b["height"]);$c["depth"] = max($a["depth"], $b["depth"]); return $c;'),
-		       "vertSum", create_function('$a,$b','$c["width"] = max($a["width"],$b["width"]);$c["height"] = $a["height"] + $b["height"]; $c["depth"] = $a["depth"] + $b["depth"]; return $c;')
+    "horizSum", function($a,$b) {$c["width"] = $a["width"] + $b["width"];$c["height"] = max($a["height"], $b["height"]);$c["depth"] = max($a["depth"], $b["depth"]); return $c;},
+    "vertSum", function($a,$b) {$c["width"] = max($a["width"],$b["width"]);$c["height"] = $a["height"] + $b["height"]; $c["depth"] = $a["depth"] + $b["depth"]; return $c;}
 		       );
 
 $charSizes = array(
@@ -87,40 +87,16 @@ function charSize ($char)
  */
 
 $sizeRule = array(
-		"mi" => create_function(
-					'$contents',
-					'return charSize($contents);'
-					),
-		"mo" => create_function(
-					'$contents',
-					'return $sizeFunctions["horizSum"](charSize($contents),$charSizes["a"]);'
-					),
-		"mn" => create_function(
-					'$contents',
-					'return charSize($contents);'
-					),
-		"mrow" => create_function(
-					  '$contents',
-					  'return array_sum(explode(" ",$contents));'
-					  ),
-		"mfrac" => create_function(
-					   '$contents',
-					   'return max(explode(" ",$contents));'
-					   ),
-		"msup" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
-		"msub" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return array_shift($conts);'),
-		"msubsup" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
-		"mtext" => create_function(
-					   '$contents',
-					   'return array_sum(explode(" ",$contents));'
-					   ),
-		);
+    "mi" => function($contents) {return charSize($contents);},
+    "mo" => function($contents) {return $sizeFunctions["horizSum"](charSize($contents),$charSizes["a"]);},
+    "mn" => function($contents) {return charSize($contents);},
+    "mrow" => function($contents) {return array_sum(explode(" ",$contents));},
+    "mfrac" => function($contents) {return max(explode(" ",$contents));},
+    "msup" => function($contents) {$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));},
+    "msub" => function($contents) {$conts = explode(" ",$contents); return array_shift($conts);},
+    "msubsup" => function($contents) {$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));},
+    "mtext" => function($contents) {return array_sum(explode(" ",$contents));}
+);
 
 
 function getSizeOf ($string)
@@ -246,40 +222,35 @@ function charWidth ($char)
  */
 
 $widthRule = array(
-		"mi" => create_function(
-					'$contents',
-					'return charWidth($contents);'
-					),
-		"mo" => create_function(
-					'$contents',
-					'return (charWidth($contents) + 1);'
-					),
-		"mn" => create_function(
-					'$contents',
-					'return charWidth($contents);'
-					),
-		"mrow" => create_function(
-					  '$contents',
-					  'return array_sum(explode(" ",$contents));'
-					  ),
-		"mfrac" => create_function(
-					   '$contents',
-					   'return max(explode(" ",$contents));'
-					   ),
-		"msup" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
-		"msub" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return array_shift($conts);'),
-		"msubsup" => create_function(
-					  '$contents',
-					  '$conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));'),
-		"mtext" => create_function(
-					   '$contents',
-					   'return array_sum(explode(" ",$contents));'
-					   ),
-		);
+    "mi" => function($contents) {
+        return charWidth($contents);
+    },
+    "mo" => function($contents) {
+        return (charWidth($contents) + 1);
+    },
+    "mn" => function($contents) {
+        return charWidth($contents);
+    },
+    "mrow" => function($contents) {
+        return array_sum(explode(" ",$contents));
+    },
+    "mfrac" => function($contents) {
+        return max(explode(" ",$contents));
+    },
+    "msup" => function($contents) {
+        $conts = explode(" ",$contents); return (array_shift($conts) + .8*array_sum($conts));
+    },
+    "msub" => function($contents) {
+        $conts = explode(" ",$contents); return array_shift($conts);
+    },
+    "msubsup" => function($contents) {
+        $conts = explode(" ",$contents);
+        return (array_shift($conts) + .8*array_sum($conts));
+    },
+    "mtext" => function($contents) {
+        return array_sum(explode(" ",$contents));
+    },
+);
 
 
 function getWidthOf ($string)
@@ -299,19 +270,17 @@ function getWidthOf ($string)
       $b = $a;
       $a = preg_replace_callback(
 				 '/<([a-z]+)([^>]*)\/>/',
-				 create_function(
-						 '$matches',
-						 '
-global $widthRule;
-if (array_key_exists($matches[1], $widthRule))
-{
-return " " . $widthRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return " 0 ";
-}
-'),
+				 function($matches) {
+                     global $widthRule;
+                     if (array_key_exists($matches[1], $widthRule))
+                     {
+                         return " " . $widthRule[$matches[1]]($matches[2]) . " ";
+                     }
+                     else
+                     {
+                         return " 0 ";
+                     }
+                 },
 			$b);
     }
 
@@ -322,19 +291,17 @@ return " 0 ";
       $b = $a;
       $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
-			create_function(
-					'$matches',
-					'
-global $widthRule;
-if (array_key_exists($matches[1], $widthRule))
-{
-return " " . $widthRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return $matches[2];
-}
-'),
+			function($matches) {
+                global $widthRule;
+                if (array_key_exists($matches[1], $widthRule))
+                {
+                    return " " . $widthRule[$matches[1]]($matches[2]) . " ";
+                }
+                else
+                {
+                    return $matches[2];
+                }
+            },
 			$b);
     }
 
@@ -409,31 +376,25 @@ function charHeight ($char)
  */
 
 $heightRule = array(
-		"mi" => create_function(
-					'$contents',
-					'return charHeight($contents);'
-					),
-		"mo" => create_function(
-					'$contents',
-					'return (charHeight($contents) + 1);'
-					),
-		"mn" => create_function(
-					'$contents',
-					'return charHeight($contents);'
-					),
-		"mrow" => create_function(
-					  '$contents',
-					  'return max(explode(" ",$contents));'
-					  ),
-		"mfrac" => create_function(
-					   '$contents',
-					   'return array_sum(explode(" ",$contents));'
-					   ),
-		"mtext" => create_function(
-					   '$contents',
-					   'return max(explode(" ",$contents));'
-					   ),
-		);
+    "mi" => function($contents) {
+        return charHeight($contents);
+    },
+    "mo" => function($contents) {
+        return (charHeight($contents) + 1);
+    },
+    "mn" => function($contents) {
+        return charHeight($contents);
+    },
+    "mrow" => function($contents) {
+        return max(explode(" ",$contents));
+    },
+    "mfrac" => function($contents) {
+        return array_sum(explode(" ",$contents));
+    },
+    "mtext" => function($contents) {
+        return max(explode(" ",$contents));
+    },
+);
 
 
 function getHeightOf ($string)
@@ -453,19 +414,17 @@ function getHeightOf ($string)
       $b = $a;
       $a = preg_replace_callback(
 				 '/<([a-z]+)([^>]*)\/>/',
-				 create_function(
-						 '$matches',
-						 '
-global $heightRule;
-if (array_key_exists($matches[1], $heightRule))
-{
-return " " . $heightRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return " 0 ";
-}
-'),
+				 function($matches) {
+                     global $heightRule;
+                     if (array_key_exists($matches[1], $heightRule))
+                     {
+                         return " " . $heightRule[$matches[1]]($matches[2]) . " ";
+                     }
+                     else
+                     {
+                         return " 0 ";
+                     }
+                 },
 			$b);
     }
 
@@ -476,19 +435,17 @@ return " 0 ";
       $b = $a;
       $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
-			create_function(
-					'$matches',
-					'
-global $heightRule;
-if (array_key_exists($matches[1], $heightRule))
-{
-return " " . $heightRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return $matches[2];
-}
-'),
+			function($matches) {
+                global $heightRule;
+                if (array_key_exists($matches[1], $heightRule))
+                {
+                    return " " . $heightRule[$matches[1]]($matches[2]) . " ";
+                }
+                else
+                {
+                    return $matches[2];
+                }
+            },
 			$b);
     }
 
@@ -563,31 +520,25 @@ function charDepth ($char)
  */
 
 $depthRule = array(
-		"mi" => create_function(
-					'$contents',
-					'return charDepth($contents);'
-					),
-		"mo" => create_function(
-					'$contents',
-					'return (charDepth($contents) + 1);'
-					),
-		"mn" => create_function(
-					'$contents',
-					'return charDepth($contents);'
-					),
-		"mrow" => create_function(
-					  '$contents',
-					  'return max(explode(" ",$contents));'
-					  ),
-		"mfrac" => create_function(
-					   '$contents',
-					   'return array_sum(explode(" ",$contents));'
-					   ),
-		"mtext" => create_function(
-					   '$contents',
-					   'return max(explode(" ",$contents));'
-					   ),
-		);
+    "mi" => function($contents) {
+        return charDepth($contents);
+    },
+    "mo" => function($contents) {
+        return (charDepth($contents) + 1);
+    },
+    "mn" => function($contents) {
+        return charDepth($contents);
+    },
+    "mrow" => function($contents) {
+        return max(explode(" ",$contents));
+    },
+    "mfrac" => function($contents) {
+        return array_sum(explode(" ",$contents));
+    },
+    "mtext" => function($contents) {
+        return max(explode(" ",$contents));
+    },
+);
 
 
 function getDepthOf ($string)
@@ -608,19 +559,17 @@ function getDepthOf ($string)
       $b = $a;
       $a = preg_replace_callback(
 				 '/<([a-z]+)([^>]*)\/>/',
-				 create_function(
-						 '$matches',
-						 '
-global $depthRule;
-if (array_key_exists($matches[1], $depthRule))
-{
-return " " . $depthRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return " 0 ";
-}
-'),
+				 function($matches) {
+                     global $depthRule;
+                     if (array_key_exists($matches[1], $depthRule))
+                     {
+                         return " " . $depthRule[$matches[1]]($matches[2]) . " ";
+                     }
+                     else
+                     {
+                         return " 0 ";
+                     }
+                 },
 			$b);
     }
 
@@ -632,19 +581,17 @@ return " 0 ";
       $b = $a;
       $a = preg_replace_callback(
 			'/<([a-z]+)[^>]*>([^<]*)<\/([a-z]+)>/',
-			create_function(
-					'$matches',
-					'
-global $depthRule;
-if (array_key_exists($matches[1], $depthRule))
-{
-return " " . $depthRule[$matches[1]]($matches[2]) . " ";
-}
-else
-{
-return $matches[2];
-}
-'),
+			function($matches) {
+                global $depthRule;
+                if (array_key_exists($matches[1], $depthRule))
+                {
+                    return " " . $depthRule[$matches[1]]($matches[2]) . " ";
+                }
+                else
+                {
+                    return $matches[2];
+                }
+            },
 			$b);
     }
 
